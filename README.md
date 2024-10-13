@@ -7,6 +7,7 @@
 2) Apply a linear transformation to anatomy MRI till there is alignment with dicoms.
 
 **Output**: ID_Transformed_Anatomy.nrrd for anatomy
+Linear transformation applied to the anatomy
 
 # 2. Segmentation
 **Program**: iTK-Snap 
