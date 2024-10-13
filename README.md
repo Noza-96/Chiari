@@ -13,8 +13,8 @@
 
 **Instructions**: 
 1) Segmentation from the top segment of SAS to ~50 mm below. 
-2) Make sure wall bottom surfface 
-are perpendicular to the to the XY-plane. 
+2) Make sure wall bottom surface 
+is perpendicular to the to the XY-plane. 
 
 **Output**: ID_Segmentation.nrrd and ID_non_smooth.stl 
 
