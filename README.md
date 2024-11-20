@@ -3,7 +3,7 @@
 **Program**: Slicer 
 
 **Instructions**: 
-1) Add .nrrd of anatomy and .dcm of all flow rate measurements to SLICER. 
+1) Add ID_segmentation.nrrd of anatomy and .dcm of all flow rate measurements to SLICER. 
 2) Apply a linear transformation to anatomy MRI till there is alignment with dicoms.
 
 **Output**: ID_Transformed_Anatomy.nrrd for anatomy
