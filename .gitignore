@@ -1,0 +1,67 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# macOS generated Thumbnails
+._*
+
+# macOS system files related to metadata
+.Spotlight-V100
+.Trashes
+*.swp
+.fseventsd
+.VolumeIcon.icns
+._.Trashes
+
+# MATLAB files
+*.asv
+*.m~            # Backup files
+*.mat~          # Backup MAT files
+*.autosave.mat  # Auto-saved MAT files
+*.slxc          # Simulink Cache files
+*.mex*          # Compiled MEX files
+*.mlappinstall  # App installer files
+*.mdl           # Simulink models (if auto-generated)
+*.slx           # Simulink files (if auto-generated)
+*.log           # MATLAB log files
+*.rpt           # MATLAB reports
+*.fig           # MATLAB figure files (if not version-controlled)
+*.mlpkginstall  # MATLAB toolbox installer files
+
+# Python files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.egg-info/
+*.eggs/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Markdown Editor Backups
+*.md~
+*.markdown~
+*.md.bak
+*.md.bkp
+
+# Common Editors Backup Files
+*~
+*.swp
+*.swo
+*.tmp
+
+# VSCode settings (if applicable)
+.vscode/
+
+# Logs and other temporary files
+*.log
+*.tmp
+*.bak
+
+# Environment and dependency folders
+.env
+.venv/
+*.env
+*.venv
