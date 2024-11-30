@@ -1,0 +1,614 @@
+# encoding: utf-8
+# 2024 R1
+SetScriptVersion(Version="24.1.144")
+system1 = GetSystem(Name="FLTG")
+setup1 = system1.GetContainer(ComponentName="Setup")
+fluentLauncherSettings1 = setup1.GetFluentLauncherSettings()
+fluentLauncherSettings1.SetEntityProperties(Properties=Set(EnvPath={}))
+setup1.Edit()
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "24.1"(cx-gui-do cx-activate-item "Error*OK")(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Materials|Fluid|csf"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Materials|Fluid|csf"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Materials|Fluid|csf"))(cx-gui-do cx-activate-item "Create/Edit Materials*PanelButtons*PushButton1(Close)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Materials"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Materials"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Materials\"))(cx-use-window-id 51)(cx-set-camera-relative '(1.22676 -0.281803 -0.396369) '(0 0 0) '(-0.337198 -0.132432 0.365555) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-0.188194 1.22084 -0.107654) '(0 0 0) '(-0.534269 -0.511196 -0.0285701) 0 0)")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Close Fluent")')
+setupComponent1 = system1.GetComponent(Name="Setup")
+setupComponent1.Reset()
+setupComponent1.Refresh()
+fluentLauncherSettings1.SetEntityProperties(Properties=Set(DisplayText="Fluent Launcher Settings", EnvPath={}, RunParallel=True, NumberOfProcessorsMeshing=12, NumberOfProcessors=12))
+setup1.Edit()
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+fluentLauncherSettings1.SetEntityProperties(Properties=Set(EnvPath={}))
+tGridData1 = GetDataEntity("/Mesh 1/TGridData:TGridData")
+tGridData1.SetEntityProperties(Properties=Set(RunParallel=True, NumberOfProcs=16))
+mesh1 = system1.GetContainer(ComponentName="Mesh")
+Fluent.Edit(Container=mesh1)
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "24.1"(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)')
+setup1.SendCommand(Command="(newline)")
+setup1.SendCommand(Command="(cx-use-window-id 51)(cx-set-camera-relative '(0.779294 -0.402593 -2.41537) '(0 0 0) '(-0.0071798 0.111163 0.77058) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-4.80783 -0.512382 1.54171) '(0 0 0) '(0.184213 -1.70478 0.0607993) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(1.50037 -1.77762 1.98764) '(0 0 0) '(0.914897 0.0821845 -0.279366) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(0.164244 0.103214 0.0468372) '(0 0 0) '(0.0229156 0.0158988 -0.0325145) 0 0)")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Close Fluent")')
+setup1.SendCommand(Command="(%py-exec \"workflow.SaveWorkflow(FilePath=r'H:\\.shortcut-targets-by-id\\1XF2JOROdJ0B3txwAztMCdrZx0_ng8Mo8\\Syringomyelia\\Resonancias20240606\\ansys\\Chiari_Granada_files\\dp0\\FLTG\\Fluent\\FLTG_workflow_files\\FLTG.wft')\")")
+setup1.SendCommand(Command="(%py-exec \"workflow.SaveWorkflow(FilePath=r'H:\\.shortcut-targets-by-id\\1XF2JOROdJ0B3txwAztMCdrZx0_ng8Mo8\\Syringomyelia\\Resonancias20240606\\ansys\\Chiari_Granada_files\\dp0\\FLTG\\Fluent\\FLTG_workflow_files\\FLTG.wft')\")")
+fluentLauncherSettings1.SetEntityProperties(Properties=Set(Precision="Double", EnvPath={}))
+setup1.Edit()
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "24.1"(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*New...")(cx-gui-do cx-activate-tab-index "Expression*Table1*Frame1" 0)(cx-gui-do cx-activate-tab-index "Expression*Table1*Frame1" 1)(cx-gui-do cx-activate-tab-index "Expression*Table1*Frame1" 0)')
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-text-entry \"Expression*Table1*TextEntry2(Name)\" \"Q\")(cx-gui-do cx-activate-item \"Expression*Table1*TextEntry2(Name)\")")
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-text-entry \"Expression*Table1*TextEntry2(Name)\" \"Q_C2\")(cx-gui-do cx-activate-item \"Expression*Table1*TextEntry2(Name)\")")
+setup1.SendCommand(Command="""(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"R\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"R\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"r\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"r\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"R\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"R\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072 + 0.0943393001937061i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072 + 0.0943393001937061i)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*e\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(c\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(co\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072 + 0.0943393001937061i)*exp(1i*t*1[s^-1])
+\" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton2(Cancel)\")""")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*Import From File...")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*Import From File...")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*List")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*Manage...")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Expression Manager*PanelButtons*PushButton1(Close)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Reference Frames"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*New...")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(a<expr>,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(a<expr>,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(a<expr>,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(a<expr>,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(a<expr>,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(a<expr>,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(a<expr,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vecto,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(a,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(a,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(1,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(1,<expr>)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(1,<expr)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(1,)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(1,2,3,4)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(1,2,3,4)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(1,2,3,4)\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(1,2,3,4cross(<vector>,<vector>))\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"vector(1,2,3,4cross(<vector>,<vector>))\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-activate-item \"Expression*Table1*ExpressionEntry3(Definition)\")")
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton2(Cancel)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Ribbon*Frame1*Frame4(User-Defined)*Table1*Table3(User Defined)*PushButton7(Read Table)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Table File Manager*PanelButtons*PushButton1(OK)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Information*OK")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Table File Manager...")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Table File Manager*PanelButtons*PushButton5(Settings)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Table Settings*PanelButtons*PushButton2(Cancel)")')
+setup1.SendCommand(Command="(cx-use-window-id 51)(cx-set-camera-relative '(-0.0605457 0.428737 -0.0897863) '(0 0 0) '(-0.0658287 -0.0844743 -0.396843) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-1.13672 -3.68787 -1.14629) '(0 0 0) '(-0.0775124 -0.250754 1.13002) 0 0)(cx-gui-do cx-activate-item \"Table File Manager*PanelButtons*PushButton2(Cancel)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Expression Manager*Table1*Table1*ButtonBox2*PushButton1(New)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton2(Cancel)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Expression Manager*Table1*Table1*ButtonBox2*PushButton5(List)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Expression Manager*Table1*Table1*ButtonBox2*PushButton1(New)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-text-entry \"Expression*Table1*TextEntry2(Name)\" \"Q0\")(cx-gui-do cx-activate-item \"Expression*Table1*TextEntry2(Name)\")")
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072 + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.*s + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.*sin + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*s + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(t + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(t*[s^-1]) + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(t*[s^-1]) + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(t*[s^-1]) + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(t*[s^-1]) + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(t*[s^-1]) + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(t*[s^-1]) + 0.0943393001937061i	-0.0261924439036648 + 0.0683239174688394i	-0.0376543323358788 + 0.00978488783063004i	-0.00274055193403765 - 0.00772438842762392i	0.00113538569167434 + 0.00521699904003310i	-0.00742603010464494 + 0.00153632166186553i	-0.00213531712022501 - 0.00461352656327032i	0.00220528668857866 - 0.000726071139807436i	0.000544700292810773 + 0.000271016661417825i	0.00118998263302738 - 0.000687453359597996i\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1]) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1]) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1]) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1]) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1]) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1]) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1]) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1]) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1]) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1]) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1]) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1]) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1]) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1]) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1]) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1]) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1]) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1]) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1]) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1]) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1]) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1]) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1]) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1]) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1]) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1]) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1]) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1]) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1]) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1]) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1]) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1]) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1]) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1]) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1]) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1]) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1]) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1]) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1]) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1]) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1]) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1]) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1]) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1]) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1]) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1]) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1]) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1]) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1]) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1]) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1]) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1]) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1]) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1]) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s?1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s?1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s?1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s?1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s?1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s?1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s?1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s?1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s?1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s?1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1]) )-0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1])) \" . 1))(cx-gui-do cx-activate-item \"Expression*Table1*ExpressionEntry3(Definition)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-toggle-button2 "Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)" #t)(cx-gui-do cx-activate-item "Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)")(cx-gui-do cx-set-toggle-button2 "Parameter Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)" #f)(cx-gui-do cx-activate-item "Parameter Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)")(cx-gui-do cx-set-toggle-button2 "Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)" #t)(cx-gui-do cx-activate-item "Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)")(cx-gui-do cx-set-toggle-button2 "Parameter Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)" #f)(cx-gui-do cx-activate-item "Parameter Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)")(cx-gui-do cx-activate-item "Expression*PanelButtons*PushButton1(OK)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Expression Manager*PanelButtons*PushButton1(Close)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|Q0"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|Q0"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Named Expressions|Q0\"))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1])) \" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton2(Cancel)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*New...")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-text-entry "Expression*Table1*TextEntry2(Name)" "u_in")(cx-gui-do cx-activate-item "Expression*Table1*TextEntry2(Name)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/\" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton2(Cancel)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|Q0"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|Q0"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Named Expressions|Q0\"))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1])) \" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1]))) *[m^3/s\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1]))) *[m^3/s]\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1]))) *[m^3/s]\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1]))) *[m^3/s]\" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton1(OK)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|Q0 (Invalid)"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|Q0 (Invalid)"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Named Expressions|Q0 (Invalid)\"))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1]))) *[m(^3/s]\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1]))) *[m/s]\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1]))) *1[m^3/s]\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1]))) *1[m^3/s]\" . 1))(cx-gui-do cx-activate-item \"Expression*Table1*ExpressionEntry3(Definition)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Expression*PanelButtons*PushButton1(OK)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|Q0"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|Q0"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Named Expressions|Q0\"))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"(0.143140427408072*sin(1*t*1[s^-1])+ 0.0943393001937061*(-cos(1*t*1[s^-1])) -0.0261924439036648*sin(2*t*1[s^-1])+ 0.0683239174688394*(-cos(2*t*1[s^-1])) -0.0376543323358788*sin(3*t*1[s^-1]) + 0.00978488783063004*(-cos(3*t*1[s^-1])) -0.00274055193403765*sin(4*t*1[s^-1]) - 0.00772438842762392*(-cos(4*t*1[s^-1])) + 0.00113538569167434*sin(5*t*1[s^-1]) + 0.00521699904003310*(-cos(5*t*1[s^-1])) -0.00742603010464494 *sin(6*t*1[s^-1]) + 0.00153632166186553*(-cos(6*t*1[s^-1])) -0.00213531712022501*sin(7*t*1[s^-1]) - 0.00461352656327032*(-cos(7*t*1[s^-1])) + 0.00220528668857866*sin(8*t*1[s^-1]) - 0.000726071139807436*(-cos(8*t*1[s^-1])) + 0.000544700292810773*sin(9*t*1[s^-1]) + 0.000271016661417825*(-cos(9*t*1[s^-1])) + 0.00118998263302738*sin(10*t*1[s^-1]) - 0.000687453359597996*(-cos(10*t*1[s^-1]))) *1[m^3/s]\" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton2(Cancel)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*New...")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-text-entry "Expression*Table1*TextEntry2(Name)" "U_in")(cx-gui-do cx-activate-item "Expression*Table1*TextEntry2(Name)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/A\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton2(Cancel)\")")
+setup1.SendCommand(Command="(cx-use-window-id 51)(cx-set-camera-relative '(1.46315 0.719368 -2.80402) '(0 0 0) '(-0.350139 -1.52284 -0.590978) 0 0)(cx-gui-do cx-set-toggle-button2 \"General*Table1*Table2(Solver)*ToggleBox5(Time)*Transient\" #t)(cx-gui-do cx-activate-item \"General*Table1*Table2(Solver)*ToggleBox5(Time)*Transient\")(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|General\"))")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|General"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|General"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Materials|Fluid|air"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Materials|Fluid|air"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-text-entry \"Create/Edit Materials*Table1*Frame1*Table1*TextEntry1(Name)\" \"csf\")(cx-gui-do cx-set-real-entry-list \"Create/Edit Materials*RealEntry10\" '( 1000))(cx-gui-do cx-set-real-entry-list \"Create/Edit Materials*RealEntry16\" '( 0.0007))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Create/Edit Materials*RealEntry16")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Question*OK")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Create/Edit Materials*PanelButtons*PushButton3(Change/Create)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Create/Edit Materials*PanelButtons*PushButton1(Close)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Materials|Fluid|csf"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Internal"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Outlet|top (pressure-outlet, id=14)"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Outlet|top (pressure-outlet, id=14)"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Outlet|top (pressure-outlet, id=14)"))(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 0)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 1)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 0)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 2)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 0)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 3)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 0)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 4)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 0)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 5)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 0)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 6)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 0)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 7)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 0)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 8)(cx-gui-do cx-activate-tab-index "Pressure Outlet*Frame2*Frame2" 0)(cx-gui-do cx-activate-item "Pressure Outlet*PanelButtons*PushButton2(Cancel)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Inlet|bottom (velocity-inlet, id=13)"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Inlet|bottom (velocity-inlet, id=13)"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Boundary Conditions|Inlet|bottom (velocity-inlet, id=13)\"))(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 0)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 1)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 0)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 2)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 0)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 3)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 0)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 4)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 0)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 5)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 0)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 6)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 0)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 7)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 0)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 8)(cx-gui-do cx-activate-tab-index \"Velocity Inlet*Frame2*Frame2\" 0)(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"0\" . 0))(cx-gui-do cx-enable-apply-button \"Velocity Inlet\")(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Ar\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Are\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Are\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Area\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Area\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Area\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Ar\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"A\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Q0\" . 1))(cx-gui-do cx-activate-item \"Velocity Inlet*PanelButtons*PushButton1(OK)\")(cx-gui-do cx-activate-item \"Error*OK\")(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Q0/Ar\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Q0/Ar\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Q0/Area\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Q0\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Q0\" . 1))(cx-gui-do cx-activate-item \"Velocity Inlet*PanelButtons*PushButton2(Cancel)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Report Definitions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*Surface ReportSubMenu*Area...")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Surface Report Definition*Table1*Table2*Table6*List1(Surfaces)\" '( 0))(cx-gui-do cx-activate-item \"Surface Report Definition*Table1*Table2*Table6*List1(Surfaces)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Surface Report Definition*PanelButtons*PushButton4(Compute)")(cx-gui-do cx-activate-item "Error*OK")(cx-gui-do cx-activate-item "Surface Report Definition*PanelButtons*PushButton2(Cancel)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Curvilinear Coordinate System"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*New...")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-list-selections \"Location Selection*List1\" '( 0))(cx-gui-do cx-activate-item \"Location Selection*List1\")(cx-gui-do cx-activate-item \"Location Selection*PanelButtons*PushButton1(OK)\")(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"'bottom'\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"A'bottom'\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area'bottom'\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area('bottom')\" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton2(Cancel)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Boundary Conditions\"))(cx-gui-do cx-set-list-selections \"Boundary Conditions*Table1*List2(Zone)\" '( 0))(cx-gui-do cx-activate-item \"Boundary Conditions*Table1*List2(Zone)\")(cx-gui-do cx-set-list-selections \"Boundary Conditions*Table1*List2(Zone)\" '( 2))(cx-gui-do cx-activate-item \"Boundary Conditions*Table1*List2(Zone)\")(cx-gui-do cx-set-list-selections \"Boundary Conditions*Table1*List2(Zone)\" '( 1))(cx-gui-do cx-activate-item \"Boundary Conditions*Table1*List2(Zone)\")(cx-gui-do cx-set-list-selections \"Boundary Conditions*Table1*List2(Zone)\" '( 3))(cx-gui-do cx-activate-item \"Boundary Conditions*Table1*List2(Zone)\")(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Mesh Interfaces\"))(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Boundary Conditions\"))")
+setup1.SendCommand(Command="/report/surface-integrals/area 2 () no")
+setup1.SendCommand(Command='/report/surface-integrals/area "top" () no')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Boundary Conditions*Table1*List2(Zone)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Boundary Conditions*Table1*List2(Zone)\" '( 3))(cx-gui-do cx-activate-item \"Boundary Conditions*Table1*List2(Zone)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Boundary Conditions*Table1*List2(Zone)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Boundary Conditions*Table1*List2(Zone)\" '( 3))(cx-gui-do cx-activate-item \"Boundary Conditions*Table1*List2(Zone)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Boundary Conditions*Table1*List2(Zone)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Boundary Conditions*Table1*List2(Zone)\" '( 3))(cx-gui-do cx-activate-item \"Boundary Conditions*Table1*List2(Zone)\")(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Reference Values\"))")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Reference Values"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Reference Values"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Auxiliary Geometry Definitions"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Auxiliary Geometry Definitions"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Auxiliary Geometry Definitions"))')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Manage Auxiliary Geometry Definitions*PanelButtons*PushButton3(New)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Auxiliary Geometry Definition*PanelButtons*PushButton2(Cancel)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Mesh Interfaces"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Mesh Interfaces"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Mesh Interfaces"))(cx-gui-do cx-activate-item "Mesh Interfaces*PanelButtons*PushButton2(Cancel)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Manage Auxiliary Geometry Definitions*PanelButtons*PushButton1(Close)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Reference Values"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Reference Values"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Reference Values\"))(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Reference Values\"))(cx-gui-do cx-list-tree-right-click \"NavigationPane*Frame2*Table1*List_Tree2\" )(cx-gui-do cx-set-list-selections \"Reference Values*DropDownList1(Compute from)\" '( 3))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Reference Values*DropDownList1(Compute from)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Reference Values*DropDownList1(Compute from)\" '( 0))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Reference Values*DropDownList1(Compute from)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Reference Values*DropDownList1(Compute from)\" '( 3))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Reference Values*DropDownList1(Compute from)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Reference Frames"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Curvilinear Coordinate System"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Curvilinear Coordinate System"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Curvilinear Coordinate System"))(cx-gui-do cx-activate-tab-index "Curvilinear Coordinate System*Frame7(Dir0 Tab)" 0)(cx-gui-do cx-activate-tab-index "Curvilinear Coordinate System*Frame7(Dir0 Tab)" 1)(cx-gui-do cx-activate-tab-index "Curvilinear Coordinate System*Frame7(Dir0 Tab)" 0)(cx-gui-do cx-activate-item "Curvilinear Coordinate System*PanelButtons*PushButton1(Close)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Expression Manager*Table1*Table1*ButtonBox2*PushButton1(New)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-activate-item \"Expression*Table1*ExpressionEntry3(Definition)\")")
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"YFaceArea\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area(['bottom'])\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area(['bottom'])\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area(['bottom'])\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Area(['bottom'])\" . 1))(cx-gui-do cx-activate-item \"Expression*Table1*ExpressionEntry3(Definition)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Expression*PanelButtons*PushButton1(OK)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|expr1"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|expr1"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-expr1*Compute")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|expr1"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|expr1"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-expr1*Delete")(cx-gui-do cx-activate-item "Question*OK")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions"))(cx-gui-do cx-list-tree-right-click "NavigationPane*Frame2*Table1*List_Tree2" )')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuTree-Named Expressions*New...")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"\" . 1))(cx-gui-do cx-set-text-entry \"Expression*Table1*TextEntry2(Name)\" \"U_inlet\")(cx-gui-do cx-activate-item \"Expression*Table1*TextEntry2(Name)\")")
+setup1.SendCommand(Command="(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/A\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area(['bottom'])\" . 1))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area(['bottom'])\" . 1))(cx-gui-do cx-activate-item \"Expression*Table1*ExpressionEntry3(Definition)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-toggle-button2 "Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)" #t)(cx-gui-do cx-activate-item "Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)")(cx-gui-do cx-set-toggle-button2 "Parameter Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)" #f)(cx-gui-do cx-activate-item "Parameter Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)")(cx-gui-do cx-set-toggle-button2 "Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)" #t)(cx-gui-do cx-activate-item "Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)")(cx-gui-do cx-set-toggle-button2 "Parameter Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)" #f)(cx-gui-do cx-activate-item "Parameter Expression*Table1*Frame1*Frame1(Details)*CheckButton4(Use as Input Parameter)")(cx-gui-do cx-activate-item "Expression*PanelButtons*PushButton1(OK)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|U_inlet"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|U_inlet"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|U_inlet"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|U_inlet"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Named Expressions|U_inlet"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Named Expressions|U_inlet\"))(cx-gui-do cx-set-expression-entry \"Expression*Table1*ExpressionEntry3(Definition)\" '(\"Q0/Area(['bottom'])\" . 1))(cx-gui-do cx-activate-item \"Expression*PanelButtons*PushButton1(OK)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Expression Manager*PanelButtons*PushButton1(Close)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Internal|interior--cut-extrude2 (interior, id=1047)"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Internal|interior--cut-extrude2 (interior, id=1047)"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Internal|interior--cut-extrude2 (interior, id=1047)"))(cx-gui-do cx-activate-item "Interior*PanelButtons*PushButton2(Cancel)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Inlet|bottom (velocity-inlet, id=13)"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions|Inlet|bottom (velocity-inlet, id=13)"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Setup|Boundary Conditions|Inlet|bottom (velocity-inlet, id=13)\"))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"0\" . 0))(cx-gui-do cx-enable-apply-button \"Velocity Inlet\")(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"Q0\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"\" . 1))(cx-gui-do cx-set-expression-entry \"Velocity Inlet*Frame2*Frame2*Frame1(Momentum)*Table1*Table9*ExpressionEntry1(Velocity Magnitude)\" '(\"U_inlet\" . 1))(cx-gui-do cx-activate-item \"Velocity Inlet*PanelButtons*PushButton1(OK)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Velocity Inlet*PanelButtons*PushButton2(Cancel)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Methods"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Methods"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Methods"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Controls"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Controls"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Controls"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Report Definitions"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Monitors"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Monitors"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Monitors"))(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Monitors|Residual"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Monitors|Residual"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Solution|Monitors|Residual\"))(cx-gui-do cx-set-real-entry-list \"Residual Monitors*Table1*Table2*Table1*Table1(Equations)*RealEntry11\" '( 0.0001))(cx-gui-do cx-set-real-entry-list \"Residual Monitors*Table1*Table2*Table1*Table1(Equations)*RealEntry17\" '( 0.0001))(cx-gui-do cx-set-real-entry-list \"Residual Monitors*Table1*Table2*Table1*Table1(Equations)*RealEntry23\" '( 0.0001))(cx-gui-do cx-set-real-entry-list \"Residual Monitors*Table1*Table2*Table1*Table1(Equations)*RealEntry29\" '( 0.0001))(cx-gui-do cx-activate-item \"Residual Monitors*PanelButtons*PushButton1(OK)\")")
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))(cx-gui-do cx-set-integer-entry "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table1*Table1*IntegerEntry1(Number of Time Steps)" 1)(cx-gui-do cx-activate-item "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table1*Table1*IntegerEntry1(Number of Time Steps)")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Run Calculation*Table1*Table7(Time Advancement)*Table1*Table3*DropDownList1(Method)\" '( 1))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Run Calculation*Table1*Table7(Time Advancement)*Table1*Table3*DropDownList1(Method)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-integer-entry "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table4*IntegerEntry6(Time Steps per Period)" 100)(cx-gui-do cx-activate-item "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table4*IntegerEntry6(Time Steps per Period)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-integer-entry "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table4*IntegerEntry9(Total Periods)" 2)(cx-gui-do cx-activate-item "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table4*IntegerEntry9(Total Periods)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-integer-entry "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table5*Table1*Table1*IntegerEntry1(Max Iterations/Time Step)" 40)(cx-gui-do cx-activate-item "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table5*Table1*Table1*IntegerEntry1(Max Iterations/Time Step)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Initialization"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Initialization"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Initialization"))(cx-gui-do cx-set-toggle-button2 "Solution Initialization*Table1*ToggleBox3(Initialization Methods)*Hybrid  Initialization" #t)(cx-gui-do cx-activate-item "Solution Initialization*Table1*ToggleBox3(Initialization Methods)*Hybrid  Initialization")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Solution Initialization*Table1*Frame12*PushButton2(Initialize)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))(cx-gui-do cx-set-integer-entry "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table4*IntegerEntry9(Total Periods)" 1)(cx-gui-do cx-activate-item "Run Calculation*Table1*Table7(Time Advancement)*Table3(Parameters)*Table4*IntegerEntry9(Total Periods)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Run Calculation*Table1*Table9(Solution Advancement)*Table1*PushButton1(Calculate)")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Information*OK")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Close Fluent")')
+solution1 = system1.GetContainer(ComponentName="Solution")
+solution1.Edit()
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "24.1"')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Close Fluent")')
+template1 = GetTemplate(TemplateName="Results")
+system2 = template1.CreateSystem(
+    Position="Right",
+    RelativeTo=system1)
+solutionComponent1 = system1.GetComponent(Name="Solution")
+resultsComponent1 = system2.GetComponent(Name="Results")
+solutionComponent1.TransferData(TargetComponent=resultsComponent1)
+results1 = system2.GetContainer(ComponentName="Results")
+results1.Edit()
+results1.SendCommand(Command="""VIEW:View 1
+  Camera Mode = User Specified
+  CAMERA:
+    Option = Pivot Point and Quaternion
+    Pivot Point = -0.100116, 0.0738727, -1.041
+    Scale = 2.538
+    Pan = 0, 0
+    Rotation Quaternion = -0.145776, -0.330946, 0.23398, 0.902485
+    
+  END
+
+END
+
+VIEW:View 4
+  Camera Mode = User Specified
+  CAMERA:
+    Option = Pivot Point and Quaternion
+    Pivot Point = 0, 0, 0
+    Scale = 0.97561
+    Pan = 0, 0
+    Rotation Quaternion = 0.279848, -0.364705, -0.115917, 0.880476
+    
+  END
+
+END
+
+VIEW:View 1
+  Light Angle = 50, 110
+END
+
+VIEW:View 2
+  Light Angle = 50, 110
+END
+
+VIEW:View 3
+  Light Angle = 50, 110
+END
+
+VIEW:View 4
+  Light Angle = 50, 110
+END
+
+> update
+# Sending visibility action from ViewUtilities
+>show /DATA READER/CASE:Case FLTG/BOUNDARY:bottom, view=/VIEW:View 1""")
+results1.SendCommand(Command="""# Sending visibility action from ViewUtilities
+>show /DATA READER/CASE:Case FLTG/BOUNDARY:top, view=/VIEW:View 1""")
+results1.SendCommand(Command="""# Sending visibility action from ViewUtilities
+>show /DATA READER/CASE:Case FLTG/BOUNDARY:wall, view=/VIEW:View 1""")
+results1.SendCommand(Command="""VIEW:View 1
+  Camera Mode = User Specified
+  CAMERA:
+    Option = Pivot Point and Quaternion
+    Pivot Point = -0.100116, 0.0738727, -1.041
+    Scale = 3.65448
+    Pan = 0, 0
+    Rotation Quaternion = -0.286458, 0.300645, 0.208587, 0.885468
+    
+  END
+
+END
+
+> update
+> autolegend plot=/VECTOR:vel, view=VIEW:View 1""")
+results1.SendCommand(Command="""# Sending visibility action from ViewUtilities
+>hide /WIREFRAME:Wireframe, view=/VIEW:View 1""")
+results1.SendCommand(Command="> autolegend plot=/CONTOUR:vel, view=VIEW:View 1")
+results1.SendCommand(Command="""CONTOUR:vel
+Apply Instancing Transform = On
+Clip Contour = Off
+Colour Map = Default Colour Map
+Colour Scale = Linear
+Colour Variable = Velocity u
+Colour Variable Boundary Values = Conservative
+Constant Contour Colour = Off
+Contour Range = Global
+Culling Mode = No Culling
+Domain List = /DOMAIN GROUP:All Domains
+Draw Contours = On
+Font = Sans Serif
+Fringe Fill = On
+Instancing Transform = /DEFAULT INSTANCE TRANSFORM:Default Transform
+Lighting = On
+Line Colour = 0, 0, 0
+Line Colour Mode = Default
+Line Width = 1
+Location List = bottom
+Max = 0.0 [m s^-1]
+Min = 0.0 [m s^-1]
+Number of Contours = 11
+Show Numbers = Off
+Specular Lighting = On
+Surface Drawing = Smooth Shading
+Text Colour = 0, 0, 0
+Text Colour Mode = Default
+Text Height = 0.024
+Transparency = 0.0
+Use Face Values = Off
+Value List = 0 [m s^-1],1 [m s^-1]
+  OBJECT VIEW TRANSFORM:
+  Apply Reflection = Off
+  Apply Rotation = Off
+  Apply Scale = Off
+  Apply Translation = Off
+  Principal Axis = Z
+  Reflection Plane Option = XY Plane
+  Rotation Angle = 0.0 [degree]
+  Rotation Axis From = 0 [m], 0 [m], 0 [m]
+  Rotation Axis To = 0 [m], 0 [m], 0 [m]
+  Rotation Axis Type = Principal Axis
+  Scale Vector = 1 , 1 , 1 
+  Translation Vector = 0 [m], 0 [m], 0 [m]
+  X = 0.0 [m]
+  Y = 0.0 [m]
+  Z = 0.0 [m]
+  END
+END""")
+results1.SendCommand(Command="""# Sending visibility action from ViewUtilities
+>show /CONTOUR:vel, view=/VIEW:View 1""")
+results1.SendCommand(Command="""VIEW:View 1
+  Camera Mode = User Specified
+  CAMERA:
+    Option = Pivot Point and Quaternion
+    Pivot Point = -0.100116, 0.0738727, -1.041
+    Scale = 3.65448
+    Pan = 0, 0
+    Rotation Quaternion = -0.019388, 0.0238767, 0.254228, 0.966659
+    
+  END
+
+END
+
+> update
+# Sending visibility action from ViewUtilities
+>hide /DATA READER/CASE:Case FLTG/BOUNDARY:bottom, view=/VIEW:View 1""")
+results1.SendCommand(Command="""# Sending visibility action from ViewUtilities
+>hide /DATA READER/CASE:Case FLTG/BOUNDARY:top, view=/VIEW:View 1""")
+results1.SendCommand(Command="""# Sending visibility action from ViewUtilities
+>hide /DATA READER/CASE:Case FLTG/BOUNDARY:wall, view=/VIEW:View 1""")
+results1.SendCommand(Command="""VIEW:View 1
+  Camera Mode = User Specified
+  CAMERA:
+    Option = Pivot Point and Quaternion
+    Pivot Point = -0.100116, 0.0738727, -1.041
+    Scale = 4.17701
+    Pan = 0, 0
+    Rotation Quaternion = -0.176767, 0.0405593, 0.118265, 0.976284
+    
+  END
+
+END
+
+> update
+CONTOUR:vel
+Apply Instancing Transform = On
+Clip Contour = Off
+Colour Map = Default Colour Map
+Colour Scale = Linear
+Colour Variable = Velocity u
+Colour Variable Boundary Values = Conservative
+Constant Contour Colour = Off
+Contour Range = Global
+Culling Mode = No Culling
+Domain List = /DOMAIN GROUP:All Domains
+Draw Contours = On
+Font = Sans Serif
+Fringe Fill = On
+Instancing Transform = /DEFAULT INSTANCE TRANSFORM:Default Transform
+Lighting = On
+Line Colour = 0, 0, 0
+Line Colour Mode = Default
+Line Width = 1
+Location List = top
+Max = 0.0 [m s^-1]
+Min = 0.0 [m s^-1]
+Number of Contours = 11
+Show Numbers = Off
+Specular Lighting = On
+Surface Drawing = Smooth Shading
+Text Colour = 0, 0, 0
+Text Colour Mode = Default
+Text Height = 0.024
+Transparency = 0.0
+Use Face Values = Off
+Value List = 0 [m s^-1],1 [m s^-1]
+  OBJECT VIEW TRANSFORM:
+  Apply Reflection = Off
+  Apply Rotation = Off
+  Apply Scale = Off
+  Apply Translation = Off
+  Principal Axis = Z
+  Reflection Plane Option = XY Plane
+  Rotation Angle = 0.0 [degree]
+  Rotation Axis From = 0 [m], 0 [m], 0 [m]
+  Rotation Axis To = 0 [m], 0 [m], 0 [m]
+  Rotation Axis Type = Principal Axis
+  Scale Vector = 1 , 1 , 1 
+  Translation Vector = 0 [m], 0 [m], 0 [m]
+  X = 0.0 [m]
+  Y = 0.0 [m]
+  Z = 0.0 [m]
+  END
+END""")
+results1.SendCommand(Command="""VIEW:View 1
+  Camera Mode = User Specified
+  CAMERA:
+    Option = Pivot Point and Quaternion
+    Pivot Point = -0.100116, 0.0738727, -1.041
+    Scale = 3.2766
+    Pan = 0, 0
+    Rotation Quaternion = -0.147114, 0.0870138, 0.0111073, 0.985227
+    
+  END
+
+END
+
+> update
+CONTOUR:vel
+Apply Instancing Transform = On
+Clip Contour = Off
+Colour Map = Default Colour Map
+Colour Scale = Linear
+Colour Variable = Velocity u
+Colour Variable Boundary Values = Conservative
+Constant Contour Colour = Off
+Contour Range = Global
+Culling Mode = No Culling
+Domain List = /DOMAIN GROUP:All Domains
+Draw Contours = On
+Font = Sans Serif
+Fringe Fill = On
+Instancing Transform = /DEFAULT INSTANCE TRANSFORM:Default Transform
+Lighting = On
+Line Colour = 0, 0, 0
+Line Colour Mode = Default
+Line Width = 1
+Location List = top
+Max = 0.0 [m s^-1]
+Min = 0.0 [m s^-1]
+Number of Contours = 21
+Show Numbers = Off
+Specular Lighting = On
+Surface Drawing = Smooth Shading
+Text Colour = 0, 0, 0
+Text Colour Mode = Default
+Text Height = 0.024
+Transparency = 0.0
+Use Face Values = Off
+Value List = 0 [m s^-1],1 [m s^-1]
+  OBJECT VIEW TRANSFORM:
+  Apply Reflection = Off
+  Apply Rotation = Off
+  Apply Scale = Off
+  Apply Translation = Off
+  Principal Axis = Z
+  Reflection Plane Option = XY Plane
+  Rotation Angle = 0.0 [degree]
+  Rotation Axis From = 0 [m], 0 [m], 0 [m]
+  Rotation Axis To = 0 [m], 0 [m], 0 [m]
+  Rotation Axis Type = Principal Axis
+  Scale Vector = 1 , 1 , 1 
+  Translation Vector = 0 [m], 0 [m], 0 [m]
+  X = 0.0 [m]
+  Y = 0.0 [m]
+  Z = 0.0 [m]
+  END
+END""")
+results1.SendCommand(Command="""ANIMATION:ANIMATION
+QAnim MPEG Filename = C:/Users/guill/OneDrive/Documentos/FLTG.wmv
+QAnim Save MPEG = Off
+QAnim Looping = Bounce
+QAnim Looping Cycles = 1
+Video Format = wmv
+
+END""")
+results1.SendCommand(Command="""CONTOUR:vel
+Apply Instancing Transform = On
+Clip Contour = Off
+Colour Map = Default Colour Map
+Colour Scale = Linear
+Colour Variable = Velocity u
+Colour Variable Boundary Values = Conservative
+Constant Contour Colour = Off
+Contour Range = Global
+Culling Mode = No Culling
+Domain List = /DOMAIN GROUP:All Domains
+Draw Contours = On
+Font = Sans Serif
+Fringe Fill = On
+Instancing Transform = /DEFAULT INSTANCE TRANSFORM:Default Transform
+Lighting = On
+Line Colour = 0, 0, 0
+Line Colour Mode = Default
+Line Width = 1
+Location List = top
+Max = 0.0 [m s^-1]
+Min = 0.0 [m s^-1]
+Number of Contours = 21
+Show Numbers = Off
+Specular Lighting = On
+Surface Drawing = Smooth Shading
+Text Colour = 0, 0, 0
+Text Colour Mode = Default
+Text Height = 0.024
+Transparency = 0.0
+Use Face Values = Off
+Value List = 0 [m s^-1],1 [m s^-1]
+  OBJECT VIEW TRANSFORM:
+  Apply Reflection = Off
+  Apply Rotation = Off
+  Apply Scale = Off
+  Apply Translation = Off
+  Principal Axis = Z
+  Reflection Plane Option = XY Plane
+  Rotation Angle = 0.0 [degree]
+  Rotation Axis From = 0 [m], 0 [m], 0 [m]
+  Rotation Axis To = 0 [m], 0 [m], 0 [m]
+  Rotation Axis Type = Principal Axis
+  Scale Vector = 1 , 1 , 1 
+  Translation Vector = 0 [m], 0 [m], 0 [m]
+  X = 0.0 [m]
+  Y = 0.0 [m]
+  Z = 0.0 [m]
+  END
+END""")
+results1.Exit()
+fluentLauncherSettings1.SetEntityProperties(Properties=Set(EnvPath={}))
+setup1.Edit()
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command="/file/set-tui-version \"24.1\"(cx-use-window-id 51)(cx-set-camera-relative '(-1.99417 -1.34496 -3.98477) '(0 0 0) '(-0.611102 -0.81965 0.770736) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-0.130126 -0.0201735 0.567122) '(0 0 0) '(0.275736 0.465502 -0.0848671) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(2.62599 4.11902 -0.00838453) '(0 0 0) '(1.24985 -0.766622 -0.299671) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-0.549972 -0.264194 -0.0311742) '(0 0 0) '(0.0289156 0.436741 -0.487153) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-0.0185542 -0.00637555 0.00198126) '(0 0 0) '(-0.00494474 0.0146877 0.000957303) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(0.786996 0.0143726 -0.0207826) '(0 0 0) '(-0.00719702 -0.62758 0.311275) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-0.514882 0.0467131 0.0268065) '(0 0 0) '(0.0346486 0.389127 0.0307421) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-0.190259 -0.0341754 -0.0394294) '(0 0 0) '(-0.398574 0.0309801 0.57225) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-0.511356 -0.391376 0.409032) '(0 0 0) '(0.115197 0.213016 -0.165268) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(0.220752 -2.84509 1.00164) '(0 0 0) '(0.0686973 -0.248364 0.00523877) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(0.182369 -1.36319 -1.05072) '(0 0 0) '(-0.439401 0.267193 0.227132) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-1.53433 2.44347 -0.259425) '(0 0 0) '(0.0387521 -0.0108605 -0.0103127) 0 0)(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Results|Surfaces\"))(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Results|Surfaces\"))(cx-gui-do cx-list-tree-right-click \"NavigationPane*Frame2*Table1*List_Tree2\" )")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*NewSubMenu*Plane...")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Plane Surface*Table1*Table2(Method)*DropDownList1\" '( 1))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Plane Surface*Table1*Table2(Method)*DropDownList1")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-list-selections \"Plane Surface*Table1*Table2(Method)*DropDownList1\" '( 2))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Plane Surface*Table1*Table2(Method)*DropDownList1")')
+setup1.SendCommand(Command="(cx-gui-do cx-set-real-entry-list \"Plane Surface*Table1*Frame3*Table1*Table1(Point)*RealEntry3(Z)\" '( 0))(cx-gui-do cx-activate-item \"Plane Surface*Table1*Frame3*Table1*Table1(Point)*RealEntry3(Z)\")")
+setup1.SendCommand(Command="(cx-use-window-id 51)(cxg-clear-all-selections (cx-active-window))(cxg-add-surfaces-to-selection '(wall) (cx-active-window))(cx-use-window-id 51)")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Plane Surface*Table1*Frame3*Table1*Table1(Point)*PushButton4(Select with Mouse)")(cx-gui-do cx-activate-item "Working*Cancel")')
+setup1.SendCommand(Command="(cx-use-window-id 51)(cxg-clear-all-selections (cx-active-window))(cxg-add-surfaces-to-selection '(wall) (cx-active-window))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Quick Edit*Table1*PushButton4(icon_close)")')
+setup1.SendCommand(Command="(cx-use-window-id 51)(cx-use-window-id 51)(cx-set-camera-relative '(0.609094 -0.807748 0.622882) '(0 0 0) '(0.122362 0.0182714 -0.0678989) 0 0)(cx-gui-do cx-set-list-selections \"Plane Surface*Table1*Table2(Method)*DropDownList1\" '( 2))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Plane Surface*Table1*Table2(Method)*DropDownList1")')
+setup1.SendCommand(Command='(cx-use-window-id 51)(cx-gui-do cx-activate-item "Plane Surface*PanelButtons*PushButton2(Cancel)")')
+system3 = GetSystem(Name="Geom")
+geometry1 = system3.GetContainer(ComponentName="Geometry")
+geometry1.Edit(IsSpaceClaimGeometry=True)
+geometry1.Exit()
+fluentLauncherSettings1.SetEntityProperties(Properties=Set(EnvPath={}))
+tGridData1.SetEntityProperties(Properties=Set(RunParallel=True, NumberOfProcs=16))
+Fluent.Edit(Container=mesh1)
+setup1.SendCommand(Command='(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 1)')
+setup1.SendCommand(Command='/file/set-tui-version "24.1"(cx-gui-do cx-activate-tab-index "NavigationPane*Frame1(TreeTab)" 0)')
+setup1.SendCommand(Command="(newline)")
+setup1.SendCommand(Command="(cx-use-window-id 51)(cx-set-camera-relative '(-4.00875 -5.50867 -1.98186) '(0 0 0) '(0.268025 -0.585309 1.46507) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(2.40342 -1.05274 1.23258) '(0 0 0) '(0.102797 0.0575096 0.0102114) 0 0)(cx-gui-do cx-activate-tab-index \"NavigationPane*Frame1(TreeTab)\" 1)(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Mesh Generation|Model|Mesh Objects|geom-cut-extrude2\"))(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Mesh Generation|Model|Geometry Objects\"))(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Mesh Generation|Model|CAD Assemblies\"))(cx-gui-do cx-set-list-tree-selections \"NavigationPane*Frame2*Table1*List_Tree2\" (list \"Mesh Generation\"))")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "ToolBar*View*isometric")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*PopupMenuModel-View*Isometric")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*DisplayMenu*Views...")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "Views*PanelButtons*PushButton2(Close)")')
+setup1.SendCommand(Command='(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list ))')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "ToolBar*Visibility*axes")')
+setup1.SendCommand(Command="(cx-use-window-id 51)(cx-set-camera-relative '(-2.15778 -1.08223 1.58925) '(0 0 0) '(0.616836 0.189043 0.0718943) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-3.09203 -2.10311 -1.3274) '(0 0 0) '(-0.122925 0.0918789 0.582299) 0 0)")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "ToolBar*Filter*position")')
+setup1.SendCommand(Command="(cx-use-window-id 51)(cx-set-camera-relative '(1.98969 -1.20231 1.00624) '(0 0 0) '(-0.642498 -0.255608 0.0529565) 0 0)(cx-use-window-id 51)(cx-set-camera-relative '(-0.357253 -0.140125 -0.20057) '(0 0 0) '(-0.0563778 -0.0351629 -0.0772332) 0 0)")
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "ToolBar*Filter*position")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "ToolBar*Filter*position")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "ToolBar*Filter*position")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "ToolBar*Filter*position")')
+setup1.SendCommand(Command='(cx-gui-do cx-activate-item "MenuBar*FileMenu*Close Fluent")')
+setup1.SendCommand(Command="(%py-exec \"workflow.SaveWorkflow(FilePath=r'H:\\.shortcut-targets-by-id\\1XF2JOROdJ0B3txwAztMCdrZx0_ng8Mo8\\Syringomyelia\\Resonancias20240606\\ansys\\Chiari_Granada_files\\dp0\\FLTG\\Fluent\\FLTG_workflow_files\\FLTG.wft')\")")
+setup1.SendCommand(Command="(%py-exec \"workflow.SaveWorkflow(FilePath=r'H:\\.shortcut-targets-by-id\\1XF2JOROdJ0B3txwAztMCdrZx0_ng8Mo8\\Syringomyelia\\Resonancias20240606\\ansys\\Chiari_Granada_files\\dp0\\FLTG\\Fluent\\FLTG_workflow_files\\FLTG.wft')\")")
+geometry1.Edit(IsSpaceClaimGeometry=True)
+Save(Overwrite=True)
+Save(Overwrite=True)

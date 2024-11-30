@@ -1,0 +1,4 @@
+/file/read-case-data "variable_case.cas"
+/file/read-profile "inlet_1.csv"
+/solve/dual-time-iterate 1 15
+/file/write-case-data, "variable_case_final.cas"

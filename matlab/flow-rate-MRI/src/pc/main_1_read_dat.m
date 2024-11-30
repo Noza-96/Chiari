@@ -1,0 +1,41 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+cas.dirdat = '../../dat'; % (do not include ending "/" in cas.dirdat)
+
+cas.subj = 's101';
+cas.anal = 'flow';
+cas.sess = '20240606am-card';
+
+resettimevector = false;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+aux.fig_opts = set_plotting_style;
+[aux.nt10, aux.klr] = define_colors;
+
+disp([newline + "Setting up folders ..." + newline])
+
+cas = scan_folders_set_cas(cas);
+
+if cas.Ncas_PC > 0
+    disp([newline + "Reading PC DICOMS ..." + newline])
+    dat_PC = read_dicoms_PC(cas, resettimevector);
+end
+
+if cas.Ncas_RT > 0
+    disp([newline + "Reading RT DICOMS ..." + newline])
+    dat_RT = read_dicoms_RT(cas, resettimevector);
+end
+
+if cas.Ncas_FM > 0
+    disp([newline + "Reading FM DICOMS ..." + newline])
+    dat_FM = read_dicoms_FM(cas);
+end
+
+disp([newline + "Saving everything in a .mat file ..." + newline])
+
+save([cas.dirmat, '/01-read_dat.mat'], 'aux', 'cas', 'dat_PC');
+
+disp([newline + "Done!" + newline])
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

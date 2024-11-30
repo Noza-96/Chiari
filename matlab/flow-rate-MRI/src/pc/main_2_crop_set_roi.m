@@ -1,0 +1,39 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+reference_location = 'C03C04'; 
+% (set to 'zero' to set location to 0.0)
+% (set to 'fromsag' to replace locations with those from sagittal geometry)
+% (e.g. 'C02C03' to shift all locations so that the C02C03 locations coincides with sagittal geometry)
+
+crop_size = 128;
+
+makemovies = false;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+disp([newline + "Adjusting vertical location ..." + newline])
+
+dat_PC = adjust_vertical_location_PC(cas, dat_PC, reference_location);
+
+disp([newline + "Cropping data ..." + newline])
+
+dat_PC = crop_data(cas, dat_PC, crop_size);
+
+disp([newline + "Making movies (if requested) ..." + newline])
+
+if makemovies
+    make_movies(cas, dat_PC, 'U_tot');
+end
+
+disp([newline + "Setting up ROIs ..." + newline])
+
+%dat_PC = define_ROI_freehand(cas, dat_PC);
+dat_PC = define_ROI_video(cas, dat_PC);
+
+disp([newline + "Saving everything in a .mat file ..." + newline])
+
+save([cas.dirmat, '/02-crop_set_roi.mat'], 'aux', 'cas', 'dat_PC');
+
+disp([newline + "Done!" + newline])
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
