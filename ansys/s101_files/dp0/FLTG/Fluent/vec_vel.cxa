@@ -1,8 +1,0 @@
-AnimationSequence1.0
-NAME: vec_vel
-WINID: 1
-STORAGE: 4
-PLOTANIMATION: 0
-FRAMES: 2
-Frame 0 4 vec_vel_0000.ppm 1
-Frame 1 4 vec_vel_0001.ppm 1
