@@ -66,9 +66,35 @@
 18) export to file
 ![alt text](screenshots/18_export_to_file.png) 
 
-19) if you want to obtain the plane defined by a dicom to do a subsequent cut of the geometry, you can run in python interpreter (Control + 3) the code: 
+19) save slicer 3D session with all changes as ID_slicer, for future use
 
+20) if you want to obtain the plane defined by a dicom to do a subsequent cut of the geometry, open the Python Interactor in Slicer (```Ctrl + 3```) and run the code, using **yellow, green, or red**: 
 
+```
+# Get the Yellow slice node (for c3-c4 view)
+sliceNode = slicer.mrmlScene.GetNodeByID("vtkMRMLSliceNodeYellow")
+
+# Get the SliceToRAS transform matrix (mapping slice coordinates to RAS coordinates)
+sliceToRAS = sliceNode.GetSliceToRAS()
+
+# Get the origin (position) of the slice (translation part of the transformation matrix)
+origin = sliceToRAS.GetElement(0, 3), sliceToRAS.GetElement(1, 3), sliceToRAS.GetElement(2, 3)
+
+# Get the normal vector (orientation of the slice)
+normal = sliceToRAS.MultiplyPoint((0, 0, 1, 0))[:3]  # This applies the slice's orientation in RAS coordinates
+
+# Output the results
+print("Origin (Position):", origin)  # This is the position of the plane
+print("Normal Vector:", normal)      # This is the direction of the plane
+
+# Optionally, save the plane parameters to a text file for later use
+with open("plane_info.txt", "w") as f:
+    f.write(f"Origin: {origin}\n")
+    f.write(f"Normal: {normal}\n")
+
+print("Plane information saved to plane_info.txt")
+
+```
 
 
 **Next is only for visualization!**
