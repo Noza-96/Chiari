@@ -5,11 +5,81 @@
 # 1. Alignment anatomy to flow rate MRIs
 **Program**: Slicer 
 
-**Instructions**: 
+
+## Instructions: 
 1) Add ID_segmentation.nrrd of anatomy and .dcm of all flow rate measurements to SLICER. 
 2) Apply a linear transformation to anatomy MRI till there is alignment with dicoms.
 
-**Output**: ID_Transformed_Anatomy.nrrd
+## Step-by-Step:
+
+1) add data
+![alt text](screenshots/1_add_data.png)
+
+2) load flow as sequences and anatomy as segmentation
+![111](screenshots/2_load_sequences_segmentation.png)
+
+3) load segmentation as volume, this allows for the linear transformation
+![alt text](screenshots/3_load_nrddsegmentation_as_volume.png)
+
+4) center 3D view
+![alt text](screenshots/4_center_3D_view.png) 
+
+5) rotate to volume plane
+![alt text](screenshots/5_rotate_to_volume_plane.png) 
+
+6) reset field of view, assign each window to a different view (c1c2, ...) and unable  3D view (open eye)
+![alt text](screenshots/6_reset_field_of_view.png) 
+
+7) go to segmentations
+![alt text](screenshots/7_go_to_segmentations.png) 
+
+8) change to desired opacity
+![alt text](screenshots/8_change_opacity.png) 
+
+9) go to transforms
+![alt text](screenshots/9_go_to_transforms.png) 
+
+10) create new linear transform
+![alt text](screenshots/10_create_new_linear_transform.png) 
+
+11) transform both segmentation and volume
+![alt text](screenshots/11_transformed_both_nrrd_segmentaiton_and_volume.png) 
+
+12) after flow measurements are aligned with anatomy, go to resample image
+![alt text](screenshots/12_go_to_resample_image.png) 
+
+13) in inputs, image to wrap volume
+![alt text](screenshots/13_image_to_warp_volume_nrrd.png) 
+
+14) save output image as ID_transformed_segmentation.nrrd
+![alt text](screenshots/14_name_output_image.png) 
+
+15) select the linear transformation
+![alt text](screenshots/15_select_your_linear_transform.png) 
+
+16) apply linear transformation
+![alt text](screenshots/16_apply.png) 
+
+17) go to data
+![alt text](screenshots/17_go_to_data.png) 
+
+18) export to file
+![alt text](screenshots/18_export_to_file.png) 
+
+19) if you want to obtain the plane defined by a dicom to do a subsequent cut of the geometry, you can run in python interpreter (Control + 3) the code: 
+
+
+
+
+**Next is only for visualization!**
+
+19) change background color
+![alt text](screenshots/19_change_background_color.png) 
+
+20) spin 3D view
+![alt text](screenshots/20_spin_3D_view.png)
+
+ **Output**: ID_transformed_segmentation.nrrd
 Linear transformation applied to the anatomy
 
 # 2. Segmentation
