@@ -1,7 +1,5 @@
 # Chiari
 
-# TODO: re-write these instructions with the screenshots/videos
-
 # 1. Alignment anatomy to flow rate MRIs
 **Program**: Slicer 
 
