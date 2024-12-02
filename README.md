@@ -51,7 +51,7 @@
 13) in inputs, image to wrap volume
 ![alt text](screenshots/13_image_to_warp_volume_nrrd.png) 
 
-14) save output image as ID_transformed_segmentation.nrrd
+14) save output image as ID_transformed_segmentation
 ![alt text](screenshots/14_name_output_image.png) 
 
 15) select the linear transformation
@@ -92,8 +92,7 @@ with open("plane_info.txt", "w") as f:
     f.write(f"Origin: {origin}\n")
     f.write(f"Normal: {normal}\n")
 
-print("Plane information saved to plane_info.txt")
-
+print("Plane information saved to plane_info.txt")=
 ```
 
 
