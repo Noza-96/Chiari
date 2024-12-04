@@ -1,19 +1,29 @@
-# Chiari
+# Chiari Simulation Pipeline
+
+This repository provides a step-by-step guide for creating computational simulations of cerebrospinal fluid (CSF) flow in Chiari Malformation patients. The pipeline integrates segmentation, geometry preparation, and numerical simulations to analyze CSF dynamics using a combination of advanced imaging and computational tools.
+
+## Purpose
+
+The pipeline facilitates the transformation of patient-specific imaging data into computational models for numerical simulations. This process includes segmentation of the CSF space, alignment of anatomical and flow-rate MRIs, computational geometry creation, meshing, and boundary condition integration for Ansys Fluent simulations.
 
 <a id="Table_contents"></a>
 
-# Table of Contents
-1. [Segmentation](#Segmentation)
-2. [Alignment anatomy to flow rate MRIs](#Alignment)
-3. [Smooth segmentation](#Smooth)
-4. [Point cloud](#Point_cloud)
-5. [Computational geometry](#Computational_geometry)
-6. [Ansys Mesh](#Ansys_mesh)
-7. [Inlet BC from PC-MRI measurements](#Inlet_BC)
-8. [Numerical simulations](#Numerical_simulations)
-9. [Post-processing](#Post-processing)
+## Table of Contents
+1. [Segmentation](#Segmentation): Extract CSF anatomy from MRIs using ITK-Snap
+2. [Alignment](#Alignment): Align anatomical segmentation to flow-rate MRI using Slicer.
+3. [Smooth segmentation](#Smooth): Refine segmentation to a smooth 3D model using Fusion 360.
+4. [Point cloud](#Point_cloud): Create a point cloud representation using Rhino.
+5. [Computational geometry](#Computational_geometry): Build a simulation-ready geometry using SolidWorks.
+6. [Meshing](#Ansys_mesh): Generate a computational mesh in Ansys.
+7. [Inlet Boundary Conditions](#Inlet_BC): Process PC-MRI velocity data using MATLAB.
+8. [Numerical simulations](#Numerical_simulations): Run simulations in Ansys Fluent to compute velocity and pressure fields.
+9. [Post-processing](#Post-processing): Analyze results in MATLAB to extract insights like longitudinal impedance and velocity comparisons.
 
-# 1. Segmentation <a id="Segmentation"></a>
+## Overview
+
+For details on each step, refer to the [Table of Contents](#Table_contents). Ensure you have the necessary software installed, including ITK-Snap, Slicer, Fusion 360, Rhino, SolidWorks, Ansys, and MATLAB
+
+## 1. Segmentation <a id="Segmentation"></a>
 
 **Program**: iTK-Snap 
 
@@ -25,15 +35,15 @@
 
 [Back to top](#Table_contents)
 
-# 2. Alignment anatomy to flow rate MRIs <a id="Alignment"></a>
+## 2. Alignment anatomy to flow rate MRIs <a id="Alignment"></a>
 
 **Program**: Slicer 
 
-## Instructions: 
+### Instructions: 
 1) Add ID_segmentation.nrrd of anatomy and .dcm of all flow rate measurements to SLICER. 
 2) Apply a linear transformation to anatomy MRI till there is alignment with dicoms.
 
-## Step-by-Step:
+### Step-by-Step:
 
 1) add data
 ![alt text](screenshots/1_add_data.png)
@@ -132,7 +142,7 @@ Linear transformation applied to the anatomy
 
 [Back to top](#Table_contents)
 
-# 3. Smooth segmentation <a id="Smooth"></a>
+## 3. Smooth segmentation <a id="Smooth"></a>
 
 **Program**:  Fusion 360
 
@@ -144,7 +154,7 @@ Linear transformation applied to the anatomy
 
 
 
-# 4. Point cloud <a id="Point_cloud"></a>
+## 4. Point cloud <a id="Point_cloud"></a>
 
 **Program**:  Rhino 8
 
@@ -154,7 +164,7 @@ Linear transformation applied to the anatomy
 
 [Back to top](#Table_contents)
 
-# 5. Computational geometry <a id="Computational_geometry"></a>
+## 5. Computational geometry <a id="Computational_geometry"></a>
 **Program**: SolidWorks 
 
 **Instructions**: 
@@ -166,7 +176,7 @@ Linear transformation applied to the anatomy
 [Back to top](#Table_contents)
 
 
-# 6. Ansys Mesh <a id="Ansys_mesh"></a>
+## 6. Ansys Mesh <a id="Ansys_mesh"></a>
 **Program**: Ansys
 
 **Outputs**: 
@@ -175,7 +185,7 @@ Linear transformation applied to the anatomy
 
 [Back to top](#Table_contents)
 
-# 7. Inlet BC from PC MRI measurements <a id="Inlet_BC"></a>
+## 7. Velocities from PC MRI measurements <a id="Inlet_BC"></a>
 
 **Program**:  Matlab
 
@@ -188,7 +198,7 @@ Linear transformation applied to the anatomy
 
 [Back to top](#Table_contents)
 
-# 8. Numerical simulations <a id="Numerical_simulations"></a>
+## 8. Numerical simulations <a id="Numerical_simulations"></a>
 
 **Program**: Ansys Fluent
 
@@ -198,7 +208,7 @@ Linear transformation applied to the anatomy
 
 [Back to top](#Table_contents)
 
-# 9. Post-processing  <a id="Post-processing"></a>
+## 9. Post-processing  <a id="Post-processing"></a>
 
 **Program**:  Matlab
 
