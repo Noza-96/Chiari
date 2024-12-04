@@ -9,10 +9,9 @@
 4. [Point cloud](#Point_cloud)
 5. [Computational geometry](#Computational_geometry)
 6. [Ansys Mesh](#Ansys_mesh)
-7. [Inlet BC](#Inlet_BC)
-8. [](#)
-9. [](#)
-
+7. [Inlet BC from PC-MRI measurements](#Inlet_BC)
+8. [Numerical simulations](#Numerical_simulations)
+9. [Post-processing](#Post-processing)
 
 # 1. Segmentation <a id="Segmentation"></a>
 
@@ -189,20 +188,22 @@ Linear transformation applied to the anatomy
 
 [Back to top](#Table_contents)
 
-<a id="Numerical_simulations"></a>
-# 8. Numerical simulations
+# 8. Numerical simulations <a id="Numerical_simulations"></a>
+
 **Program**: Ansys Fluent
+
 **Outputs**: 
 1) Pressure drop in 25 mm section (used to calculate longitudinal impedance).
 2) Time-dependent velocity field at the measurement locations.  
 
 [Back to top](#Table_contents)
 
-<a id="Post-processing"></a>
-# 9. Post-processing 
+# 9. Post-processing  <a id="Post-processing"></a>
+
 **Program**:  Matlab
 
 **Output**: 
 1) longitudinal impedance.
 2) Comparison measured velocity to calculated velocity.
 
+[Back to top](#Table_contents)
