@@ -1,8 +1,34 @@
 # Chiari
 
-# 1. Alignment anatomy to flow rate MRIs
-**Program**: Slicer 
+<a id="Table_contents"></a>
 
+# Table of Contents
+1. [Segmentation](#Segmentation)
+2. [Alignment anatomy to flow rate MRIs](#Alignment)
+3. [Smooth segmentation](#Smooth)
+4. [Point cloud](#Point_cloud)
+5. [Computational geometry](#Computational_geometry)
+6. [Ansys Mesh](#Ansys_mesh)
+7. [Inlet BC](#Inlet_BC)
+8. [](#)
+9. [](#)
+
+
+# 1. Segmentation <a id="Segmentation"></a>
+
+**Program**: iTK-Snap 
+
+**Instructions**: 
+1) Segmentation from the top segment of SAS to ~50 mm below. 
+2) Make sure that bottom wall is below lower pc-MRI measurement.
+
+**Output**: ID_Segmentation.nrrd and ID_non_smooth.stl 
+
+[Back to top](#Table_contents)
+
+# 2. Alignment anatomy to flow rate MRIs <a id="Alignment"></a>
+
+**Program**: Slicer 
 
 ## Instructions: 
 1) Add ID_segmentation.nrrd of anatomy and .dcm of all flow rate measurements to SLICER. 
@@ -105,31 +131,31 @@ print("Plane information saved to plane_info.txt")=
  **Output**: ID_transformed_segmentation.nrrd
 Linear transformation applied to the anatomy
 
-# 2. Segmentation
-**Program**: iTK-Snap 
+[Back to top](#Table_contents)
 
-**Instructions**: 
-1) Segmentation from the top segment of SAS to ~50 mm below. 
-2) Make sure wall bottom surface 
-is perpendicular to the to the XY-plane. 
+# 3. Smooth segmentation <a id="Smooth"></a>
 
-**Output**: ID_Segmentation.nrrd and ID_non_smooth.stl 
-
-# 3. Smooth segmentation
 **Program**:  Fusion 360
 
 **Instructions**: Smooth segmentation
 
 **Output**: ID_smooth.stl
 
-# 4. Point cloud
+[Back to top](#Table_contents)
+
+
+
+# 4. Point cloud <a id="Point_cloud"></a>
+
 **Program**:  Rhino 8
 
 **Instructions**: Transform ID_smooth.stl to point cloud. 
 
 **Output**: ID_cloud.3dm
 
-# 5. Computational geometry
+[Back to top](#Table_contents)
+
+# 5. Computational geometry <a id="Computational_geometry"></a>
 **Program**: SolidWorks 
 
 **Instructions**: 
@@ -138,14 +164,20 @@ is perpendicular to the to the XY-plane.
 
 **Output**: ID_ansys.STEP
 
-# 6. Ansys Mesh
+[Back to top](#Table_contents)
+
+
+# 6. Ansys Mesh <a id="Ansys_mesh"></a>
 **Program**: Ansys
 
 **Outputs**: 
 1) Ansys mesh to use in numerical simulations.
 2) .prof of the lower boundary. 
 
-# 7. Inlet BC from PC MRI measurements
+[Back to top](#Table_contents)
+
+# 7. Inlet BC from PC MRI measurements <a id="Inlet_BC"></a>
+
 **Program**:  Matlab
 
 **Instructions**: 
@@ -155,12 +187,18 @@ is perpendicular to the to the XY-plane.
 
 **Output**: .prof for 100 instants of time to add in Ansys as inlet boundary condition. 
 
+[Back to top](#Table_contents)
+
+<a id="Numerical_simulations"></a>
 # 8. Numerical simulations
 **Program**: Ansys Fluent
 **Outputs**: 
 1) Pressure drop in 25 mm section (used to calculate longitudinal impedance).
 2) Time-dependent velocity field at the measurement locations.  
 
+[Back to top](#Table_contents)
+
+<a id="Post-processing"></a>
 # 9. Post-processing 
 **Program**:  Matlab
 
