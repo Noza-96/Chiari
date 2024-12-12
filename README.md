@@ -43,7 +43,10 @@ For details on each step, refer to the [Table of Contents](#Table_contents). Ens
 1) Add ID_segmentation.nrrd of anatomy and .dcm of all flow rate measurements to SLICER. 
 2) Apply a linear transformation to anatomy MRI till there is alignment with dicoms.
 
-### Step-by-Step:
+ **Output**: ID_transformed_segmentation.nrrd and ID_transformed_segmentation.stl 
+
+<details>
+  <summary> Step-by-Step:</summary>
 
 1) add data
 ![alt text](screenshots/1_add_data.png)
@@ -137,8 +140,7 @@ print("Plane information saved to plane_info.txt")=
 20) spin 3D view
 ![alt text](screenshots/20_spin_3D_view.png)
 
- **Output**: ID_transformed_segmentation.nrrd
-Linear transformation applied to the anatomy
+</details>
 
 [Back to top](#Table_contents)
 
