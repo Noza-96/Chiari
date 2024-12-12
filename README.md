@@ -39,7 +39,7 @@ For details on each step, refer to the [Table of Contents](#Table_contents). Ens
 
 **Program**: Slicer 
 
-### Instructions: 
+**Instructions**: 
 1) Add ID_segmentation.nrrd of anatomy and .dcm of all flow rate measurements to SLICER. 
 2) Apply a linear transformation to anatomy MRI till there is alignment with dicoms.
 
@@ -52,7 +52,7 @@ For details on each step, refer to the [Table of Contents](#Table_contents). Ens
 ![alt text](screenshots/1_add_data.png)
 
 2) load flow as sequences and anatomy as segmentation
-![111](screenshots/2_load_sequences_segmentation.png)
+![alt text](screenshots/2_load_sequences_segmentation.png)
 
 3) load segmentation as volume, this allows for the linear transformation
 ![alt text](screenshots/3_load_nrddsegmentation_as_volume.png)
@@ -132,13 +132,32 @@ print("Plane information saved to plane_info.txt")=
 ```
 
 
-**Next is only for visualization!**
+
+**Next two steps (19 and 20) are only for visualization!**
 
 19) change background color
 ![alt text](screenshots/19_change_background_color.png) 
 
 20) spin 3D view
 ![alt text](screenshots/20_spin_3D_view.png)
+
+
+**Save as stl:**
+
+21) load ID_transformed_segmentation.nrrd
+![alt text](screenshots/stl_1_load_nrrd.png) 
+
+22) go to data
+![alt text](screenshots/stl_2_go_to_data.png)
+
+23) export visible segments 
+![alt text](screenshots/stl_3_export_visible_segments.png)
+
+24) export to file 
+![alt text](screenshots/stl_4_export_to_file.png)
+
+25) save as stl
+![alt text](screenshots/stl_5_save_as_stl.png)
 
 </details>
 
