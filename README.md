@@ -43,7 +43,7 @@ For details on each step, refer to the [Table of Contents](#Table_contents). Ens
 1) Add ID_segmentation.nrrd of anatomy and .dcm of all flow rate measurements to SLICER. 
 2) Apply a linear transformation to anatomy MRI till there is alignment with dicoms.
 
- **Output**: ID_transformed_segmentation.nrrd and ID_transformed_segmentation.stl 
+ **Output**: ID_transformed_segmentation.nrrd and ID_transformed.stl 
 
 <details>
   <summary> Step-by-Step:</summary>
@@ -87,7 +87,7 @@ For details on each step, refer to the [Table of Contents](#Table_contents). Ens
 13) in inputs, image to wrap volume
 ![alt text](screenshots/13_image_to_warp_volume_nrrd.png) 
 
-14) save output image as ID_transformed_segmentation
+14) create new volume as ID_transformed_segmentation
 ![alt text](screenshots/14_name_output_image.png) 
 
 15) select the linear transformation
@@ -104,8 +104,8 @@ For details on each step, refer to the [Table of Contents](#Table_contents). Ens
 
 19) save slicer 3D session with all changes as ID_slicer, for future use
 
-20) if you want to obtain the plane defined by a dicom to do a subsequent cut of the geometry, open the Python Interactor in Slicer (```Ctrl + 3```) and run the code, using **yellow, green, or red**: 
-
+<!-- 20) if you want to obtain the plane defined by a dicom to do a subsequent cut of the geometry, open the Python Interactor in Slicer (```Ctrl + 3```) and run the code, using **yellow, green, or red**:  -->
+<!-- 
 ```
 # Get the Yellow slice node (for c3-c4 view)
 sliceNode = slicer.mrmlScene.GetNodeByID("vtkMRMLSliceNodeYellow")
@@ -129,16 +129,16 @@ with open("plane_info.txt", "w") as f:
     f.write(f"Normal: {normal}\n")
 
 print("Plane information saved to plane_info.txt")=
-```
+``` -->
 
 
 
-**Next two steps (19 and 20) are only for visualization!**
+**Next two steps (20 and 21) are only for visualization!**
 
-19) change background color
+20) change background color
 ![alt text](screenshots/19_change_background_color.png) 
 
-20) spin 3D view
+21) spin 3D view
 ![alt text](screenshots/20_spin_3D_view.png)
 
 
@@ -150,14 +150,28 @@ print("Plane information saved to plane_info.txt")=
 22) go to data
 ![alt text](screenshots/stl_2_go_to_data.png)
 
-23) export visible segments 
+23) export visible segments to models
 ![alt text](screenshots/stl_3_export_visible_segments.png)
 
 24) export to file 
 ![alt text](screenshots/stl_4_export_to_file.png)
 
-25) save as stl
+25) save as ID_transformed.stl
 ![alt text](screenshots/stl_5_save_as_stl.png)
+
+**Clip segmentation between in-plane measurements:**
+
+26) go to Segmentations, in the bottom select export models, make segmentation unvisible
+![alt text](screenshots/clip_1.png)
+
+27) go to Models, change color to differentiate from segmentation
+![alt text](screenshots/clip_3.png)
+
+28) clip selected model, selecting the options at the bottom of the figure
+![alt text](screenshots/clip_5.png)
+
+29) go to Data, save as ID_segmentation.stl
+![alt text](screenshots/clip_6.png)
 
 </details>
 
