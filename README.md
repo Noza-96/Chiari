@@ -117,7 +117,7 @@ else:
     raise NotImplementedError
     output_path = '' # TODO: implement later
 
-exec(open(os.path.join(output_path, "save_plane_points.py")).read())
+exec(open(os.path.join(output_path, "slicer_clip_planes.py")).read())
 ```
 
 
