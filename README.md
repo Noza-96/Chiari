@@ -112,12 +112,13 @@ import os
 
 hostname = platform.node()
 if hostname == 'Guillermos-MacBook-Pro.local':
-    output_path = '/Users/noza/Documents/chiari/git-chiari'
+    chiari_path = '/Users/noza/Documents/chiari'
 else:
     raise NotImplementedError
-    output_path = '' # TODO: implement later
+    chiari_path = '' # TODO: implement later
 
-exec(open(os.path.join(output_path, "slicer_clip_planes.py")).read())
+exec(open(os.path.join(chiari_path, "git-chiari/slicer3D-code/slicer_clip_planes.py")).read())
+
 ```
 
 

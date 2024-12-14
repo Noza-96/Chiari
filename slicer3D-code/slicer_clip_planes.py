@@ -3,12 +3,14 @@ import os
 
 pid = input("Patient ID:")
 
-hostname = platform.node()
-if hostname == 'Guillermos-MacBook-Pro.local':
-    output_path = f'/Users/noza/My Drive/chiari-computations/segmentation/{pid}'
-else:
-    raise NotImplementedError
-    output_path = '' # TODO: implement later
+# hostname = platform.node()
+# if hostname == 'Guillermos-MacBook-Pro.local':
+#     output_path = f'/Users/noza/My Drive/chiari-computations/segmentation/{pid}'
+# else:
+#     raise NotImplementedError
+#     output_path = '' # TODO: implement later
+
+output_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
 
 for color, plane_name in zip(['Red', 'Yellow'], ['top_plane', 'bottom_plane']):
     # Get the red slice node (for FM view) and yellow slice node (for c3-c4 view)
