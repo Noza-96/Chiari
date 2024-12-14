@@ -104,8 +104,8 @@ For details on each step, refer to the [Table of Contents](#Table_contents). Ens
 
 19) save slicer 3D session with all changes as ID_slicer, for future use
 
-<!-- 20) if you want to obtain the plane defined by a dicom to do a subsequent cut of the geometry, open the Python Interactor in Slicer (```Ctrl + 3```) and run the code, using **yellow, green, or red**:  -->
-<!-- 
+20) if you want to obtain the plane defined by a dicom to do a subsequent cut of the geometry, open the Python Interactor in Slicer (```Ctrl + 3```) and run the code, using **yellow, green, or red**:  -->
+
 ```
 # Get the Yellow slice node (for c3-c4 view)
 sliceNode = slicer.mrmlScene.GetNodeByID("vtkMRMLSliceNodeYellow")
@@ -125,11 +125,11 @@ print("Normal Vector:", normal)      # This is the direction of the plane
 
 # Optionally, save the plane parameters to a text file for later use
 with open("plane_info.txt", "w") as f:
-    f.write(f"Origin: {origin}\n")
+    f.write(f"Origin: {origin}\sn")
     f.write(f"Normal: {normal}\n")
 
 print("Plane information saved to plane_info.txt")=
-``` -->
+```
 
 
 
