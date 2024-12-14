@@ -107,28 +107,17 @@ For details on each step, refer to the [Table of Contents](#Table_contents). Ens
 20) if you want to obtain the plane defined by a dicom to do a subsequent cut of the geometry, open the Python Interactor in Slicer (```Ctrl + 3```) and run the code, using **yellow, green, or red**:  -->
 
 ```
-# Get the Yellow slice node (for c3-c4 view)
-sliceNode = slicer.mrmlScene.GetNodeByID("vtkMRMLSliceNodeYellow")
+import platform
+import os
 
-# Get the SliceToRAS transform matrix (mapping slice coordinates to RAS coordinates)
-sliceToRAS = sliceNode.GetSliceToRAS()
+hostname = platform.node()
+if hostname == 'Guillermos-MacBook-Pro.local':
+    output_path = '/Users/noza/Documents/chiari/git-chiari'
+else:
+    raise NotImplementedError
+    output_path = '' # TODO: implement later
 
-# Get the origin (position) of the slice (translation part of the transformation matrix)
-origin = sliceToRAS.GetElement(0, 3), sliceToRAS.GetElement(1, 3), sliceToRAS.GetElement(2, 3)
-
-# Get the normal vector (orientation of the slice)
-normal = sliceToRAS.MultiplyPoint((0, 0, 1, 0))[:3]  # This applies the slice's orientation in RAS coordinates
-
-# Output the results
-print("Origin (Position):", origin)  # This is the position of the plane
-print("Normal Vector:", normal)      # This is the direction of the plane
-
-# Optionally, save the plane parameters to a text file for later use
-with open("plane_info.txt", "w") as f:
-    f.write(f"Origin: {origin}\sn")
-    f.write(f"Normal: {normal}\n")
-
-print("Plane information saved to plane_info.txt")=
+exec(open(os.path.join(output_path, "save_plane_points.py")).read())
 ```
 
 
