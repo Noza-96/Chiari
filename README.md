@@ -39,6 +39,8 @@ For details on each step, refer to the [Table of Contents](#Table_contents). Ens
 
 **Program**: Slicer 
 
+**Description**: The primary objective of this step is to use Slicer 3D to align the segmentation with the pcMRI measurements. Additional outcomes are a smoothed segmentation, automatically done by the program, as well as the extraction of the plane locations of the top and bottom pcMRI sites, needed later to perform the two cuts of the geometry.   
+
 **Instructions**: 
 1) Add ID_segmentation.nrrd of anatomy and .dcm of all flow rate measurements to SLICER. 
 2) Apply a linear transformation to anatomy MRI till there is alignment with dicoms.
@@ -167,7 +169,7 @@ exec(open(os.path.join(chiari_path, "git-chiari/slicer3D-code/slicer_clip_planes
 
 [Back to top](#Table_contents)
 
-## 3. Smooth segmentation <a id="Smooth"></a>
+<!-- ## 3. Smooth segmentation <a id="Smooth"></a>
 
 **Program**:  Fusion 360
 
@@ -175,11 +177,11 @@ exec(open(os.path.join(chiari_path, "git-chiari/slicer3D-code/slicer_clip_planes
 
 **Output**: ID_smooth.stl
 
-[Back to top](#Table_contents)
+[Back to top](#Table_contents) -->
 
 
 
-## 4. Point cloud <a id="Point_cloud"></a>
+## 3. Point cloud <a id="Point_cloud"></a>
 
 **Program**:  Rhino 8
 
