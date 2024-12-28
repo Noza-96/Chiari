@@ -1,7 +1,11 @@
+from qt import QInputDialog
 import platform
 import os
 import slicer
 import vtk
+
+# Suppress VTK warnings and errors
+vtk.vtkObject.GlobalWarningDisplayOff()
 
 # Function to get the volume nodes with the maximum, minimum, and mid-z origins 
 def get_volumes_with_extreme_and_mid_z():
@@ -55,82 +59,77 @@ def get_volumes_with_extreme_and_mid_z():
 
 # Assign the volume nodes to specific slice views
 def assign_to_slices(volume_max_z, volume_min_z, volume_mid_z):
-    if volume_max_z is not None:
-        slicer.app.layoutManager().sliceWidget("Red").sliceLogic().GetSliceCompositeNode().SetBackgroundVolumeID(volume_max_z.GetID())
-        print(f"Assigned volume '{volume_max_z.GetName()}' to the red slice view.")
-    else:
-        print("No volume node found for maximum z.")
-
     if volume_min_z is not None:
         slicer.app.layoutManager().sliceWidget("Yellow").sliceLogic().GetSliceCompositeNode().SetBackgroundVolumeID(volume_min_z.GetID())
-        print(f"Assigned volume '{volume_min_z.GetName()}' to the yellow slice view.")
     else:
         print("No volume node found for minimum z.")
 
+    if volume_max_z is not None:
+        slicer.app.layoutManager().sliceWidget("Red").sliceLogic().GetSliceCompositeNode().SetBackgroundVolumeID(volume_max_z.GetID())
+    else:
+        print("No volume node found for maximum z.")
+
     if volume_mid_z is not None:
         slicer.app.layoutManager().sliceWidget("Green").sliceLogic().GetSliceCompositeNode().SetBackgroundVolumeID(volume_mid_z.GetID())
-        print(f"Assigned volume '{volume_mid_z.GetName()}' to the green slice view.")
     else:
         print("No volume node found for mid z.")
 
-# Suppress VTK warnings and errors
-# vtk.vtkObject.GlobalWarningDisplayOff()
+# Function to get the Patient ID using a dialog box
+def get_patient_id():
+    result = QInputDialog.getText(None, "Patient ID", "Enter the Patient ID:")
+    if isinstance(result, tuple):  # Expected behavior
+        patient_id, ok = result
+        if ok and patient_id:
+            return patient_id
+    elif isinstance(result, str):  # If it only returns the ID as a string
+        return result
+    print("No valid Patient ID entered.")
+    return None
 
-pid = input("Patient ID:")
+# Function to get the local path to the Chiari folder based on the hostname
+def get_local_chiari_path():
+    hostname = platform.node()
+    if hostname == 'Guillermos-MacBook-Pro.local' or hostname == 'Guillermos-MBP':
+        chiari_path = '/Users/noza/Documents/chiari'
+    elif hostname == 'Lenovo':
+        chiari_path = r'C:\Users\guill\Documents\chiari'
 
-hostname = platform.node()
-if hostname == 'Guillermos-MacBook-Pro.local':
-    chiari_path = '/Users/noza/Documents/chiari'
-elif hostname == 'Lenovo':
-    chiari_path = r'C:\Users\guill\Documents\chiari'
+    return chiari_path
 
+# Get Patient ID from the user
+pid = get_patient_id()
+if not pid:
+    print("Operation canceled due to missing Patient ID.")
+    exit()
+
+# Get the local path to the Chiari folder
+chiari_path = get_local_chiari_path()
 segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
-
 pcMRI_path = os.path.join(segmentation_path, "pcMRI")
 
-# Load the raw_segmentation.nrrd as both a segmentation and a volume
+# Load the segmentation file and visualize it in 3D
 raw_segmentation_file_path = os.path.join(segmentation_path, "raw_segmentation.nrrd")
-
-# Load as segmentation
+raw_segmentation_node = slicer.util.loadSegmentation(raw_segmentation_file_path)
+# Change the name of the loaded segmentation that will be used for the transformation
 segmentation_node = slicer.util.loadSegmentation(raw_segmentation_file_path)
-
-# Change the name of the loaded segmentation
 segmentation_node.SetName("transformed_segmentation")
+segmentation_node.CreateClosedSurfaceRepresentation()
+segmentation_node.GetDisplayNode().SetVisibility3D(True)
 
-# Load as volume
-volume_node = slicer.util.loadVolume(raw_segmentation_file_path)
-
-# Change the name of the loaded volume
-volume_node.SetName("transformed_segmentation_v")
-
-print("1. Segmentation loaded as volume and segemntation")
-
-# Get all files in the directory pcMRI
+# Get all .nrrd files in the directory pcMRI and load them as Sequence
 files = os.listdir(pcMRI_path)
-
-# Filter out .DS_Store files
-valid_files = [file for file in files if file != '.DS_Store' and file.lower().endswith('.nrrd')]
-
-# Load each valid .nrrd file as a sequence in Slicer
-for file_name in valid_files:
+nrrd_files = [file for file in files if file != '.DS_Store' and file.lower().endswith('.nrrd')]
+for file_name in nrrd_files:
     file_path = os.path.join(pcMRI_path, file_name)
-    slicer.util.loadVolume(file_path)
-
-print("2. PC-MRI files loaded as sequence")
+    slicer.util.loadSequence(file_path)
 
 # Assign each view to the corresponding segment based on the relative z-location
 volume_with_max_z, volume_with_min_z, volume_with_mid_z = get_volumes_with_extreme_and_mid_z()
 assign_to_slices(volume_with_max_z, volume_with_min_z, volume_with_mid_z)
 
-print("3. PC-MRI planes asigned to three views (red, yellow, green) based on their z-location")
-
-# Get the layout manager
+# Get the layout manager and adjust the slice views
 layout_manager = slicer.app.layoutManager()
-
-# List of slice view names
 slice_views = ["Red", "Yellow", "Green"]
-
-# Loop through each slice view
 for view in slice_views:
     # Get the slice widget for the current view
     slice_view = layout_manager.sliceWidget(view)
@@ -153,10 +152,45 @@ for view in slice_views:
     current_visibility = slice_node.GetSliceVisible()
     slice_node.SetSliceVisible(not current_visibility)
 
-# segmentationNode = slicer.util.getNode("transformed_segmentation")
-segmentation_node.CreateClosedSurfaceRepresentation()
-segmentation_node.GetDisplayNode().SetVisibility3D(True)
+# Apply a linear transformation to the segmentation to align it with the sequence segmentation
+# 1. Do an initial automatic linear transformation
+# TODO: implement automatic linear transformation to minimize the difference between the segmentation and the sequence segmentation
+# the "sequence segmentation" is the segmentation that corresponds to the manual markings done in MATLAB on the sequence images
+# for now, use the temporary manual transformation below
+# Create a new transform node
+transform_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ManualTransform")
+# Create a vtkTransform object
+vtk_transform = vtk.vtkTransform()
+# Manually adjust the transformation (apply translation, rotation, scaling)
+vtk_transform.Translate(10, 0, 0)
+vtk_transform.RotateX(45)
+transform_node.SetAndObserveTransformToParent(vtk_transform)
+# Apply this transform to a segmentation node
+segmentation_node = slicer.util.getNode('transformed_segmentation')  # Example segmentation node
+segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
+segmentation_display_node = segmentation_node.GetDisplayNode()
+# 2. TODO: ask for user input "Would you like to manually adjust the transformation? (yes/no)"
+# if yes, allow the user to manually adjust the transformation, then continue
 
-print("4. Adjustment visualization")
+# Export the transformed segmentation as an STL file
+export_folder = os.path.join(segmentation_path, 'stl')
+if not os.path.exists(export_folder):
+    os.makedirs(export_folder)
+
+exporter = slicer.vtkSlicerSegmentationsModuleLogic()
+exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(
+    export_folder, 
+    segmentation_node, 
+    None,  # Export all segments
+    "STL",
+)
+
+# Rename the exported file
+old_filename = os.path.join(export_folder, "transformed_segmentation_Segment_1.stl")
+new_filename = os.path.join(export_folder, "transformed_geometry.stl")
+if os.path.exists(old_filename):
+    os.rename(old_filename, new_filename)
+
+ 
 
 
