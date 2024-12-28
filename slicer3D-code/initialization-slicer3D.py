@@ -81,9 +81,8 @@ pid = input("Patient ID:")
 hostname = platform.node()
 if hostname == 'Guillermos-MacBook-Pro.local':
     chiari_path = '/Users/noza/Documents/chiari'
-else:
-    raise NotImplementedError
-    chiari_path = ''  # TODO: implement later
+elif hostname == 'Lenovo':
+    chiari_path = r'C:\Users\guill\Documents\chiari'
 
 segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
 
