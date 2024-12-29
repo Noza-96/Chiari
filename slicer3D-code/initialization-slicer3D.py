@@ -98,6 +98,83 @@ def get_local_chiari_path():
 
     return chiari_path
 
+# Function to adjust the slice views
+def adjust_slice_views():
+    layout_manager = slicer.app.layoutManager()
+    slice_views = ["Red", "Yellow", "Green"]
+    for view in slice_views:
+        # Get the slice widget for the current view
+        slice_view = layout_manager.sliceWidget(view)
+        # Get the slice logic for the current view
+        slice_logic = slice_view.sliceLogic()
+        slice_node = slice_logic.GetSliceNode()
+        # Set the orientation to axial
+        slice_node.SetOrientation("Axial")
+        # Reset the view by fitting it to the entire scene
+        slice_logic.FitSliceToAll()
+        # Rotate the slice to match the lowest volume axes
+        slice_logic.RotateSliceToLowestVolumeAxes()
+        # Make visible in 3D
+        current_visibility = slice_node.GetSliceVisible()
+        slice_node.SetSliceVisible(not current_visibility)
+        # Enable human orientation markers
+        slice_view.sliceView().mrmlSliceNode().SetOrientationMarkerType(slice_node.OrientationMarkerTypeHuman)
+        slice_view.sliceView().mrmlSliceNode().SetOrientationMarkerSize(slice_node.OrientationMarkerSizeLarge)
+        # Center the view in the 3D view
+        threeD_view = layout_manager.threeDWidget(0).threeDView()
+        threeD_view.resetFocalPoint()
+        view_node = threeD_view.mrmlViewNode()
+        view_node.SetBoxVisible(False)
+
+# Function to display the segmentation in 3D
+def display_segmentation_3D(segmentation_node, opacity2D=0.4):
+    segmentation_node.CreateClosedSurfaceRepresentation()
+    segmentation_display_node = segmentation_node.GetDisplayNode()
+    segmentation_display_node.SetVisibility3D(True)
+    segmentation_display_node.SetOpacity3D(0.6)
+    segmentation_display_node.SetOpacity2DFill(opacity2D)
+    segmentation_display_node.SetOpacity2DOutline(opacity2D)
+
+# Save plane points to a text file
+def save_plane_points(segmentation_path):
+    for color, plane_name in zip(['Red', 'Yellow'], ['top_plane', 'bottom_plane']):
+        # Get the red slice node (for FM view) and yellow slice node (for c3-c4 view)
+        sliceNode = slicer.mrmlScene.GetNodeByID(f"vtkMRMLSliceNode{color}")
+
+        # Get the SliceToRAS transform matrix (mapping slice coordinates to RAS coordinates)
+        sliceToRAS = sliceNode.GetSliceToRAS()
+
+        # Get the origin (position) of the slice (translation part of the transformation matrix)
+        origin = sliceToRAS.GetElement(0, 3), sliceToRAS.GetElement(1, 3), sliceToRAS.GetElement(2, 3)
+
+        # Get the basis vectors of the slice coordinate system
+        xAxis = sliceToRAS.MultiplyPoint((1, 0, 0, 0))[:3]  # X direction in RAS coordinates
+        yAxis = sliceToRAS.MultiplyPoint((0, 1, 0, 0))[:3]  # Y direction in RAS coordinates
+
+        # Generate three points on the plane
+        # 1. Origin (already computed)
+        point1 = origin
+        # 2. A point along the X-axis direction from the origin
+        point2 = tuple(origin[i] + 5*xAxis[i] for i in range(3))
+        # 3. A point along the Y-axis direction from the origin
+        point3 = tuple(origin[i] + 5*yAxis[i] for i in range(3))
+
+        # Output the results
+        print("Point 1 (Origin):", point1)
+        print("Point 2:", point2)
+        print("Point 3:", point3)
+
+        # Optionally, save the plane parameters to a text file for later use
+        export_folder = os.path.join(segmentation_path, 'planes')
+        if not os.path.exists(export_folder):
+            os.makedirs(export_folder)
+
+        output_filename = os.path.join(export_folder, f"{plane_name}.txt")
+        with open(output_filename, "w") as f:
+            f.write(f"Point 1: {point1}\n")
+            f.write(f"Point 2: {point2}\n")
+            f.write(f"Point 3: {point3}\n")
+
 # Get Patient ID from the user
 pid = get_patient_id()
 if not pid:
@@ -110,13 +187,9 @@ segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}'
 pcMRI_path = os.path.join(segmentation_path, "pcMRI")
 
 # Load the segmentation file and visualize it in 3D
-raw_segmentation_file_path = os.path.join(segmentation_path, "raw_segmentation.nrrd")
-raw_segmentation_node = slicer.util.loadSegmentation(raw_segmentation_file_path)
-# Change the name of the loaded segmentation that will be used for the transformation
-segmentation_node = slicer.util.loadSegmentation(raw_segmentation_file_path)
+segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, 'raw_segmentation.nrrd'))
 segmentation_node.SetName("transformed_segmentation")
-segmentation_node.CreateClosedSurfaceRepresentation()
-segmentation_node.GetDisplayNode().SetVisibility3D(True)
+display_segmentation_3D(segmentation_node)
 
 # Get all .nrrd files in the directory pcMRI and load them as Sequence
 files = os.listdir(pcMRI_path)
@@ -129,40 +202,24 @@ for file_name in nrrd_files:
 volume_with_max_z, volume_with_min_z, volume_with_mid_z = get_volumes_with_extreme_and_mid_z()
 assign_to_slices(volume_with_max_z, volume_with_min_z, volume_with_mid_z)
 
-# Get the layout manager and adjust the slice views
-layout_manager = slicer.app.layoutManager()
-slice_views = ["Red", "Yellow", "Green"]
-for view in slice_views:
-    # Get the slice widget for the current view
-    slice_view = layout_manager.sliceWidget(view)
+# Adjust the slice views
+adjust_slice_views()
 
-    # Get the slice logic for the current view
-    slice_logic = slice_view.sliceLogic()
-
-    slice_node = slice_logic.GetSliceNode()
-
-    # Set the orientation to axial
-    slice_node.SetOrientation("Axial")
-
-    # Reset the view by fitting it to the entire scene
-    slice_logic.FitSliceToAll()
-
-    # Rotate the slice to match the lowest volume axes
-    slice_logic.RotateSliceToLowestVolumeAxes()
-    
-    # Make visible in 3D
-    current_visibility = slice_node.GetSliceVisible()
-    slice_node.SetSliceVisible(not current_visibility)
-
-    # Center the view in the 3D view
-    threeD_view = layout_manager.threeDWidget(0).threeDView()
-    threeD_view.resetFocalPoint()
+# Save the plane points to a text file
+save_plane_points(segmentation_path)
 
 # Apply a linear transformation to the segmentation to align it with the sequence segmentation
-# 1. Do an initial automatic linear transformation
-# TODO: implement
-# 2. Manually adjust the transformation if needed
-response = QMessageBox.question(None, 'Manual Linear Transformation', 'Do you want to do the transformation manually?', QMessageBox.Yes | QMessageBox.No)
+# 1. Load existing transformed segmentation, if it exists
+transformed_geometry_path = os.path.join(segmentation_path, 'stl', 'transformed_geometry.stl')
+if os.path.exists(transformed_geometry_path):
+    response = QMessageBox.question(None, 'Load Existing Transformation', 'Do you want to load the existing transformed segmentation?', QMessageBox.Yes | QMessageBox.No)
+    if response == QMessageBox.Yes:
+        slicer.mrmlScene.RemoveNode(segmentation_node)
+        segmentation_node = slicer.util.loadSegmentation(transformed_geometry_path)
+        segmentation_node.SetName("transformed_segmentation")
+        display_segmentation_3D(segmentation_node)
+# 2. Manually adjust the transformation if desired
+response = QMessageBox.question(None, 'Manual Linear Transformation', 'Do you want to adjust the transformation manually?', QMessageBox.Yes | QMessageBox.No)
 if response == QMessageBox.Yes:
     # Open the GUI Module Transforms on Slicer3D
     slicer.util.selectModule('Transforms')
@@ -171,35 +228,34 @@ if response == QMessageBox.Yes:
     # Create a vtkTransform object
     vtk_transform = vtk.vtkTransform()
     # TODO: set the Active Transform to the new transform node
-    # Open a new QMessageBox that lets the user click "Done" when they finish the manual adjustments
-    done_message_box = QMessageBox()
-    done_message_box.setWindowTitle('Manual Transformation')
-    done_message_box.setText('Click "Ok" when you finish the manual adjustments.')
-    done_message_box.setStandardButtons(QMessageBox.Ok)
-    done_message_box.exec_()
     # Apply the transform to the segmentation node
     segmentation_node = slicer.util.getNode('transformed_segmentation')
     segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
     segmentation_display_node = segmentation_node.GetDisplayNode()
+    display_segmentation_3D(segmentation_node, opacity2D=0.2)
+    while True:
+        user_input = input('Type "ok" when you have finished the manual transformation: ')
+        if user_input.lower() == 'ok':
+            # Export the transformed segmentation as an STL file
+            response = QMessageBox.question(None, 'Export STL', 'Do you want to export the transformed segmentation as STL?', QMessageBox.Yes | QMessageBox.No)
+            if response == QMessageBox.Yes:
+                export_folder = os.path.join(segmentation_path, 'stl')
+                if not os.path.exists(export_folder):
+                    os.makedirs(export_folder)
 
-# Export the transformed segmentation as an STL file
-response = QMessageBox.question(None, 'Export STL', 'Do you want to export the transformed segmentation as STL?', QMessageBox.Yes | QMessageBox.No)
-if response == QMessageBox.Yes:
-    export_folder = os.path.join(segmentation_path, 'stl')
-    if not os.path.exists(export_folder):
-        os.makedirs(export_folder)
+                exporter = slicer.vtkSlicerSegmentationsModuleLogic()
+                exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
 
-    exporter = slicer.vtkSlicerSegmentationsModuleLogic()
-    exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
+                # Rename the exported file
+                old_filename = os.path.join(export_folder, "transformed_segmentation_Segment_1.stl")
+                new_filename = os.path.join(export_folder, "transformed_geometry.stl")
+                if os.path.exists(old_filename):
+                    os.replace(old_filename, new_filename)
+                else:
+                    raise FileNotFoundError(f"File not found: {old_filename}")
+            
+            break
 
-    # Rename the exported file
-    old_filename = os.path.join(export_folder, "transformed_segmentation_Segment_1.stl")
-    new_filename = os.path.join(export_folder, "transformed_geometry.stl")
-    if os.path.exists(old_filename):
-        os.replace(old_filename, new_filename)
-    else:
-        raise FileNotFoundError(f"File not found: {old_filename}")
-
- 
+    
 
 
