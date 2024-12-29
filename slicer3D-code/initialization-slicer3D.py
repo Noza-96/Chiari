@@ -1,4 +1,4 @@
-from qt import QInputDialog
+from qt import QInputDialog, QMessageBox
 import platform
 import os
 import slicer
@@ -6,6 +6,9 @@ import vtk
 
 # Suppress VTK warnings and errors
 vtk.vtkObject.GlobalWarningDisplayOff()
+
+# Clear the MRML scene to delete all loaded data
+slicer.mrmlScene.Clear(0)
 
 # Function to get the volume nodes with the maximum, minimum, and mid-z origins 
 def get_volumes_with_extreme_and_mid_z():
@@ -83,8 +86,7 @@ def get_patient_id():
             return patient_id
     elif isinstance(result, str):  # If it only returns the ID as a string
         return result
-    print("No valid Patient ID entered.")
-    return None
+    raise ValueError("No valid Patient ID entered.")
 
 # Function to get the local path to the Chiari folder based on the hostname
 def get_local_chiari_path():
@@ -152,44 +154,51 @@ for view in slice_views:
     current_visibility = slice_node.GetSliceVisible()
     slice_node.SetSliceVisible(not current_visibility)
 
+    # Center the view in the 3D view
+    threeD_view = layout_manager.threeDWidget(0).threeDView()
+    threeD_view.resetFocalPoint()
+
 # Apply a linear transformation to the segmentation to align it with the sequence segmentation
 # 1. Do an initial automatic linear transformation
-# TODO: implement automatic linear transformation to minimize the difference between the segmentation and the sequence segmentation
-# the "sequence segmentation" is the segmentation that corresponds to the manual markings done in MATLAB on the sequence images
-# for now, use the temporary manual transformation below
-# Create a new transform node
-transform_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ManualTransform")
-# Create a vtkTransform object
-vtk_transform = vtk.vtkTransform()
-# Manually adjust the transformation (apply translation, rotation, scaling)
-vtk_transform.Translate(10, 0, 0)
-vtk_transform.RotateX(45)
-transform_node.SetAndObserveTransformToParent(vtk_transform)
-# Apply this transform to a segmentation node
-segmentation_node = slicer.util.getNode('transformed_segmentation')  # Example segmentation node
-segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
-segmentation_display_node = segmentation_node.GetDisplayNode()
-# 2. TODO: ask for user input "Would you like to manually adjust the transformation? (yes/no)"
-# if yes, allow the user to manually adjust the transformation, then continue
+# TODO: implement
+# 2. Manually adjust the transformation if needed
+response = QMessageBox.question(None, 'Manual Linear Transformation', 'Do you want to do the transformation manually?', QMessageBox.Yes | QMessageBox.No)
+if response == QMessageBox.Yes:
+    # Open the GUI Module Transforms on Slicer3D
+    slicer.util.selectModule('Transforms')
+    # Create a new transform node
+    transform_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ManualTransform")
+    # Create a vtkTransform object
+    vtk_transform = vtk.vtkTransform()
+    # TODO: set the Active Transform to the new transform node
+    # Open a new QMessageBox that lets the user click "Done" when they finish the manual adjustments
+    done_message_box = QMessageBox()
+    done_message_box.setWindowTitle('Manual Transformation')
+    done_message_box.setText('Click "Ok" when you finish the manual adjustments.')
+    done_message_box.setStandardButtons(QMessageBox.Ok)
+    done_message_box.exec_()
+    # Apply the transform to the segmentation node
+    segmentation_node = slicer.util.getNode('transformed_segmentation')
+    segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
+    segmentation_display_node = segmentation_node.GetDisplayNode()
 
 # Export the transformed segmentation as an STL file
-export_folder = os.path.join(segmentation_path, 'stl')
-if not os.path.exists(export_folder):
-    os.makedirs(export_folder)
+response = QMessageBox.question(None, 'Export STL', 'Do you want to export the transformed segmentation as STL?', QMessageBox.Yes | QMessageBox.No)
+if response == QMessageBox.Yes:
+    export_folder = os.path.join(segmentation_path, 'stl')
+    if not os.path.exists(export_folder):
+        os.makedirs(export_folder)
 
-exporter = slicer.vtkSlicerSegmentationsModuleLogic()
-exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(
-    export_folder, 
-    segmentation_node, 
-    None,  # Export all segments
-    "STL",
-)
+    exporter = slicer.vtkSlicerSegmentationsModuleLogic()
+    exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
 
-# Rename the exported file
-old_filename = os.path.join(export_folder, "transformed_segmentation_Segment_1.stl")
-new_filename = os.path.join(export_folder, "transformed_geometry.stl")
-if os.path.exists(old_filename):
-    os.rename(old_filename, new_filename)
+    # Rename the exported file
+    old_filename = os.path.join(export_folder, "transformed_segmentation_Segment_1.stl")
+    new_filename = os.path.join(export_folder, "transformed_geometry.stl")
+    if os.path.exists(old_filename):
+        os.replace(old_filename, new_filename)
+    else:
+        raise FileNotFoundError(f"File not found: {old_filename}")
 
  
 
