@@ -159,11 +159,6 @@ def save_plane_points(segmentation_path):
         # 3. A point along the Y-axis direction from the origin
         point3 = tuple(origin[i] + 5*yAxis[i] for i in range(3))
 
-        # Output the results
-        print("Point 1 (Origin):", point1)
-        print("Point 2:", point2)
-        print("Point 3:", point3)
-
         # Optionally, save the plane parameters to a text file for later use
         export_folder = os.path.join(segmentation_path, 'planes')
         if not os.path.exists(export_folder):
@@ -171,9 +166,13 @@ def save_plane_points(segmentation_path):
 
         output_filename = os.path.join(export_folder, f"{plane_name}.txt")
         with open(output_filename, "w") as f:
-            f.write(f"Point 1: {point1}\n")
-            f.write(f"Point 2: {point2}\n")
-            f.write(f"Point 3: {point3}\n")
+            f.write("3d=True\n")
+            f.write("polyline=False\n\n")
+            f.write(f"{point1[2]} {point1[0]} {point1[1]}\n")
+            f.write(f"{point2[2]} {point2[0]} {point2[1]}\n")
+            f.write(f"{point3[2]} {point3[0]} {point3[1]}\n")
+    # Output the results
+    print("plane data saved to .txt files")
 
 # Get Patient ID from the user
 pid = get_patient_id()
@@ -207,6 +206,7 @@ adjust_slice_views()
 
 # Save the plane points to a text file
 save_plane_points(segmentation_path)
+
 
 # Apply a linear transformation to the segmentation to align it with the sequence segmentation
 # 1. Load existing transformed segmentation, if it exists
@@ -253,7 +253,9 @@ if response == QMessageBox.Yes:
                     os.replace(old_filename, new_filename)
                 else:
                     raise FileNotFoundError(f"File not found: {old_filename}")
-            
+                
+                # Output the results
+                print("transformed_geometry.stl saved in stl folder")
             break
 
     
