@@ -179,13 +179,14 @@ function dat = read_dicoms_PC(cas, resettimevector)
     end
     disp(' '); disp(' '); disp(' ');
 
-    fig = figure;
-    if exist(""+cas.dirdat+"/"+cas.subj+"/segmentation.stl", 'file') == 2
-        disp("Segmentation exists!")
-        gm = importGeometry(""+cas.dirdat+"/"+cas.subj+"/segmentation.stl");
-        gm = importGeometry(cas.dirseg+"/"+cas.subj+"/segmentation.stl");
 
-        scale(gm,[-1,-1,1])
+    % Create figure to visualize locations pc-mri measurements 
+    fig = figure;
+    segm_path = ""+cas.dirseg+"/"+cas.subj+"/stl/segmentation.stl";
+    if exist(segm_path, 'file') == 2
+        disp("Segmentation exists!")
+        gm = importGeometry(segm_path);
+        scale(gm,[1,1,1])
         pdegplot(gm)
     else
         disp("There is no segmentation...")
@@ -193,7 +194,7 @@ function dat = read_dicoms_PC(cas, resettimevector)
     for idat = 1:Ndat
         DrawImageSlice3D(fname_showorient{idat}, fig, 0.75);
     end
-    saveas(fig, [cas.dirfig, '/orientation_of_planes_PC.fig'])
+    saveas(fig, [cas.dirfig, '/pc-mri_locations.fig'])
     
     dat.Ndat         = Ndat;
     dat.locz         = locz;

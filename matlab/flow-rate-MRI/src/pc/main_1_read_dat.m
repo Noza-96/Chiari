@@ -38,6 +38,8 @@ disp([newline + "Saving everything in a .mat file ..." + newline])
 
 save([cas.dirmat, '/01-read_dat.mat'], 'aux', 'cas', 'dat_PC');
 
+% Figure to visualize locations pc-mri measurements in read_dicoms_pc
+
 disp([newline + "Done!" + newline])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

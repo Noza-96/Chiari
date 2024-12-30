@@ -3,15 +3,17 @@ clear; close all;
 
 % Choose subject
 subject = "s101";
+session = 'before';
+
 
 % Define MRI data path
-MRI_path = fullfile("..", "2. Flow_rate_MRI", "dat", subject, "flow", "20240606am-card", "mat", "*");
+data_path = fullfile("..", "flow-rate-MRI", "dat", subject, "flow", session);
 
 % Load data
-[cas, dat_PC] = load_data(subject, MRI_path);
+[cas, dat_PC] = load_data(subject, fullfile(data_path, "mat", "*"));
 
 %% 2. Calculate flow rate from PC-MRI measurements and visualize locations
-MRI_locations(subject, dat_PC, cas);
+MRI_locations(subject, data_path, dat_PC, cas);
 
 %% 3. Create Fourier flow rate data for ANSYS input - Uniform
 Q0_ansys(subject, dat_PC, 30, 1);
