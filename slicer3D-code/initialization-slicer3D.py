@@ -23,8 +23,8 @@ def get_volumes_with_extreme_and_mid_z():
 
     # Iterate over all volume nodes in the scene
     for node in slicer.util.getNodesByClass("vtkMRMLScalarVolumeNode"):
-        # Skip the transformed_segmentation_v volume
-        if node.GetName() == "transformed_segmentation_v":
+        # Skip the segmentation_v volume
+        if node.GetName() == "segmentation_v":
             continue
 
         # Get the IJK-to-RAS transformation matrix
@@ -187,7 +187,7 @@ pcMRI_path = os.path.join(segmentation_path, "pcMRI")
 
 # Load the segmentation file and visualize it in 3D
 segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, 'raw_segmentation.nrrd'))
-segmentation_node.SetName("transformed_segmentation")
+segmentation_node.SetName("segmentation")
 display_segmentation_3D(segmentation_node)
 
 # Get all .nrrd files in the directory pcMRI and load them as Sequence
@@ -210,13 +210,13 @@ save_plane_points(segmentation_path)
 
 # Apply a linear transformation to the segmentation to align it with the sequence segmentation
 # 1. Load existing transformed segmentation, if it exists
-transformed_geometry_path = os.path.join(segmentation_path, 'stl', 'transformed_geometry.stl')
+transformed_geometry_path = os.path.join(segmentation_path, 'stl', 'segmentation.stl')
 if os.path.exists(transformed_geometry_path):
     response = QMessageBox.question(None, 'Load Existing Transformation', 'Do you want to load the existing transformed segmentation?', QMessageBox.Yes | QMessageBox.No)
     if response == QMessageBox.Yes:
         slicer.mrmlScene.RemoveNode(segmentation_node)
         segmentation_node = slicer.util.loadSegmentation(transformed_geometry_path)
-        segmentation_node.SetName("transformed_segmentation")
+        segmentation_node.SetName("segmentation")
         display_segmentation_3D(segmentation_node)
 # 2. Manually adjust the transformation if desired
 response = QMessageBox.question(None, 'Manual Linear Transformation', 'Do you want to adjust the transformation manually?', QMessageBox.Yes | QMessageBox.No)
@@ -229,7 +229,7 @@ if response == QMessageBox.Yes:
     vtk_transform = vtk.vtkTransform()
     # TODO: set the Active Transform to the new transform node
     # Apply the transform to the segmentation node
-    segmentation_node = slicer.util.getNode('transformed_segmentation')
+    segmentation_node = slicer.util.getNode('segmentation')
     segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
     segmentation_display_node = segmentation_node.GetDisplayNode()
     display_segmentation_3D(segmentation_node, opacity2D=0.2)
@@ -247,15 +247,15 @@ if response == QMessageBox.Yes:
                 exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
 
                 # Rename the exported file
-                old_filename = os.path.join(export_folder, "transformed_segmentation_Segment_1.stl")
-                new_filename = os.path.join(export_folder, "transformed_geometry.stl")
+                old_filename = os.path.join(export_folder, "segmentation_Segment_1.stl")
+                new_filename = os.path.join(export_folder, "segmentation.stl")
                 if os.path.exists(old_filename):
                     os.replace(old_filename, new_filename)
                 else:
                     raise FileNotFoundError(f"File not found: {old_filename}")
                 
                 # Output the results
-                print("transformed_geometry.stl saved in stl folder")
+                print("segmentation.stl saved in stl folder")
             break
 
     

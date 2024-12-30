@@ -183,6 +183,8 @@ function dat = read_dicoms_PC(cas, resettimevector)
     if exist(""+cas.dirdat+"/"+cas.subj+"/segmentation.stl", 'file') == 2
         disp("Segmentation exists!")
         gm = importGeometry(""+cas.dirdat+"/"+cas.subj+"/segmentation.stl");
+        gm = importGeometry(cas.dirseg+"/"+cas.subj+"/segmentation.stl");
+
         scale(gm,[-1,-1,1])
         pdegplot(gm)
     else

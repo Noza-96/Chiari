@@ -4,7 +4,9 @@ cas.dirdat = '../../dat'; % (do not include ending "/" in cas.dirdat)
 
 cas.subj = 's101';
 cas.anal = 'flow';
-cas.sess = '20240606am-card';
+cas.sess = 'before';
+
+cas.dirseg = '../../../../../computations/segmentation';
 
 resettimevector = false;
 
