@@ -1,54 +1,31 @@
 function cas = scan_folders_set_cas(cas)
+% Define directories with a modular structure
+cas.dirgeo = fullfile(cas.dirdat, cas.subj, 'geom');
+commonPath = fullfile(cas.dirdat, cas.subj, cas.anal, cas.sess);
+cas.dirdcm = fullfile(commonPath, 'dcm');
+cas.dirmat = fullfile(commonPath, 'mat');
+cas.dirflm = fullfile(commonPath, 'flm');
+cas.dirvid = cas.dirflm;
+cas.dirfig = cas.dirflm;
 
-    cas.dirgeo = [cas.dirdat, '/', cas.subj, '/geom'];
-    cas.dirdcm = [cas.dirdat, '/', cas.subj, '/', cas.anal, '/', cas.sess, '/dcm'];
-    cas.dirmat = [cas.dirdat, '/', cas.subj, '/', cas.anal, '/', cas.sess, '/mat'];
-    cas.dirflm = [cas.dirdat, '/', cas.subj, '/', cas.anal, '/', cas.sess, '/flm'];
+cas.diransys = fullfile(cas.dircloud, 'ansys', cas.subj);
+cas.diransys_out = fullfile(cas.diransys, 'outputs');
+cas.diransys_in = fullfile(cas.diransys, 'inputs');
+cas.dirseg = fullfile(cas.dircloud, 'segmentation', cas.subj);
 
-    cas.dirvid   = [cas.dirdat, '/', cas.subj, '/', cas.anal, '/', cas.sess, '/flm'];
-    cas.dirfig   = [cas.dirdat, '/', cas.subj, '/', cas.anal, '/', cas.sess, '/flm'];
-    cas.diransys = [cas.dircloud,'/ansys/', cas.subj];
-    cas.dirseg   = [cas.dircloud,'/segmentation/', cas.subj];
+% List of directories to ensure exist
+dirsToCreate = {cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.dirvid, cas.dirseg, cas.dirfig};
 
-    if not(isfolder(cas.dirmat))
-        mkdir(cas.dirmat)
-    end
+% Create directories if not present
+for i = 1:length(dirsToCreate)
+    createDirIfNotExists(dirsToCreate{i});
+end
 
-    if not(isfolder(cas.dirvid))
-        mkdir(cas.dirvid)
-    end
-
-    if not(isfolder(cas.dirseg))
-        mkdir(cas.dirseg)
-    end
-
-    if not(isfolder(cas.dirfig))
-        mkdir(cas.dirfig)
-    end
-
-    if not(isfolder(cas.diransys))
-        mkdir(cas.diransys)
-    end
-
-
-
-    if not(isfolder('./aux_PC'))
-        mkdir('./aux_PC')
-    else
-        delete('./aux_PC/*')
-    end
-
-    if not(isfolder('./aux_RT'))
-        mkdir('./aux_RT')
-    else
-        delete('./aux_RT/*')
-    end
-
-    if not(isfolder('./aux_FM'))
-        mkdir('./aux_FM')
-    else
-        delete('./aux_FM/*')
-    end
+% Auxiliary directories to clean or create
+auxDirs = {'./aux_PC', './aux_RT', './aux_FM'};
+for i = 1:length(auxDirs)
+    createOrCleanDir(auxDirs{i});
+end
 
     system('cp get_folders_PC.sh ./aux_PC');
     system('cp get_folders_RT.sh ./aux_RT');
@@ -237,3 +214,21 @@ function cas = scan_folders_set_cas(cas)
     cas.tech        = tech;
 
 end
+
+
+% Helper function to create a directory if it does not exist
+function createDirIfNotExists(dirPath)
+    if ~isfolder(dirPath)
+        mkdir(dirPath);
+    end
+end
+
+% Helper function to clean or create a directory
+function createOrCleanDir(dirPath)
+    if ~isfolder(dirPath)
+        mkdir(dirPath);
+    else
+        delete(fullfile(dirPath, '*'));
+    end
+end
+
