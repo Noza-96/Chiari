@@ -11,6 +11,8 @@ cas.anal = 'flow';
 
 resettimevector = false;
 
+% addpath(fun)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 aux.fig_opts = set_plotting_style;

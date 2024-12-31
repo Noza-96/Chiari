@@ -4,6 +4,7 @@ function dat = read_dicoms_PC(cas, resettimevector)
 
     % Get data for each case and store in cell structures were first dimension is case number:
 
+    pixel_coord = cell(1, Ndat);
     for idat = 1:Ndat
         
         disp([cas.dirdcm, '/', cas.folders_PC_P{idat}]);
@@ -25,15 +26,6 @@ function dat = read_dicoms_PC(cas, resettimevector)
             sysout = erase(sysout, "=");
             sysout = sysout(find(~isspace(sysout)));
             venc{idat}(jj) = str2num(sysout);
-
-            % Hack to find RR:
-            % Note: unnecessary, RR is simply last time plus delta t; this is later
-            % computed as T.
-            %[status, sysout] = system( sprintf('strings %s | awk ''/RR/''', fname) );
-            %sysout = sysout(find(~isspace(sysout)));
-            %sysout = extractAfter(sysout, "RR");
-            %sysout = extractBefore(sysout, "+");
-            %RR{idat}(jj) = str2num(sysout);
 
             info{idat}{jj} = dicominfo(fname);
 
@@ -126,7 +118,36 @@ function dat = read_dicoms_PC(cas, resettimevector)
             im{idat}{jj}    = im_unsorted{idat}{sortind(jj)};
             immag{idat}{jj} = immag_unsorted{idat}{sortind(jj)};
             imcom{idat}{jj} = imcom_unsorted{idat}{sortind(jj)};
+
+            % Extract metadata for coordinate calculation
+            pixel_spacing = info{idat}{jj}.PixelSpacing; % [spacing_x; spacing_y]
+            image_position = info{idat}{jj}.ImagePositionPatient; % [x; y; z]
+            image_orientation = info{idat}{jj}.ImageOrientationPatient; % [row_dir_x; row_dir_y; row_dir_z; col_dir_x; col_dir_y; col_dir_z]
+            
+            % Directions
+            row_direction = image_orientation(1:3);
+            col_direction = image_orientation(4:6);
+            
+            % Image dimensions
+            [rows, cols] = size(dicomread(info{idat}{jj}));
+            
+            % Preallocate array for coordinates
+            pixel_coordinates = zeros(rows, cols, 3); % For (x, y, z) of each pixel
+            
+            % Calculate 3D coordinates for each pixel
+            for i = 1:rows
+                for j = 1:cols
+                    pixel_coordinates(i, j, :) = image_position ...
+                                               + (i-1) * row_direction * pixel_spacing(2) ...
+                                               + (j-1) * col_direction * pixel_spacing(1);
+                end
+            end
+            
+            % Store in cell for this case
+            pixel_coord{idat} = pixel_coordinates;
         end
+
+
 
         for jj = 1:numim
 
@@ -195,7 +216,8 @@ function dat = read_dicoms_PC(cas, resettimevector)
         DrawImageSlice3D(fname_showorient{idat}, fig, 0.75);
     end
     saveas(fig, [cas.dirfig, '/pc-mri_locations.fig'])
-    
+
+    dat.pixel_coord  = pixel_coord;
     dat.Ndat         = Ndat;
     dat.locz         = locz;
     dat.Nt           = Nt;

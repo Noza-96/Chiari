@@ -111,6 +111,7 @@ function dat = crop_data(cas, dat, croppedsize)
         dat.magni{idat} = dat.magni{idat}(ycmcl+1 : ycpcl, xcmcl+1 : xcpcl, :);
         dat.compl{idat} = dat.compl{idat}(ycmcl+1 : ycpcl, xcmcl+1 : xcpcl, :);
         dat.U_tot{idat} = dat.U_tot{idat}(ycmcl+1 : ycpcl, xcmcl+1 : xcpcl, :);
+        dat.pixel_coord{idat} = dat.pixel_coord{idat}(ycmcl+1 : ycpcl, xcmcl+1 : xcpcl, :);
 
     end
 

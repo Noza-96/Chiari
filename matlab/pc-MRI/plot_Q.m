@@ -58,9 +58,9 @@ function plot_Q(aux, cas, dat, save_figs, idat_sel, sffx)
             maxQ = max(abs(QQQ));
 
             xlim([-0.5, 1.5])
-            ylim([-Qlim, Qlim])
+            ylim([-maxQ, maxQ])
             set(gca, 'XTick', [0:0.5:1])
-            set(gca, 'YTick', [-Qlim,0,Qlim])
+            set(gca, 'YTick', [-maxQ,0,maxQ])
             daspect([1,DA,1])
 
             if kk == Ndat
