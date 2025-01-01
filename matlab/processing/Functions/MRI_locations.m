@@ -1,7 +1,7 @@
 % Create figure with segmentation together with MRI locations
-function MRI_locations(subject, data_path, dat_PC, cas)
+function MRI_locations(dat_PC, cas)
     % Open the existing figure
-    fig1 = openfig(data_path + "/fig/pc-mri_locations.fig", 'invisible');
+    fig1 = openfig(fullfile(cas.dirfig, "pc-mri_locations.fig"), 'invisible');
     ax1 = gca;  % Get the axes of the loaded figure
 
     Ndata = dat_PC.Ndat;
@@ -28,7 +28,7 @@ function MRI_locations(subject, data_path, dat_PC, cas)
     Vs = zeros(1, length(dat_PC.Q_SAS));
 
     % Loop through each flow data set
-    for k = 1:length(dat_PC.Q_SAS)
+    for k = 1:Ndata
         Q = -dat_PC.Q_SAS{k};  % Get flow data
         Nt = dat_PC.Nt{k};     % Get number of time points
         t = linspace(0, 1, Nt);  % Create time vector
@@ -67,6 +67,6 @@ function MRI_locations(subject, data_path, dat_PC, cas)
     title("$V_s$", 'Interpreter', 'latex', 'FontSize', 16);
     xlim([floor(min(Vs(:)) / 0.05) * 0.05, ceil(max(Vs(:)) / 0.05) * 0.05]);
     set(gcf, 'Color', 'w');  % Set background color to white for figures
-    saveas(gcf, fullfile("Figures", subject,"pre","MRI_locations"), 'png');
-    disp('2. Visualized locations PC-MRI measurements and calculated flow rates...')
+    saveas(gcf, fullfile(cas.dirfig,"MRI_locations"), 'png');
+    disp('1. Visualized locations PC-MRI measurements and calculated flow rates...')
 end
