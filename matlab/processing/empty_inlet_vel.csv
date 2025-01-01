@@ -1,0 +1,12 @@
+##ANSYS Fluent 24.1.0,,,
+##,,,
+##Generated on: 06:26:30,16-Sep-0024,,
+##,,,
+##Generated from case: FLTG.1-Setup-Output.cas.h5,,,
+##,,,
+,,,
+[Name],,,
+inlet_vel,,,
+,,,
+[Data],,,
+x,y,z,u1

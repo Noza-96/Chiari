@@ -17,6 +17,11 @@ MRI_locations(dat_PC, cas);
 %% 3. Create Fourier flow rate data for ANSYS input - Uniform
 Q0_ansys(dat_PC, cas, 30);
 
+%% 4. Velocity profiles to ansys
+velocity_inlet_journal(dat_PC, cas);
+
+% Old
+
 %% 4. Transform MRI measurements for ANSYS inlet velocity profile - Variable (Here we change sign of velocity)
 MRI_to_ansys_inlet_velocity(subject, dat_PC, 0);
 

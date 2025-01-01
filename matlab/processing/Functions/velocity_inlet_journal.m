@@ -1,7 +1,7 @@
 %Save velocity field on udms
-function velocity_inlet_journal(subject)
+function velocity_inlet_journal(dat_PC, cas)
     cycles = 3;
-    fileID = fopen("data/"+subject+"/ansys_inputs/FLTG/velocity_inlet_journal.jou", 'w');
+    fileID = fopen(cas.diransys_in+"/velocity_inlet_journal.jou", 'w');
     
     fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Initialization"))\n' );
     fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Initialization"))\n' );

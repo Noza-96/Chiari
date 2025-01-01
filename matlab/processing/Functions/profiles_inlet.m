@@ -1,68 +1,74 @@
 %Show animation velocity inlet together with flow rate measurement
-function profiles_inlet (subject, example_animation)
+function profiles_inlet (dat_PC, cas)
 
-    load("data/"+subject+"/inlet_velocity.mat",'u','x','y','A')
-    
-    U = horzcat(u{:})*1e-2; %m/s
-    
-    Uf=zeros(size(U,1),100);
-    
-    for k=1:size(U,1)
-        [Uf(k,:), ~, ~] = four_approx(U(k,:),20,0);
-    end
-    
-    % Qf=mean(Uf,1)*A*1e4; %[ml/s]
-    
-    
-    if example_animation == 1
-        figure
-        tiledlayout(2,1,"TileSpacing","compact",Padding="compact")
-        set(gcf,'Position',[100,100,400,600])
-        for n = 1:100
-            nexttile(1)
-            scatter(x*1e3, y*1e3, 100, Uf(:,n)*1e2, 'filled', 'd');
-            bluetored(6)
-            set(gca,'LineWidth',1,'TickLength',[0.01 0.01])
-            c = colorbar;
-            c.Label.String = '[cm/s]';
-            title("Inlet velocity $t="+num2str((n)/100, '%.2f')+"$ s",'Interpreter','latex',FontSize=20)
-            box on
-            nexttile(2)
-            flow_rate(mean(Uf,1)*A*1e6,n)
-            drawnow
-        end
-    end
-    
+    location = [1,dat_PC.Ndat];
+    sstt = {"top", "bootom"};
+
+    for loc = 1:2
+
+        % pcMRI velocity    
+        U = -dat_PC.U_SAS{location(loc)}*1e-2; % m/s
+        U = reshape(U,[size(U,1)*size(U,2),size(U,3)]);
+        
+        %xyz coordinates
+        xyz = dat_PC.pixel_coord{location(loc)}*1e-3; %m
+        x = reshape(xyz(:,:,1),[],1);
+        y = reshape(xyz(:,:,2),[],1);
+        z = reshape(xyz(:,:,3),[],1);
+
      
-    % Create CSV file
     
-    % Define file name
-    for n=1:size(Uf, 2)
-        filename = "data/"+subject+"/empty_inlet_vel.csv";  
-        % Read the CSV file as a cell array to handle mixed types
-        data = readcell(filename);
+        u=zeros(size(U,1),100);
         
-        % Specify the row and columns to update
-        row = 10;
-        Col = 4;
-        numValues = size(Uf, 2);
-
-        for i = 1:size(Uf, 1)
-            % for j = 1:size(Uf, 2)
-                data{row + i, Col} = Uf(i, n);
-            % end
+        % We use the fourier approximation to fo from 40 data points to 100
+        for k=1:size(U,1)
+            [u(k,:), ~, ~] = four_approx(U(k,:),20,0);
         end
+        disp('1 done')
+
         
-        
-        % Convert the cell array to a table
-        dataTable = cell2table(data);
-        
-        % Write the updated table back to the CSV file
-        filename = "data/"+subject+"/ansys_inputs/FLTG/inlet_"+num2str(n)+".csv";
-        writetable(dataTable, filename, 'WriteVariableNames', false);
+    
+        % Create CSV file
+        filename = "empty_inlet_vel.csv";  
+        data = readcell(filename);
+        row = 10; 
+        n_data = length(x);
+        data(row + (1:n_data), 1) = num2cell(x); % Update column 1
+        data(row + (1:n_data), 2) = num2cell(y); % Update column 2
+        data(row + (1:n_data), 3) = num2cell(z); % Update column 3
+
+        for n=1:size(u, 2)
+            % Read the CSV file as a cell array to handle mixed types
+            data(row + (1:n_data), 4) = num2cell(u(:, n)); % Update column 3       
+
+            % Convert the cell array to a table
+            dataTable = cell2table(data);
+            
+            % Write the updated table back to the CSV file
+            filename = cas.diransys_in + "/"+sstt{loc}+"_prof_"+num2str(n)+".csv";
+            writetable(dataTable, filename, 'WriteVariableNames', false);
+            n
+        end
+        fprintf('Data saved for %s\n', sstt{loc});
+        Q=mean(u,1)*A;
+        save(fullfile(cas.dirdat,sstt{loc}+"_velocity.mat"), 'x','y','z','u','Q');
+
+        % figure
+        % % set(gcf,'Position',[100,100,400,600])
+        % for n = 1:100
+        %     scatter(x*1e2, y*1e2, 10, u(:,n)*1e2, 'filled', 'd');
+        %     bluetored(6)
+        %     set(gca,'LineWidth',1,'TickLength',[0.01 0.01])
+        %     xlabel("$x$ [cm]",fontsize=16,Interpreter="latex")
+        %     ylabel("$y$ [cm]",fontsize=16,Interpreter="latex")
+        %     c = colorbar;
+        %     c.Label.String = '[cm/s]';
+        %     set(gca, 'View', [90 90]); % Rotates the axes
+        %     title(""+sstt{loc}+ " velocity $t="+num2str((n)/100, '%.2f')+"$ s",'Interpreter','latex',FontSize=20)
+        %     box on
+        %     drawnow
+        % end  
     end
-    Qf=mean(Uf,1)*A;
-    save("data/"+subject+"/inlet_velocity.mat", 'Uf','Qf', '-append');
 end
 
 
