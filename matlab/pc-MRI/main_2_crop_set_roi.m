@@ -5,7 +5,7 @@ reference_location = 'C03C04';
 % (set to 'fromsag' to replace locations with those from sagittal geometry)
 % (e.g. 'C02C03' to shift all locations so that the C02C03 locations coincides with sagittal geometry)
 
-crop_size = 128; % Number of pixels to crop 256x256 image in
+crop_size = 64; % Number of pixels to crop 256x256 image in
 
 makemovies = false;
 
