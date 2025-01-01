@@ -42,7 +42,7 @@ function velocity_inlet_journal(dat_PC, cas)
         fprintf(fileID,'(cx-gui-do cx-activate-item "MenuBar*WriteSubMenu*Stop Journal")\n' );
             
         %Generate .csv files with profile information to input in Ansys
-        profiles_inlet (subject, 0)
+        profiles_inlet (dat_PC, cas)
 
         disp('5. Generated journal for variable velocity profile together with .csv files...')
 end
