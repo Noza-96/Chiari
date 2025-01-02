@@ -51,8 +51,22 @@ scatter3(xx, yy, zz, 20, uu, 'filled'); % 3D scatter plot
 addpath('Functions/');
 addpath('Functions/Others/')
 
-load(fullfile(cas.dirmat, sstt{loc}+"_velocity.mat"))
+% pcMRI velocity    
+uu = -dat_PC.U_SAS{index}; % m/s
+uu = reshape(uu(:,:,ceil(end/2)),[],1);
+xyz = dat_PC.pixel_coord{index}*1e1; %m
+xx = reshape(xyz(:,:,1),[],1)*1e-2;
+yy = reshape(xyz(:,:,2),[],1)*1e-2;
+zz = reshape(xyz(:,:,3),[],1)*1e-2;
+nonzero_indices = uu(:) ~= 0;
 
+uu = uu(nonzero_indices);
+xx = xx(nonzero_indices);
+yy = yy(nonzero_indices);
+zz = zz(nonzero_indices);
+
+load(fullfile(cas.dirmat, sstt{loc}+"_velocity.mat"))
+figure
 scatter(x*1e2, y*1e2, 10, u(:,n)*1e2, 'filled', 'd');
 bluetored(6)
 set(gca,'LineWidth',1,'TickLength',[0.01 0.01])
@@ -74,7 +88,7 @@ Z_mesh = Mesh{4} * 100;
 U = Mesh{5} * 100;
 fclose(meshID);
 figure; % Create a new figure
-scatter3(X_mesh, Y_mesh, Z_mesh, 20, U, 'filled'); % 3D scatter plot
+scatter3(X_mesh, Y_mesh, Z_mesh, 5, U, 'filled'); % 3D scatter plot
 colorbar; % Add a color bar to show the velocity magnitude
 xlabel('X (cm)'); % Label for the x-axis
 ylabel('Y (cm)'); % Label for the y-axis
@@ -83,10 +97,10 @@ title('3D Scatter Plot of Mesh Coordinates');
 axis equal
 hold on 
 nonzero_indices = u(:,n) ~= 0;
-scatter3(x(nonzero_indices)*1e2, y(nonzero_indices)*1e2, z(nonzero_indices)*1e2, 10, u(nonzero_indices,n)*1e2, 'filled'); % 3D scatter plot
+% scatter3(x(nonzero_indices)*1e2, y(nonzero_indices)*1e2, z(nonzero_indices)*1e2, 10, u(nonzero_indices,n)*1e2, 'filled'); % 3D scatter plot
 grid on; % Enable grid for better visualization
 
-scatter3(xx, yy, zz, 5, uu, 'filled'); % 3D scatter plot
+scatter3(xx, yy, zz, 20, uu, 'filled'); % 3D scatter plot
 
 
 %% 4. Transform MRI measurements for ANSYS inlet velocity profile - Variable (Here we change sign of velocity)

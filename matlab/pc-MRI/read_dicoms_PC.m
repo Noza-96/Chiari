@@ -137,9 +137,10 @@ function dat = read_dicoms_PC(cas, resettimevector)
             % Calculate 3D coordinates for each pixel
             for i = 1:rows
                 for j = 1:cols
-                    pixel_coordinates(i, j, :) = image_position ...
-                                               + (i-1) * row_direction * pixel_spacing(2) ...
-                                               + (j-1) * col_direction * pixel_spacing(1);
+                pixel_coordinates(i, j, :) = image_position ...
+                                           + (j-1) * row_direction * pixel_spacing(1) ...
+                                           + (i-1) * col_direction * pixel_spacing(2);
+
                 end
             end
             
