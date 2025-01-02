@@ -20,7 +20,7 @@ Q0_ansys(dat_PC, cas, 30);
 %% 4. Velocity profiles to ansys
 velocity_inlet_journal(dat_PC, cas);
 %% 4. Velocity profiles to ansys
-clear; close all;
+% clear; close all;
 
 % Choose subject
 subject = "s101";
@@ -28,16 +28,31 @@ session = 'before';
 
 sstt = {"top", "bottom"};
 loc = 2;
+index = 4;
+n = 50;
+
+load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","01-read_dat.mat"));
 
 % Define MRI data path
 load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
 
+% pcMRI velocity    
+uu = -dat_PC.U_SAS{index}; % m/s
+uu = reshape(uu(:,:,ceil(end/2)),[],1);
+xyz = dat_PC.pixel_coord{index}*1e1; %m
+xx = reshape(xyz(:,:,1),[],1)*1e-1;
+yy = reshape(xyz(:,:,2),[],1)*1e-1;
+zz = reshape(xyz(:,:,3),[],1)*1e-1;
+
+hold on 
+scatter3(xx, yy, zz, 20, uu, 'filled'); % 3D scatter plot
+
+%% 
 addpath('Functions/');
 addpath('Functions/Others/')
 
 load(fullfile(cas.dirmat, sstt{loc}+"_velocity.mat"))
 
-n = 50;
 scatter(x*1e2, y*1e2, 10, u(:,n)*1e2, 'filled', 'd');
 bluetored(6)
 set(gca,'LineWidth',1,'TickLength',[0.01 0.01])
@@ -70,6 +85,9 @@ hold on
 nonzero_indices = u(:,n) ~= 0;
 scatter3(x(nonzero_indices)*1e2, y(nonzero_indices)*1e2, z(nonzero_indices)*1e2, 10, u(nonzero_indices,n)*1e2, 'filled'); % 3D scatter plot
 grid on; % Enable grid for better visualization
+
+scatter3(xx, yy, zz, 5, uu, 'filled'); % 3D scatter plot
+
 
 %% 4. Transform MRI measurements for ANSYS inlet velocity profile - Variable (Here we change sign of velocity)
 MRI_to_ansys_inlet_velocity(subject, dat_PC, 0);
