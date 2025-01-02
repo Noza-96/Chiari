@@ -204,8 +204,8 @@ assign_to_slices(volume_with_max_z, volume_with_min_z, volume_with_mid_z)
 # Adjust the slice views
 adjust_slice_views()
 
-# Save the plane points to a text file
-save_plane_points(segmentation_path)
+# Save the plane points to a text file -- FAILS TO GIVE CORRECT POINTS
+# save_plane_points(segmentation_path)
 
 
 # Apply a linear transformation to the segmentation to align it with the sequence segmentation
