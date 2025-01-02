@@ -78,7 +78,7 @@ function profiles_inlet (dat_PC, cas)
             set(gca, 'View', [90 90]); % Rotates the axes
             title(""+sstt{loc}+ " velocity $t="+num2str((n)/100, '%.2f')+"$ s",'Interpreter','latex',FontSize=20)
             box on
-            drawnow
+            pause
         end        
     
         % Create CSV file
@@ -103,7 +103,7 @@ function profiles_inlet (dat_PC, cas)
             n
         end
         fprintf('data saved for %s\n pc-MRI measurement', sstt{loc});
-        save(fullfile(cas.dirdat,sstt{loc}+"_velocity.mat"), 'x','y','z','u');
+        save(fullfile(cas.dirmat, sstt{loc}+"_velocity.mat"), 'x','y','z','u');
 
 
     end

@@ -19,8 +19,57 @@ Q0_ansys(dat_PC, cas, 30);
 
 %% 4. Velocity profiles to ansys
 velocity_inlet_journal(dat_PC, cas);
+%% 4. Velocity profiles to ansys
+clear; close all;
 
-% Old
+% Choose subject
+subject = "s101";
+session = 'before';
+
+sstt = {"top", "bottom"};
+loc = 2;
+
+% Define MRI data path
+load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
+
+addpath('Functions/');
+addpath('Functions/Others/')
+
+load(fullfile(cas.dirmat, sstt{loc}+"_velocity.mat"))
+
+n = 50;
+scatter(x*1e2, y*1e2, 10, u(:,n)*1e2, 'filled', 'd');
+bluetored(6)
+set(gca,'LineWidth',1,'TickLength',[0.01 0.01])
+xlabel("$x$ [cm]",fontsize=16,Interpreter="latex")
+ylabel("$y$ [cm]",fontsize=16,Interpreter="latex")
+c = colorbar;
+c.Label.String = '[cm/s]';
+set(gca, 'View', [90 90]); % Rotates the axes
+title(""+sstt{loc}+ " velocity $t="+num2str((n)/100, '%.2f')+"$ s",'Interpreter','latex',FontSize=20)
+axis equal
+box on
+
+destination_file = fullfile(cas.diransys_out,"bottom_ans_geometry");
+meshID = fopen(destination_file, 'r');
+Mesh = textscan(meshID, '%d %f %f %f %f', 'Delimiter', ',', 'HeaderLines', 1);
+X_mesh = Mesh{2} * 100;
+Y_mesh = Mesh{3} * 100;
+Z_mesh = Mesh{4} * 100;
+U = Mesh{5} * 100;
+fclose(meshID);
+figure; % Create a new figure
+scatter3(X_mesh, Y_mesh, Z_mesh, 20, U, 'filled'); % 3D scatter plot
+colorbar; % Add a color bar to show the velocity magnitude
+xlabel('X (cm)'); % Label for the x-axis
+ylabel('Y (cm)'); % Label for the y-axis
+zlabel('Z (cm)'); % Label for the z-axis
+title('3D Scatter Plot of Mesh Coordinates');
+axis equal
+hold on 
+nonzero_indices = u(:,n) ~= 0;
+scatter3(x(nonzero_indices)*1e2, y(nonzero_indices)*1e2, z(nonzero_indices)*1e2, 10, u(nonzero_indices,n)*1e2, 'filled'); % 3D scatter plot
+grid on; % Enable grid for better visualization
 
 %% 4. Transform MRI measurements for ANSYS inlet velocity profile - Variable (Here we change sign of velocity)
 MRI_to_ansys_inlet_velocity(subject, dat_PC, 0);
