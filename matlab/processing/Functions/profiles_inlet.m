@@ -100,7 +100,7 @@ function profiles_inlet (dat_PC, cas)
             dataTable = cell2table(data);
             
             % Write the updated table back to the CSV file
-            filename = cas.diransys_in + "/"+sstt{loc}+"_prof_"+num2str(n)+".csv";
+            filename = cas.diransys_in + "/profiles/"+sstt{loc}+"_prof_"+num2str(n)+".csv";
             writetable(dataTable, filename, 'WriteVariableNames', false);
         end
         fprintf('data saved for %s pc-MRI measurement ...  \n', sstt{loc});

@@ -2,6 +2,8 @@
 function velocity_inlet_journal(dat_PC, cas)
     cycles = 3;
     fileID = fopen(cas.diransys_in+"/velocity_inlet_journal.jou", 'w');
+
+    profile_dir = "C:/Users/guill/Documents/chiari/computations/ansys/"+cas.subj+"/inputs/profiles";
     
     fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Initialization"))\n' );
     fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Initialization"))\n' );
@@ -24,7 +26,7 @@ function velocity_inlet_journal(dat_PC, cas)
             fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions"))\n');
             fprintf(fileID,'(cx-gui-do cx-activate-item "Boundary Conditions*Table1*Table3*Table4*Table2*ButtonBox1*PushButton2(Profiles)")\n');
             fprintf(fileID,'(cx-gui-do cx-activate-item "Profiles*Table7*Table1*PushButton1(Read)")\n');
-            fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( ""inlet_"+num2str(n)+".csv"") ""Profile Files (*.csv* *.prof* *.ttab* )"")\n");
+            fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( "" " + profile_dir + "/bottom_prof_" + num2str(n) + ".csv"") ""Profile Files (*.csv* *.prof* *.ttab* )"")\n");
             fprintf(fileID,'(cx-gui-do cx-activate-item "Profiles*PanelButtons*PushButton1(OK)")\n');
             fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))\n');
             fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))\n');
