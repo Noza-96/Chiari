@@ -11,10 +11,11 @@ cas.dirfig = cas.dirflm;
 cas.diransys = fullfile(cas.dircloud, 'ansys', cas.subj);
 cas.diransys_out = fullfile(cas.diransys, 'outputs');
 cas.diransys_in = fullfile(cas.diransys, 'inputs');
+cas.diransys_profiles = fullfile(cas.diransys_in, 'profiles');
 cas.dirseg = fullfile(cas.dircloud, 'segmentation', cas.subj);
 
 % List of directories to ensure exist
-dirsToCreate = {cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.dirvid, cas.dirseg, cas.dirfig};
+dirsToCreate = {cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, cas.dirseg, cas.dirfig};
 
 % Create directories if not present
 for i = 1:length(dirsToCreate)
