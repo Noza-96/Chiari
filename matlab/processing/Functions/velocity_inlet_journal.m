@@ -1,10 +1,12 @@
 %Save velocity field on udms
 function velocity_inlet_journal(dat_PC, cas)
     cycles = 3;
+    Nt = 2; 
     fileID = fopen(cas.diransys_in+"/velocity_inlet_journal.jou", 'w');
 
-    profile_dir = "C:/Users/guill/Documents/chiari/computations/ansys/"+cas.subj+"/inputs/profiles";
-    
+    ansys_dir = "C:/Users/guill/Documents/chiari/computations/ansys";
+    profile_dir = ansys_dir+"/"+cas.subj+"/inputs/profiles";
+
     fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Initialization"))\n' );
     fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Initialization"))\n' );
     fprintf(fileID,'(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")\n' );
@@ -19,14 +21,14 @@ function velocity_inlet_journal(dat_PC, cas)
     % fprintf(fileID,'(cx-gui-do cx-activate-item "Question*OK")\n' );
     
     for k=1:cycles
-        for n = 1:100   
+        for n = 1:Nt   
             fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions"))\n');
             fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions"))\n');
             fprintf(fileID,'(cx-gui-do cx-activate-item "NavigationPane*Frame2*Table1*List_Tree2")\n');
             fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Setup|Boundary Conditions"))\n');
             fprintf(fileID,'(cx-gui-do cx-activate-item "Boundary Conditions*Table1*Table3*Table4*Table2*ButtonBox1*PushButton2(Profiles)")\n');
             fprintf(fileID,'(cx-gui-do cx-activate-item "Profiles*Table7*Table1*PushButton1(Read)")\n');
-            fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( "" " + profile_dir + "/bottom_prof_" + num2str(n) + ".csv"") ""Profile Files (*.csv* *.prof* *.ttab* )"")\n");
+            fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """ + profile_dir + "/bottom_prof_" + num2str(n) + ".csv"") ""Profile Files (*.csv* *.prof* *.ttab* )"")\n");
             fprintf(fileID,'(cx-gui-do cx-activate-item "Profiles*PanelButtons*PushButton1(OK)")\n');
             fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))\n');
             fprintf(fileID,'(cx-gui-do cx-set-list-tree-selections "NavigationPane*Frame2*Table1*List_Tree2" (list "Solution|Run Calculation"))\n');
@@ -42,7 +44,7 @@ function velocity_inlet_journal(dat_PC, cas)
         end
     end
         fprintf(fileID,'(cx-gui-do cx-activate-item "MenuBar*WriteSubMenu*Stop Journal")\n' );
-            
+        fprintf('velocity inlet journal created ...  \n');         
         %Generate .csv files with profile information to input in Ansys
         profiles_inlet (dat_PC, cas)
 

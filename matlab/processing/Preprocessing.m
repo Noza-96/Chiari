@@ -19,6 +19,7 @@ Q0_ansys(dat_PC, cas, 30);
 
 %% 4. Velocity profiles to ansys
 velocity_inlet_journal(dat_PC, cas);
+create_plane_journal(dat_PC, cas);
 %% 4. Velocity profiles to ansys
 % clear; close all;
 
