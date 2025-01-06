@@ -6,7 +6,9 @@ cas.sess = 'before';
 
 cas.dircloud = '../../../computations'; % (do not include ending "/" in cas.dirdat)
 
-cas.dirdat = [cas.dircloud,'/pc-mri']; 
+cas.dirdat = [cas.dircloud,'/pc-mri'];
+
+cas.dir_fullpath_ansys = "C:/Users/guill/Documents/chiari/computations/ansys"; % needed for ansys computations
 
 cas.anal = 'flow';
 
