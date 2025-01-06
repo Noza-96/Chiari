@@ -19,7 +19,16 @@ Q0_ansys(dat_PC, cas, 30);
 
 %% 4. Velocity profiles to ansys
 velocity_inlet_journal(dat_PC, cas);
-create_plane_journal(dat_PC, cas);
+
+ansys_dir = 
+
+fileID = create_plane_journal_TUI(dat_PC, cas);
+
+locations = [cas.locations(1:end-1), "FM-25", "bottom", "(top)"];
+fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'}; 
+save_every_time_step_TUI (fileID, cas, ansys_dir, fields, "report")
+
+save_every_time_step_TUI (fileID, fields, locations, directory, filename)
 %% 4. Velocity profiles to ansys
 % clear; close all;
 

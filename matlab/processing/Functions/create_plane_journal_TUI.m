@@ -1,5 +1,5 @@
 %Create-planes journal
-function create_plane_journal_TUI(dat_PC, cas)
+function fileID = create_plane_journal_TUI(dat_PC, cas)
 
     N = dat_PC.Ndat;
     fileID = fopen(cas.diransys_in+"/create_planes_TUI.jou", 'w');
@@ -10,7 +10,7 @@ function create_plane_journal_TUI(dat_PC, cas)
 
     low_FM = "FM-25";
     
-    for loc = 1:N
+    for loc = 1:(N-1)
         XYZ = three_point_plane(dat_PC, loc);
         create_plane (fileID,XYZ,cas.locations{loc})
 
@@ -20,12 +20,7 @@ function create_plane_journal_TUI(dat_PC, cas)
         end
 
     end
-    locations = [cas.locations, low_FM, "bottom", "(top)"];
-    filename = "report";
-    directory = ansys_dir+"/"+cas.subj+"/outputs/"+filename;
-    fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'}; 
 
-    save_every_time_step_TUI (fileID, fields, locations, directory, filename)
     % save_vel_journal (fileID, cas)
 
     % fprintf(fileID,'(cx-gui-do cx-activate-item "MenuBar*WriteSubMenu*Stop Journal")\n');
@@ -59,22 +54,4 @@ function XYZ = three_point_plane(dat_PC, index)
 
     XYZ = [x_coords,y_coords,z_coords];
 
-end
-
-function save_every_time_step_TUI (fileID, fields, locations, directory, filename)
-    % SETUP
-    frequency = 1;
-    comma = 'no'; % Delimiter/Comma?
-    Cell_centered = 'no'; % Location/Cell-Centered?
-    export_every = 'time-step'; % Export data every: ("time-step" "flow-time")
-    
-    % Join fields and locations into a single string
-    fields_str = strjoin(fields, ' '); % Concatenate fields with space delimiter
-    locations_str = strjoin(locations, ' '); % Concatenate locations with space delimiter
-    
-    % Build the string using sprintf
-    TUI_sstt = sprintf('/file/transient-export/ascii "%s" %s %s q %s %s %s "%s" %d time-step \n', ...
-    directory, locations_str, fields_str, Cell_centered, comma, filename, export_every, frequency);
-
-    fprintf(fileID,TUI_sstt);
 end

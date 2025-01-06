@@ -4,11 +4,13 @@ clear; close all;
 
 % Choose subject
 subject = "s101";
+session = 'before';
 
-[cas, dat_PC] = load_data(subject);
+% Define MRI data path
+load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
 
 %% 2. Create 3D animations with velocity results into spinal canal geometry
-animation_3D(subject, 0)
+animation_3D(dat_PC, cas)
 
 %% 3. Comparison PC-MRI with Ansys solution -- Animation
 comparison_results(subject,cas,dat_PC)
