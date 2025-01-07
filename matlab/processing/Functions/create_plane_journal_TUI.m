@@ -3,12 +3,8 @@ function fileID = create_plane_journal_TUI(dat_PC, cas)
 
     N = dat_PC.Ndat;
     fileID = fopen(cas.diransys_in+"/create_planes_TUI.jou", 'w');
-
-    ansys_dir = "C:/Users/guill/Documents/chiari/computations/ansys";
     
     fprintf(fileID,'/file/set-tui-version "24.1"\n' );
-
-    low_FM = "FM-25";
     
     for loc = 1:(N-1)
         XYZ = three_point_plane(dat_PC, loc);
@@ -16,19 +12,16 @@ function fileID = create_plane_journal_TUI(dat_PC, cas)
 
         if loc == 1
             XYZ(:,3) = XYZ(:,3) - 0.025; % create plane 25mm lower FM
-            create_plane (fileID,XYZ,low_FM)
+            create_plane (fileID,XYZ,"FM-25")
         end
 
     end
-
-    % save_vel_journal (fileID, cas)
-
-    % fprintf(fileID,'(cx-gui-do cx-activate-item "MenuBar*WriteSubMenu*Stop Journal")\n');
+    
+    fclose(fileID);
 end
 
 
 function create_plane (fileID, XYZ, sstt)
-    xyz_sstt = {'X','Y','Z'};
     fprintf(fileID,"/surface/plane-surface "+sstt+" three-points ");
     % Loop through the points (1 to 3) and print their XYZ coordinates
     for point = 1:3

@@ -1,12 +1,11 @@
-function run_simulation_TUI(dat_PC, cas)
+function run_simulation_TUI(dat_PC, cas, cycles, iterations_time_step)
 
-    cycles = 3;
     Nt = 100; 
-    iterations_time_step = 20;
  
     fileID = fopen(cas.diransys_in+"/run_simulation_TUI.jou", 'w');
-    ansys_dir = "C:/Users/guill/Documents/chiari/computations/ansys";
-    profile_dir = ansys_dir+"/"+cas.subj+"/inputs/profiles/";
+    profile_dir = cas.dir_fullpath_ansys+"/"+cas.subj+"/inputs/profiles/";
+
+    fprintf(fileID,'/file/set-tui-version "24.1"\n' );
 
     % set time-step
     time_step = dat_PC.T{end}/100;
@@ -33,5 +32,7 @@ function run_simulation_TUI(dat_PC, cas)
                 fprintf(fileID,"/solve/dual-time-iterate 1 "+iterations_time_step+" 1 ok ok \n \n");
             end
         end
-    end 
+    end
+
+    fclose(fileID);
 end

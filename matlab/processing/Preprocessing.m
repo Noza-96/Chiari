@@ -17,18 +17,21 @@ MRI_locations(dat_PC, cas);
 %% 3. Create Fourier flow rate data for ANSYS input - Uniform
 Q0_ansys(dat_PC, cas, 30);
 
-%% 4. Velocity profiles to ansys
-velocity_inlet_journal(dat_PC, cas);
+%%  Create CSV files with velocity field information for top and bottom locations
+velocity_profiles (dat_PC, cas);
 
-ansys_dir = 
+%% TUIs to be loaded in ANSYS
 
+% Create pcmri surfaces in ansys
 fileID = create_plane_journal_TUI(dat_PC, cas);
 
-locations = [cas.locations(1:end-1), "FM-25", "bottom", "(top)"];
-fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'}; 
-save_every_time_step_TUI (fileID, cas, ansys_dir, fields, "report")
+% variables and locations to be saved each time step
+save_every_time_step_TUI (cas, {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'}, ...
+    [cas.locations(1:end-1), "FM-25", "bottom", "(top)"], "report")
 
-save_every_time_step_TUI (fileID, fields, locations, directory, filename)
+% TUI run simulation with 3 cycles and 20 iterations per time step
+run_simulation_TUI(dat_PC, cas, 3, 20)
+
 %% 4. Velocity profiles to ansys
 % clear; close all;
 

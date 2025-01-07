@@ -1,7 +1,10 @@
-function save_every_time_step_TUI (fileID, cas, ansys_dir, fields, locations, filename)
+function save_every_time_step_TUI (cas, fields, locations, filename)
     % SETUP
-    
-    directory = ansys_dir+"/"+cas.subj+"/outputs/"+filename;
+    fileID = fopen(cas.diransys_in+"/save_every_time_step_TUI.jou", 'w');
+
+    directory = cas.dir_fullpath_ansys+"/"+cas.subj+"/outputs/"+filename;
+
+    fprintf(fileID,'/file/set-tui-version "24.1"\n' );
 
     frequency = 1;
     comma = 'no'; % Delimiter/Comma?
@@ -17,4 +20,6 @@ function save_every_time_step_TUI (fileID, cas, ansys_dir, fields, locations, fi
     directory, locations_str, fields_str, Cell_centered, comma, filename, export_every, frequency);
 
     fprintf(fileID,TUI_sstt);
+
+    fclose(fileID);
 end

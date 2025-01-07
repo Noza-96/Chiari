@@ -1,5 +1,5 @@
 %Show animation velocity inlet together with flow rate measurement
-function profiles_inlet (dat_PC, cas)
+function velocity_profiles (dat_PC, cas)
 
     location = [1,dat_PC.Ndat];
     sstt = {"top", "bottom"};
@@ -11,8 +11,7 @@ function profiles_inlet (dat_PC, cas)
         % pcMRI velocity    
         U = -dat_PC.U_SAS{index}*1e-2; % m/s
         xyz = dat_PC.pixel_coord{index}*1e-3; %m
-
-
+        Q = -dat_PC.Q_SAS{index};  % Get flow data
 
         % Identify rows and columns where all elements are zero
         zeroRows = all(U(:,:,1) == 0, 2); % Logical vector for rows
@@ -64,6 +63,7 @@ function profiles_inlet (dat_PC, cas)
         for k=1:size(U,1)
             [u(k,:), ~, ~] = four_approx(U(k,:),20,0);
         end
+        [q, ~, ~] = four_approx(Q,20,0); 
 
                 % figure
         % set(gcf,'Position',[100,100,400,600])
@@ -104,7 +104,7 @@ function profiles_inlet (dat_PC, cas)
             writetable(dataTable, filename, 'WriteVariableNames', false);
         end
         fprintf('data saved for %s pc-MRI measurement ...  \n', sstt{loc});
-        save(fullfile(cas.dirmat, sstt{loc}+"_velocity.mat"), 'x','y','z','u');
+        save(fullfile(cas.dirmat, sstt{loc}+"_velocity.mat"), 'x','y','z','u','q');
 
 
     end
