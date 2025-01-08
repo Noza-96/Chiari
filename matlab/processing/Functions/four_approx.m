@@ -1,4 +1,4 @@
-function [ff, am, fm] = four_approx(f, N, visualization)
+function [ff, am, fm] = four_approx(f, N, visualization, Npoints)
     if f(1) == f(end)
         f(end) = [];
     end
@@ -13,7 +13,6 @@ function [ff, am, fm] = four_approx(f, N, visualization)
     Y_truncated(end-N+1:end) = Y(end-N+1:end);  % Retain Nth negative frequencies
 
     % Resample with 100 points
-    Npoints = 100;
     Y_resampled = zeros(Npoints, 1);
     Y_resampled(1:N+1) = Y_truncated(1:N+1);    % Copy positive frequencies
     Y_resampled(end-N+1:end) = Y_truncated(end-N+1:end);  % Copy negative frequencies

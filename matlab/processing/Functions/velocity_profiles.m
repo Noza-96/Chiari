@@ -1,5 +1,5 @@
 %Show animation velocity inlet together with flow rate measurement
-function velocity_profiles (dat_PC, cas)
+function velocity_profiles (dat_PC, cas, ts_cycle)
 
     location = [1,dat_PC.Ndat];
     sstt = {"top", "bottom"};
@@ -57,13 +57,13 @@ function velocity_profiles (dat_PC, cas)
         fprintf('%s_plane.txt created ... \n ', sstt{loc});
 
 
-        u=zeros(size(U,1),100);
+        u=zeros(size(U,1), ts_cycle);
         
         % We use the fourier approximation to fo from 40 data points to 100
         for k=1:size(U,1)
-            [u(k,:), ~, ~] = four_approx(U(k,:),20,0);
+            [u(k,:), ~, ~] = four_approx(U(k,:), 20, 0, ts_cycle);
         end
-        [q, ~, ~] = four_approx(Q,20,0); 
+        [q, ~, ~] = four_approx(Q, 20, 0, ts_cycle); 
 
                 % figure
         % set(gcf,'Position',[100,100,400,600])

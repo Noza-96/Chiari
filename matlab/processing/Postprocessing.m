@@ -9,11 +9,15 @@ session = 'before';
 % Define MRI data path
 load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
 
+load(fullfile(cas.dirmat,"DNS.mat"),'DNS')
 %% 2. Create 3D animations with velocity results into spinal canal geometry
-animation_3D(dat_PC, cas)
+animation_3D(dat_PC, cas, DNS)
+
+%% 3. Obtain integral quantities
+comparison_results(cas,dat_PC)
 
 %% 3. Comparison PC-MRI with Ansys solution -- Animation
-comparison_results(subject,cas,dat_PC)
+comparison_results(cas,dat_PC)
 
 %% 4. Longitudinal impedance - Pressure drop and Flow rate
 longitudinal_impedance(subject); 

@@ -1,8 +1,8 @@
-function save_every_time_step_TUI (cas, fields, locations, filename)
+function save_every_time_step_TUI (cas, fields, locations, filename, ansys_path)
     % SETUP
     fileID = fopen(cas.diransys_in+"/save_every_time_step_TUI.jou", 'w');
 
-    directory = cas.dir_fullpath_ansys+"/"+cas.subj+"/outputs/"+filename;
+    directory = ansys_path+"/"+cas.subj+"/outputs/"+filename;
 
     fprintf(fileID,'/file/set-tui-version "24.1"\n' );
 
@@ -16,7 +16,7 @@ function save_every_time_step_TUI (cas, fields, locations, filename)
     locations_str = strjoin(locations, ' '); % Concatenate locations with space delimiter
     
     % Build the string using sprintf
-    TUI_sstt = sprintf('/file/transient-export/ascii "%s" %s %s q %s %s %s "%s" %d time-step \n', ...
+    TUI_sstt = sprintf('/file/transient-export/ascii "%s" %s () %s q %s %s %s "%s" %d time-step \n', ...
     directory, locations_str, fields_str, Cell_centered, comma, filename, export_every, frequency);
 
     fprintf(fileID,TUI_sstt);

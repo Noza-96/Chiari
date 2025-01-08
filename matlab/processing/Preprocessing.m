@@ -8,29 +8,44 @@ session = 'before';
 % Define MRI data path
 load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
 
+DNS.ansys_path = "C:/Users/guill/Documents/chiari/computations/ansys";
+
+DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
+DNS.locations = [cas.locations(1:end-1), "bottom", "FM-25", "top"];
+DNS.locz = [dat_PC.locz{1:end}, dat_PC.locz{1}+2.5, NaN];
+DNS.report_name = "report";
+DNS.cycles = 3;
+DNS.iterations_ts = 20;
+DNS.ts_cycle = 100;
+
+
 addpath('Functions/');
 addpath('Functions/Others/')
+
+save(fullfile(cas.dirmat,"DNS.mat"),'DNS')
 
 %% 2. Calculate flow rate from PC-MRI measurements and visualize locations
 MRI_locations(dat_PC, cas);
 
 %% 3. Create Fourier flow rate data for ANSYS input - Uniform
-Q0_ansys(dat_PC, cas, 30);
+Q0_ansys(dat_PC, cas, 30, DNS.ts_cycle);
 
-%%  Create CSV files with velocity field information for top and bottom locations
-velocity_profiles (dat_PC, cas);
+%% 4. Create CSV files with velocity field information for top and bottom locations
+velocity_profiles (dat_PC, cas, DNS.ts_cycle);
 
-%% TUIs to be loaded in ANSYS
+%% 5. TUIs to be loaded in ANSYS
 
-% Create pcmri surfaces in ansys
-fileID = create_plane_journal_TUI(dat_PC, cas);
+% TODO: create TUI to setup simulation 
+
+% Create pcmri surfaces in ansys 
+% TODO: export ansys surface
+create_plane_journal_TUI(dat_PC, cas);
 
 % variables and locations to be saved each time step
-save_every_time_step_TUI (cas, {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'}, ...
-    [cas.locations(1:end-1), "FM-25", "bottom", "(top)"], "report")
+save_every_time_step_TUI (cas, DNS.fields, DNS.locations, DNS.report_name, DNS.ansys_path)
 
 % TUI run simulation with 3 cycles and 20 iterations per time step
-run_simulation_TUI(dat_PC, cas, 3, 20)
+run_simulation_TUI(dat_PC, cas, DNS.cycles, DNS.iterations_ts, DNS.ts_cycle, DNS.ansys_path)
 
 %% 4. Velocity profiles to ansys
 % clear; close all;

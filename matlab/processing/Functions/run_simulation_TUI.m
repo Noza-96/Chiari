@@ -1,19 +1,17 @@
-function run_simulation_TUI(dat_PC, cas, cycles, iterations_time_step)
-
-    Nt = 100; 
+function run_simulation_TUI(dat_PC, cas, cycles, iterations_time_step, ts_cycle, ansys_path)
  
     fileID = fopen(cas.diransys_in+"/run_simulation_TUI.jou", 'w');
-    profile_dir = cas.dir_fullpath_ansys+"/"+cas.subj+"/inputs/profiles/";
+    profile_dir = ansys_path+"/"+cas.subj+"/inputs/profiles/";
 
     fprintf(fileID,'/file/set-tui-version "24.1"\n' );
 
     % set time-step
-    time_step = dat_PC.T{end}/100;
+    time_step = dat_PC.T{end}/ts_cycle;
     fprintf(fileID,"time-step "+time_step+" \n");
 
         
     for k=1:cycles
-        for n = 1:Nt   
+        for n = 1:ts_cycle   
             % load profile data
             fprintf(fileID,"/file/read-profile """+profile_dir+"bottom_prof_"+n+".csv"" \n");
             % setup inlet velocity boundary condition 

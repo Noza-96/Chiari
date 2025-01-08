@@ -1,7 +1,7 @@
-function Q0_ansys(dat_PC,cas,modes)
+function Q0_ansys(dat_PC,cas,modes, ts_cycle)
 
-    t = linspace(0,1,100);  % Time vector
-    QQ = zeros(3,100);
+    t = linspace(0,1,ts_cycle);  % Time vector
+    QQ = zeros(3,ts_cycle);
     slice = [1, dat_PC.Ndat];
     for k = 1:2
 

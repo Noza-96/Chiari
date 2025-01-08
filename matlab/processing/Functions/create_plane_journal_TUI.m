@@ -1,5 +1,5 @@
 %Create-planes journal
-function fileID = create_plane_journal_TUI(dat_PC, cas)
+function create_plane_journal_TUI(dat_PC, cas)
 
     N = dat_PC.Ndat;
     fileID = fopen(cas.diransys_in+"/create_planes_TUI.jou", 'w');

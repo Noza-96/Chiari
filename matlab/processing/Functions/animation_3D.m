@@ -1,14 +1,9 @@
-function animation_3D(dat_PC, cas)
+function animation_3D(dat_PC, cas, DNS)
 
     % 3D Animation for Velocity Output
 
-    report_name = "report";
-
-    iterations_cycle = 2;
-    cycle = 3;
-
-    N0 = (cycle-1) * iterations_cycle;
-    tt = linspace(0, 1, iterations_cycle);
+    N0 = (DNS.cycles-1) * DNS.ts_cycle;
+    tt = linspace(0, 1, DNS.ts_cycle);
     
     % animation settings
     azimuth = [-45, 0];
@@ -23,9 +18,8 @@ function animation_3D(dat_PC, cas)
     Y_mesh = Mesh{3} * 100;
     Z_mesh = Mesh{4} * 100;
     fclose(meshID);
-    ID_struc = cell (1,2);
 
-    Nloc = dat_PC.Ndat + 2 ; % add top + FM-25
+    Nloc = length(DNS.locations); % add top + FM-25
     
     % Initialize the indices and data storage arrays
     index = cell(1, Nloc); % Preallocate for index lookup
@@ -43,11 +37,11 @@ function animation_3D(dat_PC, cas)
     tiledlayout(1, length(azimuth), "Padding", "loose", "TileSpacing", "loose");
     set(gcf, 'Position', [200, 100, 800, 800]);
         
-    for n = 1:iterations_cycle
+    for n = 1:DNS.ts_cycle
         N = N0 + n;
         
         % Define file paths for velocity data
-        filePath = fullfile(cas.diransys_out, report_name + "-" + sprintf('%04d', N));            
+        filePath = fullfile(cas.diransys_out, DNS.report_name + "-" + sprintf('%04d', N));            
         if ~exist(filePath, 'file')
             error('File "%s" does not exist.', fileName);
         end
@@ -107,10 +101,11 @@ function animation_3D(dat_PC, cas)
 
         % Save the current axis handle
         prev_ax = gca; % Save the current axis before switching
+        load(fullfile(cas.dirmat, "bottom_velocity.mat"),'q');
         
         % Switch to ax1 and plot - to be completed
         ax1 = axes('Position', [0.35 0.25 0.15 0.10]);
-        flow_rate(Q(end-99:end)*1e6, 0)
+        flow_rate(q, 0)
         ylim([-2,2])
         hold on 
         xline(n/100,LineWidth=1)
@@ -128,19 +123,13 @@ function animation_3D(dat_PC, cas)
         end
 
         % Read velocity results and organize data
-        loc = [abs(max(Z(:))), dat_PC.locd{1:end-1}, abs(min(Z(:))), dat_PC.locd{1} + 2.5]; % Assuming locd is part of a structure dat_PC
-        name_loc = [{"top"}, cas.locations(1:end-1), {"bottom"}, {"FM-25"}]'; % Assuming cas is a predefined structure
-
-        % sort locations as a function of the z-coordinate
-        [loc,ii] = sort(loc);
-        name_loc = name_loc(ii);
-           
+        DNS.locz(end) = abs(max(Z(:)));
             
         % Iterate over the locations
-        for k = 1:length(loc)
+        for k = 1:length(DNS.locz)
             if n == 1
                 % Find all indices where Z falls within the range loc{k} ± 0.2
-                index{k} = find(abs(Z + loc(k)) <= 0.2); 
+                index{k} = find(abs(Z + DNS.locz(k)) <= 0.2); 
                 
                 % Assign X, Y, Z coordinates for this location
                 x_DNS{k} = X(index{k});
@@ -155,7 +144,7 @@ function animation_3D(dat_PC, cas)
         end           
     end
 
-    for k = 1:length(loc)
+    for k = 1:length(DNS.locz)
         % Combine all time steps into one array for each location (e.g., along the third dimension)
         u_combined{k} = cell2mat(u_DNS(k, :)); % Convert the cell array to a matrix
         v_combined{k} = cell2mat(v_DNS(k, :));
@@ -164,10 +153,14 @@ function animation_3D(dat_PC, cas)
        
 
     % Now, all the arrays have the same dimension, so we can use struct
-    DNS = struct('x', x_DNS, 'y', y_DNS, 'z', z_DNS, ...
-                 'u', u_combined, 'v', v_combined, 'w', w_combined, ...
-                 'locations', name_loc);
-    save(cas.dirmat,'DNS');
+    DNS.x = x_DNS;
+    DNS.y = y_DNS;
+    DNS.z = z_DNS;
+    DNS.u = u_combined;
+    DNS.v = v_combined;
+    DNS.w = w_combined;
+   
+    save(fullfile(cas.dirmat,'DNS.mat'),'DNS');
 
     % Save the animation as a video
     video_filename = "3D_velocity_animation";
