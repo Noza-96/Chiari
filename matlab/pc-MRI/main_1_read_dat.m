@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all;
 
-cas.subj = 's101';
+cas.subj = 's1';
 cas.sess = 'before';
 
 cas.dircloud = '../../../computations'; % (do not include ending "/" in cas.dirdat)

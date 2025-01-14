@@ -9,7 +9,9 @@ function dat = read_dicoms_PC(cas, resettimevector)
         
         disp([cas.dirdcm, '/', cas.folders_PC_P{idat}]);
         
-        dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_P{idat}], '*.dcm'));
+        % dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_P{idat}], '*.dcm'));
+
+        dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_P{idat}], 'MR*'));
 
         numim = numel(dicomlist);
 
@@ -20,14 +22,18 @@ function dat = read_dicoms_PC(cas, resettimevector)
             fname = fullfile([cas.dirdcm, '/', cas.folders_PC_P{idat}], dicomlist(jj).name);
 
             % Hack to find VENC:
-            command = sprintf('awk ''/^sAngio.sFlowArray.asElm\\[0\\].nVelocity/'' %s', fname);
-            [status, sysout] = system(command);
-            sysout = erase(sysout, "sAngio.sFlowArray.asElm[0].nVelocity");
-            sysout = erase(sysout, "=");
-            sysout = sysout(find(~isspace(sysout)));
-            venc{idat}(jj) = str2num(sysout);
-
+            % command = sprintf('awk ''/^sAngio.sFlowArray.asElm\\[0\\].nVelocity/'' %s', fname);
+            % [status, sysout] = system(command);
+            % sysout = erase(sysout, "sAngio.sFlowArray.asElm[0].nVelocity");
+            % sysout = erase(sysout, "=");
+            % sysout = sysout(find(~isspace(sysout)));
             info{idat}{jj} = dicominfo(fname);
+            
+            venc{idat}(jj)        = 0.1 * double(info{idat}{jj}.(dicomlookup('0019', '10CC')));
+            vencscale{idat}(jj)   = double(info{idat}{jj}.(dicomlookup('0019', '10E2')));
+            % venc{idat}(jj) = str2num(sysout);
+
+
 
             if isfield(info{idat}{jj}, 'TriggerTime') == 1
                 triggertime{idat}(jj) = info{idat}{jj}.(dicomlookup('0018', '1060'));
@@ -63,9 +69,9 @@ function dat = read_dicoms_PC(cas, resettimevector)
 
         else
 
-            dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_MAG{idat}], '*.dcm'));
+            dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_MAG{idat}], 'MR*'));
 
-            numim = numel(dicomlist);
+            numim = numel(dicomlist)
 
             fname_showorient{idat} = fullfile([cas.dirdcm, '/', cas.folders_PC_MAG{idat}], dicomlist(1).name);
 
@@ -83,7 +89,7 @@ function dat = read_dicoms_PC(cas, resettimevector)
 
         % Load DICOM files with stuff out of parallel directory for complementary use:
 
-        dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_{idat}], '*.dcm'));
+        dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_{idat}], 'MR*'));
 
         numim = numel(dicomlist);
 
@@ -163,8 +169,12 @@ function dat = read_dicoms_PC(cas, resettimevector)
             compl{idat}(:, :, jj) = imcom{idat}{jj};
 
             % Convert image pairs to velocity fields in cm/s (Note: positive is craniocaudal flow):
+            
+            % Convert image pairs to velocity fields in cm/s:
 
-            U_tot{idat}(:, :, jj) = - venc{idat} .* ( (phase{idat}(:, :, jj) - 2048) ./ 2048 );
+            Vscale{idat}(jj) = pi * vencscale{idat}(jj) / venc{idat};
+            U_tot{idat}(:, :, jj) = (phase{idat}(:, :, jj) ./ max(magni{idat}(:, :, jj), 1)) / Vscale{idat}(jj);
+            % U_tot{idat}(:, :, jj) = - venc{idat} .* ( (phase{idat}(:, :, jj) - 2048) ./ 2048 );
 
         end
 

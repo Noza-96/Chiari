@@ -2,7 +2,7 @@
 
 reference_location = 'C03C04'; 
 % (set to 'zero' to set location to 0.0)
-% (set to 'fromsag' to replace locations with those from sagittal geometry)
+% (set to 'fromsag' to replace ljocations with those from sagittal geometry)
 % (e.g. 'C02C03' to shift all locations so that the C02C03 locations coincides with sagittal geometry)
 
 crop_size = 64; % Number of pixels to crop 256x256 image in
