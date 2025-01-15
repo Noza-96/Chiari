@@ -13,7 +13,7 @@ DNS.ansys_path = "C:/Users/guill/Documents/chiari/computations/ansys";
 DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
 DNS.locations = [cas.locations(1:end-1), "bottom", "FM-25", "top"];
 DNS.locz = [dat_PC.locz{1:end}, dat_PC.locz{1}+2.5, NaN];
-DNS.report_name = "report";
+DNS.cas = "c1";
 DNS.cycles = 3;
 DNS.iterations_ts = 20;
 DNS.ts_cycle = 100;
@@ -41,8 +41,11 @@ velocity_profiles (dat_PC, cas, DNS.ts_cycle);
 % TODO: export ansys surface
 create_plane_journal_TUI(dat_PC, cas);
 
+% Create reports in ansys 
+reports_journal_TUI(dat_PC, cas, DNS.cas)
+
 % variables and locations to be saved each time step
-save_every_time_step_TUI (cas, DNS.fields, DNS.locations, DNS.report_name, DNS.ansys_path)
+save_every_time_step_TUI (cas, DNS.fields, DNS.locations, DNS.cas, DNS.ansys_path)
 
 % TUI run simulation with 3 cycles and 20 iterations per time step
 run_simulation_TUI(dat_PC, cas, DNS.cycles, DNS.iterations_ts, DNS.ts_cycle, DNS.ansys_path)

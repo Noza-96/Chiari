@@ -6,8 +6,13 @@ clear; close all;
 subject = "s101";
 session = 'before';
 
+report = "c1";
+
 % Define MRI data path
 load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
+
+addpath('Functions/');
+addpath('Functions/Others/')
 
 load(fullfile(cas.dirmat,"DNS.mat"),'DNS')
 %% 2. Create 3D animations with velocity results into spinal canal geometry
