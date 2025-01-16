@@ -1,11 +1,12 @@
 %Create-planes journal
-function create_plane_journal_TUI(dat_PC, cas)
+function create_surfaces_journal_TUI(dat_PC, cas)
 
     N = dat_PC.Ndat;
-    fileID = fopen(cas.diransys_in+"/create_planes_TUI.jou", 'w');
+    fileID = fopen(cas.diransys_in+"/create_surfaces_journal_TUI.jou", 'w');
     
     fprintf(fileID,'/file/set-tui-version "24.1"\n' );
     
+    % Create slices of PC measurements
     for loc = 1:(N-1)
         XYZ = three_point_plane(dat_PC, loc);
         create_plane (fileID,XYZ,cas.locations{loc})
@@ -14,9 +15,15 @@ function create_plane_journal_TUI(dat_PC, cas)
             XYZ(:,3) = XYZ(:,3) - 0.025; % create plane 25mm lower FM
             create_plane (fileID,XYZ,"FM-25")
         end
-
     end
-    
+
+    % Create surface to export later
+    zone_names = {'cord', 'dura', 'tonsils'};
+    for k = 1:length(zone_names)
+        fprintf(fileID,sprintf('/surface/zone-surface %s_s "%s" q \n', zone_names{k}, zone_names{k}));
+    end
+    fprintf(fileID,sprintf('/surface/group-surfaces %s () wall  q \n', strjoin(append(zone_names,'_s'),' ')));
+
     fclose(fileID);
 end
 

@@ -12,9 +12,10 @@ DNS.ansys_path = "C:/Users/guill/Documents/chiari/computations/ansys";
 
 DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
 DNS.locations = [cas.locations(1:end-1), "bottom", "FM-25", "top"];
-DNS.locz = [dat_PC.locz{1:end}, dat_PC.locz{1}+2.5, NaN];
-DNS.cas = "c1";
+% DNS.locz = [dat_PC.locz{1:end}, dat_PC.locz{1}+2.5, NaN];
+DNS.case = "c1";
 DNS.cycles = 3;
+DNS.delta_h_FM = 25;
 DNS.iterations_ts = 20;
 DNS.ts_cycle = 100;
 
@@ -37,17 +38,13 @@ velocity_profiles (dat_PC, cas, DNS.ts_cycle);
 
 % TODO: create TUI to setup simulation 
 
-% Create pcmri surfaces in ansys 
-% TODO: export ansys surface
-create_plane_journal_TUI(dat_PC, cas);
+% Create pcmri surfaces in ansys and surface
+create_surfaces_journal_TUI(dat_PC, cas);
 
-% Create reports in ansys 
-reports_journal_TUI(dat_PC, cas, DNS.cas)
+% Reports
+reports_journal_TUI(cas, DNS)
 
-% variables and locations to be saved each time step
-save_every_time_step_TUI (cas, DNS.fields, DNS.locations, DNS.cas, DNS.ansys_path)
-
-% TUI run simulation with 3 cycles and 20 iterations per time step
+% Script to run simulation
 run_simulation_TUI(dat_PC, cas, DNS.cycles, DNS.iterations_ts, DNS.ts_cycle, DNS.ansys_path)
 
 %% 4. Velocity profiles to ansys

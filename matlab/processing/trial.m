@@ -1,6 +1,3 @@
-function animation_3D(cas, dat_PC, DNS)
-
-    % 3D Animation for Velocity Output
 
     N0 = (DNS.cycles-1) * DNS.ts_cycle;
     tt = linspace(0, 1, DNS.ts_cycle);
@@ -33,11 +30,13 @@ function animation_3D(cas, dat_PC, DNS)
     u_combined = cell(Nloc, 1); 
     v_combined = cell(Nloc, 1); 
     w_combined = cell(Nloc, 1); 
+
     slice_z = zeros(Nloc, 1);
 
-    figure;
-    tiledlayout(1, length(azimuth), "Padding", "loose", "TileSpacing", "loose");
-    set(gcf, 'Position', [200, 100, 800, 800]);
+
+    % figure;
+    % tiledlayout(1, length(azimuth), "Padding", "loose", "TileSpacing", "loose");
+    % set(gcf, 'Position', [200, 100, 800, 800]);
         
     for n = 1:DNS.ts_cycle
         N = N0 + n;
@@ -72,66 +71,66 @@ function animation_3D(cas, dat_PC, DNS)
         
         % Plot the velocity data from different views
         
-            for k = 1:length(azimuth)
-                nexttile(k);
-                quiver3(X, Y, Z, U, V, W, sc);
-                hold on;
-                scatter3(X_mesh, Y_mesh, Z_mesh, 1, 'filled');
-                alpha(opacity_val);
+        %     for k = 1:length(azimuth)
+        %         nexttile(k);
+        %         quiver3(X, Y, Z, U, V, W, sc);
+        %         hold on;
+        %         scatter3(X_mesh, Y_mesh, Z_mesh, 1, 'filled');
+        %         alpha(opacity_val);
+        % 
+        %         view(azimuth(k), elevation(k));
+        %         xlim(XL);
+        %         ylim(YL);
+        %         zlim(ZL);
+        % 
+        %         set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01]);
+        %         xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+        %         ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+        %         zlabel('Z [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+        % 
+        %         if k > 1
+        %             set(gca, 'YColor', 'none');
+        %             xlabel([]);
+        %         end
+        %         grid off;
+        %         box off;    
+        %         hold off;
+        %         set(gca, 'Color', 'w');
+        %         set(gcf, 'Color', 'w');
+        %     % Update the title for the current frame
+        %     title(sprintf('$t/T = %.2f$', tt(n)), 'Interpreter', 'latex', 'FontSize', fs+4);
+        % 
+        %     % Save the current axis handle
+        %     prev_ax = gca; % Save the current axis before switching
+        %     load(fullfile(cas.dirmat, "bottom_velocity.mat"),'q');
+        % 
+        %     % Switch to ax1 and plot - to be completed
+        %     ax1 = axes('Position', [0.35 0.25 0.15 0.10]);
+        %     flow_rate(q, 0)
+        %     ylim([-2,2])
+        %     hold on 
+        %     xline(n/100,LineWidth=1)
+        %     hold off
+        %     set(gca,"FontSize",8)
+        %     ylabel("$Q\left[{\rm ml/s}\right]$",'interpreter','latex','FontSize',12)
+        %     xlabel("$t/T$",'interpreter','latex','FontSize',12)
+        %     hold off
+        % 
+        %     % Return to the previous axis after plotting in ax1
+        %     axes(prev_ax);  % Restore the previous axis
+        % 
+        %     movieVector(n) = getframe(gcf);
+        % end
+        % drawnow;
 
-                view(azimuth(k), elevation(k));
-                xlim(XL);
-                ylim(YL);
-                zlim(ZL);
-
-                set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01]);
-                xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', fs);
-                ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
-                zlabel('Z [cm]', 'Interpreter', 'latex', 'FontSize', fs);
-
-                if k > 1
-                    set(gca, 'YColor', 'none');
-                    xlabel([]);
-                end
-                grid off;
-                box off;    
-                hold off;
-                set(gca, 'Color', 'w');
-                set(gcf, 'Color', 'w');
-            % Update the title for the current frame
-            title(sprintf('$t/T = %.2f$', tt(n)), 'Interpreter', 'latex', 'FontSize', fs+4);
-    
-            % Save the current axis handle
-            prev_ax = gca; % Save the current axis before switching
-            load(fullfile(cas.dirmat, "bottom_velocity.mat"),'q');
-            
-            % Switch to ax1 and plot - to be completed
-            ax1 = axes('Position', [0.35 0.25 0.15 0.10]);
-            flow_rate(q, 0)
-            ylim([-2,2])
-            hold on 
-            xline(n/100,LineWidth=1)
-            hold off
-            set(gca,"FontSize",8)
-            ylabel("$Q\left[{\rm ml/s}\right]$",'interpreter','latex','FontSize',12)
-            xlabel("$t/T$",'interpreter','latex','FontSize',12)
-            hold off
-       
-            % Return to the previous axis after plotting in ax1
-            axes(prev_ax);  % Restore the previous axis
-            
-            movieVector(n) = getframe(gcf);
-        end
-        drawnow;
-
-        % Obtain mean z-location slices
-        for i = 1:length(dat_PC.pixel_coord)
+        % Read velocity results and organize data
+            for i = 1:length(dat_PC.pixel_coord)
             % Extract the third component (:,:,3) and compute the mean
             slice_z(i) = mean(mean(dat_PC.pixel_coord{i}(:,:,3)));
-        end
-        slice_z(end-1) = slice_z(1) - DNS.delta_h_FM;
-        slice_z(end) = max(Z(:))*10; % this is for the velocity at the top
-        DNS.locz = slice_z/10;
+            end
+            slice_z(end-1) = slice_z(1) - DNS.delta_h_FM;
+            slice_z(end) = max(Z(:))*10; % this is for the velocity at the top
+            DNS.locz = slice_z/10;
             
         % Iterate over the locations
         for k = 1:length(DNS.locz)
@@ -174,10 +173,9 @@ function animation_3D(cas, dat_PC, DNS)
     save(fullfile(cas.dirmat,'DNS.mat'),'DNS');
 
     % Save the animation as a video
-    video_filename = "3D_velocity_animation";
-    myWriter = VideoWriter(fullfile(cas.dirvid, video_filename));
-    myWriter.FrameRate = 10;
-    open(myWriter);
-    writeVideo(myWriter, movieVector);
-    close(myWriter);
-end
+    % video_filename = "3D_velocity_animation";
+    % myWriter = VideoWriter(fullfile(cas.dirvid, video_filename));
+    % myWriter.FrameRate = 10;
+    % open(myWriter);
+    % writeVideo(myWriter, movieVector);
+    % close(myWriter);

@@ -2,6 +2,7 @@ function run_simulation_TUI(dat_PC, cas, cycles, iterations_time_step, ts_cycle,
  
     fileID = fopen(cas.diransys_in+"/run_simulation_TUI.jou", 'w');
     profile_dir = ansys_path+"/"+cas.subj+"/inputs/profiles/";
+    surface_path = ansys_path+"/"+cas.subj+"/outputs/surface_mesh";
 
     fprintf(fileID,'/file/set-tui-version "24.1"\n' );
 
@@ -22,6 +23,9 @@ function run_simulation_TUI(dat_PC, cas, cycles, iterations_time_step, ts_cycle,
             if (k==1) && (n==1)
                 % hybrid initialization
                 fprintf(fileID,"/solve/initialize/hyb-initialization yes \n");
+
+                % export surface mesh
+                fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n",surface_path));
 
                 % run first iteration, with yes to continue
                 fprintf(fileID,"/solve/dual-time-iterate 1 "+iterations_time_step+" ok \n \n");

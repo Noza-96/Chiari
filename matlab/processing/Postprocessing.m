@@ -16,8 +16,8 @@ addpath('Functions/Others/')
 
 load(fullfile(cas.dirmat,"DNS.mat"),'DNS')
 %% 2. Create 3D animations with velocity results into spinal canal geometry
-animation_3D(dat_PC, cas, DNS)
-
+animation_3D(cas, dat_PC, DNS)
+load(fullfile(cas.dirmat,"DNS.mat"),'DNS')
 %% 3. Obtain integral quantities
 comparison_results(cas,dat_PC)
 
