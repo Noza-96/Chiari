@@ -1,0 +1,114 @@
+function read_ansys_reports(cas, dat_PC,DNS_case)
+    % Load DNS files
+    load(fullfile(cas.dirmat, "DNS_"+DNS_case+".mat"), 'DNS');
+
+    % load output report
+    fileID = fopen(DNS.path_out_report, 'r');
+    data = textscan(fileID, '%d %f %f %f %f', 'HeaderLines', 4);
+    fclose(fileID);
+
+    % Assign the columns to variables
+    DNS.out.ts = data{1};   % First column - Time Step
+    DNS.out.t = data{2};   % Second column - flow-time
+    DNS.out.dp = data{3};          % Third column - dp
+    DNS.out.q_bottom = data{4};    % Fourth column - q_bottom
+    DNS.out.u_max = data{5};       % Fifth column - u_max
+    
+    % Define initial cycle number
+    N0 = (DNS.cycles - 1) * DNS.ts_cycle;
+    Nloc = length(DNS.slices.locations);
+    
+    % Preallocate arrays for data storage
+    index = cell(1, Nloc); 
+    x_DNS = cell(Nloc, 1); 
+    y_DNS = cell(Nloc, 1); 
+    z_DNS = cell(Nloc, 1); 
+    u_DNS = cell(Nloc, 100); 
+    v_DNS = cell(Nloc, 100); 
+    w_DNS = cell(Nloc, 100); 
+    p_DNS = cell(Nloc, 100); 
+    u_combined = cell(Nloc, 1); 
+    v_combined = cell(Nloc, 1); 
+    w_combined = cell(Nloc, 1); 
+    p_combined = cell(Nloc, 1); 
+    slice_z = zeros(Nloc, 1);
+
+    % Calculate mean z-location slices
+    for i = 1:length(dat_PC.pixel_coord)
+        slice_z(i) = mean(mean(dat_PC.pixel_coord{i}(:,:,3)));
+    end
+
+    slice_z(end-1) = slice_z(1) - DNS.delta_h_FM;
+
+    % Load data for each time step
+    for n = 1:DNS.ts_cycle
+        N = N0 + n;
+        
+        % Define file path for velocity data
+        filePath = fullfile(cas.diransys_out, DNS.case + "_report-" + sprintf('%04d', N)); 
+        if ~exist(filePath, 'file')
+            error('File "%s" does not exist.', filePath);
+        end
+        
+        % Read data from file
+        data = read_ansys_data(filePath);
+        
+        % Initialize X, Y, Z coordinates during first iteration
+        if n == 1
+            X = data{2} * 100;
+            Y = data{3} * 100;
+            Z = data{4} * 100;
+            slice_z(end) = max(Z(:)) * 10; % Velocity at top slice
+            DNS.slices.locz = slice_z / 10; % Convert to cm
+        end
+        
+        % Velocity components
+        [U, V, W, P] = deal(data{7} * 100, data{6} * 100, data{5} * 100, data{8});
+        
+        % Loop through DNS locations and store data
+        for k = 1:length(DNS.slices.locz)
+            if n == 1
+                % Find indices where Z is within range of current location
+                index{k} = find(abs(Z - DNS.slices.locz(k)) <= 0.2); 
+                
+                % Store coordinates for current location
+                x_DNS{k} = X(index{k});
+                y_DNS{k} = Y(index{k});
+                z_DNS{k} = Z(index{k});
+            end
+
+            % Store velocity and pressure for current time step
+            u_DNS{k, n} = U(index{k});
+            v_DNS{k, n} = V(index{k});
+            w_DNS{k, n} = W(index{k});
+            p_DNS{k, n} = P(index{k});
+        end
+    end
+
+    % Combine data across time steps for each location
+    for k = 1:length(DNS.slices.locz)
+        u_combined{k} = cell2mat(u_DNS(k, :));
+        v_combined{k} = cell2mat(v_DNS(k, :));
+        w_combined{k} = cell2mat(w_DNS(k, :));
+        p_combined{k} = cell2mat(p_DNS(k, :));
+    end
+
+    % Store combined data in DNS structure
+    DNS.slices.x = x_DNS;
+    DNS.slices.y = y_DNS;
+    DNS.slices.z = z_DNS;
+    DNS.slices.u = u_combined;
+    DNS.slices.v = v_combined;
+    DNS.slices.w = w_combined;
+    DNS.slices.p = p_combined;
+
+    % Save updated DNS structure
+    save(fullfile(cas.dirmat, "DNS_"+DNS_case+".mat"), 'DNS');
+end
+
+function data = read_ansys_data(filePath)
+    % Read data from ANSYS report file
+    fileID = fopen(filePath, 'r');
+    data = textscan(fileID, '%d %f %f %f %f %f %f %f', 'HeaderLines', 1);
+    fclose(fileID);
+end

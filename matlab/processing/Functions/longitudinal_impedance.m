@@ -1,37 +1,58 @@
-%Calculate longitudinal impedance
-function longitudinal_impedance(subject)
-    % Define color schemes
-    blue = [116, 124, 187] / 255;  
+function longitudinal_impedance(cas, DNS)
+    % Calculate longitudinal impedance
+    % Inputs:
+    %   cas     - Case information including directory paths
+    %   dat_PC  - Data from pressure cycle
+    %   DNS     - Simulation results containing pressure and flow data
+
+    % Define color schemes and font sizes
     red = [241, 126, 126] / 255;
+    fs = 16;
 
-    colorm = {blue,red};
-   
-    modes = 8;
-    type = {'FLTG','FLTG-2'};
+    % Parameters
+    N_modes = 8;
+    dp = DNS.out.dp(end - DNS.ts_cycle + 1:end); % Pressure jump [Pa]
+    q = DNS.out.q_bottom(end - DNS.ts_cycle + 1:end); % Flow rate [m^3/s]
+    t = linspace(1 / DNS.ts_cycle, 1, 100); % Time vector for plotting
 
-    % Initialize variables
-    ZL = cell(1,length(type)); LI = cell(1,length(type));
-    fs=14;
-    figure
-    for k = 1:length(type)
-        load("data\"+subject+"\ansys_outputs\"+type{k}+"\flow_data.mat",'dp','Q');
-        dp = dp(end-99:end);     Q = Q(end-99:end);
-        [~, Qm, ~] = four_approx(Q*1e6, modes, 0); %Flow rate in [ml/s] - [cm3/s]
-        [~, Pm, ~] = four_approx(dp*10, modes, 0); %Pressure jumo in  rate in [dyn/cm^2]
-        ZL{k} = abs(Pm./Qm);
-        LI{k} = sum(ZL{k})*(modes-1)/(modes);
+    % Plot flow rate and pressure jump
+    figure;
+    tiledlayout(1, 2);
 
-        plot(ZL{k},'Color',colorm{k},'linewidth',1.5)
-        hold on
-    end
+    % Flow rate subplot
+    nexttile;
+    flow_rate(q * 1e6, 0); % Convert to [ml/s] and plot
+
+    % Pressure jump subplot
+    nexttile;
+    flow_rate(dp, 0);
+    ylabel("$\Delta p [{\rm Pa}]$", 'Interpreter', 'latex', 'FontSize', fs);
+    ylim([min(dp(:)), max(dp(:))]);
+
+    % Fourier analysis
+    [~, Qm, ~] = four_approx(q * 1e6, N_modes, 0, 100); % Flow rate in [ml/s]
+    [~, Pm, ~] = four_approx(dp * 10, N_modes, 0, 100); % Pressure jump in [dyn/cm^2]
+
+    % Calculate longitudinal impedance
+    DNS.ZL = abs(Pm ./ Qm); % Impedance [dyn-s/cm^5]
+    DNS.LI = sum(DNS.ZL) * (N_modes - 1) / N_modes; % Longitudinal impedance
+
+    % Plot impedance
+    figure;
+    plot(DNS.ZL, 'Color', red, 'LineWidth', 1.5);
+    hold on;
+
+    % Customize plot appearance
     set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', 10);
-    xlabel ("$f\left[{\rm Hz}\right]$",'Interpreter','latex',FontSize=fs)
-    ylabel ("$Z_L\left[{\rm dyn-s}/{\rm cm}^5\right]$",'Interpreter','latex',FontSize=fs)
-    legend(type,'interpreter','latex',FontSize=fs)
-    xlim([1,8])
-    ylim([0,100])
+    xlabel("$f\left[{\rm Hz}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
+    ylabel("$Z_L\left[{\rm dyn-s}/{\rm cm}^5\right]$", 'Interpreter', 'latex', 'FontSize', fs);
+    xlim([1, 8]);
+    ylim([0, 100]);
 
-    saveas(gcf, fullfile("Figures", subject,"post","Longitudinal_impedance"), 'png');
-    save("data/"+subject+"/Longitudinal_impedance.mat",'ZL','LI');
-    disp('4. Longitudinal impedances calculated!')
+    % Save results
+    saveas(gcf, fullfile(cas.dirfig, "Longitudinal_impedance"), 'png');
+    save(fullfile(cas.dirmat, "DNS_" + DNS.case + ".mat"), 'DNS');
+
+    % Display completion message
+    disp('Longitudinal impedance calculated...');
 end
