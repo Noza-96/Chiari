@@ -5,8 +5,8 @@ commonPath = fullfile(cas.dirdat, cas.subj, cas.anal, cas.sess);
 cas.dirdcm = fullfile(commonPath, 'dcm');
 cas.dirmat = fullfile(commonPath, 'mat');
 cas.dirflm = fullfile(commonPath, 'flm');
-cas.dirvid = cas.dirflm;
-cas.dirfig = cas.dirflm;
+cas.dirvid = fullfile(cas.dircloud, 'videos', cas.subj);
+cas.dirfig = fullfile(cas.dircloud, 'figures', cas.subj);
 
 cas.diransys = fullfile(cas.dircloud, 'ansys', cas.subj);
 cas.diransys_out = fullfile(cas.diransys, 'outputs');

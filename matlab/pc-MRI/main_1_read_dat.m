@@ -1,8 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all;
 
-cas.subj = 's1';
+cas.subj = 's101';
 cas.sess = 'before';
+cas.model = 'SIEMENS'; %GE (Utah) or SIEMENS (Granada)
 
 cas.dircloud = '../../../computations'; % (do not include ending "/" in cas.dirdat)
 
@@ -13,8 +14,6 @@ cas.dir_fullpath_ansys = "C:/Users/guill/Documents/chiari/computations/ansys"; %
 cas.anal = 'flow';
 
 resettimevector = false;
-
-% addpath(fun)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
