@@ -37,6 +37,7 @@ MRI_locations(dat_PC, cas);
 Q0_ansys(dat_PC, cas, 30, DNS.ts_cycle);
 
 %% 4. Create CSV files with velocity field information for top and bottom locations
+%TO-DO save all data in struct dat_PC.velocity.(x,y,z,u,n,q)
 velocity_profiles (dat_PC, cas, DNS.ts_cycle);
 
 %% 5. TUIs to be loaded in ANSYS

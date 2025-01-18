@@ -65,7 +65,6 @@ function animation_3D(cas, dat_PC, DNS)
                 box off;    
                 hold off;
                 set(gca, 'Color', 'w');
-                set(gcf, 'Color', 'w');
             % Update the title for the current frame
             title(sprintf('$t/T = %.2f$', tt(n)), 'Interpreter', 'latex', 'FontSize', fs+4);
     

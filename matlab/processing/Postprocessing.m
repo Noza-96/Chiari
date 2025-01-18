@@ -24,8 +24,7 @@ animation_3D(cas, dat_PC, DNS)
 longitudinal_impedance(cas, DNS)
 
 %% 4. Comparison PC-MRI with Ansys solution -- Animation
-comparison_results(cas,dat_PC)
-
+comparison_results(dat_PC,DNS)
 
 
 %% Create animations ANSYS simulations - uniform velocity field

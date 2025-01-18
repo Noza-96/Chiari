@@ -1,18 +1,6 @@
 function read_ansys_reports(cas, dat_PC,DNS_case)
     % Load DNS files
     load(fullfile(cas.dirmat, "DNS_"+DNS_case+".mat"), 'DNS');
-
-    % load output report
-    fileID = fopen(DNS.path_out_report, 'r');
-    data = textscan(fileID, '%d %f %f %f %f', 'HeaderLines', 4);
-    fclose(fileID);
-
-    % Assign the columns to variables
-    DNS.out.ts = data{1};   % First column - Time Step
-    DNS.out.t = data{2};   % Second column - flow-time
-    DNS.out.dp = data{3};          % Third column - dp
-    DNS.out.q_bottom = data{4};    % Fourth column - q_bottom
-    DNS.out.u_max = data{5};       % Fifth column - u_max
     
     % Define initial cycle number
     N0 = (DNS.cycles - 1) * DNS.ts_cycle;
@@ -101,6 +89,21 @@ function read_ansys_reports(cas, dat_PC,DNS_case)
     DNS.slices.v = v_combined;
     DNS.slices.w = w_combined;
     DNS.slices.p = p_combined;
+
+    % Save updated DNS structure
+    save(fullfile(cas.dirmat, "DNS_"+DNS_case+".mat"), 'DNS');
+
+    %% load output report
+    fileID = fopen(DNS.path_out_report, 'r');
+    data = textscan(fileID, '%d %f %f %f %f', 'HeaderLines', 4);
+    fclose(fileID);
+
+    % Assign the columns to variables
+    DNS.out.ts = data{1};   % First column - Time Step
+    DNS.out.t = data{2};   % Second column - flow-time
+    DNS.out.dp = data{3};          % Third column - dp
+    DNS.out.q_bottom = data{4};    % Fourth column - q_bottom
+    DNS.out.u_max = data{5};       % Fifth column - u_max
 
     % Save updated DNS structure
     save(fullfile(cas.dirmat, "DNS_"+DNS_case+".mat"), 'DNS');

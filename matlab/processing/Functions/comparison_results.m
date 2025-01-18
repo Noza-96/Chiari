@@ -1,8 +1,5 @@
-function comparison_results(subject,cas,dat_PC)
+function comparison_results(dat_PC,DNS)
     disp('3. Animation comparing ansys velocity results with PC-MRI measurements:')
-
-    % Open the file
-    load("data\"+subject+"\ansys_outputs\DNS.mat",'DNS');
     figure
     tit=tiledlayout(5,3,"TileSpacing","tight","Padding","loose");
     set(gcf,'pos',[100,000,1000,1000])
@@ -11,9 +8,8 @@ function comparison_results(subject,cas,dat_PC)
         % We do it for each PC-MRI measurement
         create_animation_MRI(dat_PC,n)
         % We do it for Uniform simulation
-        create_animation_ansys(DNS.Uniform,n,0)
+        create_animation_ansys(DNS.slices,n,dat_PC.Ndat,0)
         % We do it for Variable simulation
-        create_animation_ansys(DNS.Variable,n,1)
         title(tit,sprintf('$t/T = %.2f$ ', n/100),'interpreter','latex',fontsize=20);    
         movieVector(n) = getframe(gcf);
         drawnow;
@@ -59,11 +55,11 @@ function create_animation_MRI(dat_PC,n)
     end
 end
 
-function create_animation_ansys(data,n,index)
+function create_animation_ansys(data,n,Ndat,index)
 fs = 12;
-    for loc = 1:length(data)
-        x = data(loc).x;
-        y = data(loc).y;
+    for loc = 1:Ndat
+        x = data.x{loc};
+        y = data.y{loc};
         % Define the grid points for interpolation (you can adjust the resolution of the grid)
         xq = linspace(min(x), max(x), 1000); % 1000 points in x-direction
         yq = linspace(min(y), max(y), 1000); % 1000 points in y-direction
@@ -71,7 +67,7 @@ fs = 12;
         % Create a meshgrid from these points
         [Xq, Yq] = meshgrid(xq, yq);
 
-        w = data(loc).w;
+        w = data.w{loc};
         % Interpolate w onto the grid using scattered data
         Zq = griddata(x, y, w(:,n), Xq, Yq, 'cubic');
         
