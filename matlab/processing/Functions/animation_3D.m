@@ -26,12 +26,12 @@ function animation_3D(cas, dat_PC, DNS)
     ZL = [min(Z_mesh(:)) - 0.5, max(Z_mesh(:)) + 0.5];
     
     % load the variables from the slices and concatenate them
-    x = vertcat(DNS.slices.x{1:dat_PC.Ndat});
-    y = vertcat(DNS.slices.y{1:dat_PC.Ndat});
-    z = vertcat(DNS.slices.z{1:dat_PC.Ndat});
-    u = vertcat(DNS.slices.u{1:dat_PC.Ndat});
-    v = vertcat(DNS.slices.v{1:dat_PC.Ndat});
-    w = vertcat(DNS.slices.w{1:dat_PC.Ndat});
+    x = vertcat(DNS.slices.x{1:dat_PC.Ndat}) * 100;
+    y = vertcat(DNS.slices.y{1:dat_PC.Ndat}) * 100;
+    z = vertcat(DNS.slices.z{1:dat_PC.Ndat}) * 100;
+    u = vertcat(DNS.slices.u{1:dat_PC.Ndat}) * 100;
+    v = vertcat(DNS.slices.v{1:dat_PC.Ndat}) * 100;
+    w = vertcat(DNS.slices.w{1:dat_PC.Ndat}) * 100;
 
     figure;
     tiledlayout(1, length(azimuth), "Padding", "loose", "TileSpacing", "loose");

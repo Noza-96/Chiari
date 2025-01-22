@@ -40,7 +40,7 @@ function reports_journal_TUI(cas, DNS)
     
     % Join fields and locations into a single string
     fields_str = strjoin(DNS.fields, ' '); % Concatenate fields with space delimiter
-    locations_str = strjoin(DNS.locations, ' '); % Concatenate locations with space delimiter
+    locations_str = strjoin(DNS.slices.locations, ' '); % Concatenate locations with space delimiter
     
     % Build the string using sprintf
     TUI_sstt = sprintf('/file/transient-export/ascii "%s" %s () %s q %s %s %s "%s" %d time-step \n', ...

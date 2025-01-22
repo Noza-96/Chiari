@@ -14,9 +14,10 @@ case_report = "c1";
 load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
 
 % read ansys reports and save solution in .mat file
-read_ansys_reports(cas, dat_PC, "c1")
+read_ansys_reports(cas, dat_PC, case_report) % last number is in case output is not available
 
 load(fullfile(cas.dirmat, "DNS_"+case_report+".mat"), 'DNS');
+load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
 %% 2. Create 3D animations with velocity results into spinal canal geometry
 animation_3D(cas, dat_PC, DNS)
 
@@ -24,8 +25,7 @@ animation_3D(cas, dat_PC, DNS)
 longitudinal_impedance(cas, DNS)
 
 %% 4. Comparison PC-MRI with Ansys solution -- Animation
-comparison_results(dat_PC,DNS)
-
+comparison_results(cas, pcmri, DNS.slices)
 
 %% Create animations ANSYS simulations - uniform velocity field
 
