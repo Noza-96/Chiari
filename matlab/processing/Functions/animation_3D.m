@@ -94,7 +94,7 @@ function animation_3D(cas, dat_PC, DNS)
     end
 
     % Save the animation as a video
-    video_filename = "3D_velocity_animation";
+    video_filename = "3D_velocity_animation_"+DNS.case;
     myWriter = VideoWriter(fullfile(cas.dirvid, video_filename));
     myWriter.FrameRate = 10;
     open(myWriter);

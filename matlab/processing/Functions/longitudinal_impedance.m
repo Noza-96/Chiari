@@ -50,7 +50,7 @@ function longitudinal_impedance(cas, DNS)
     ylim([0, 100]);
 
     % Save results
-    saveas(gcf, fullfile(cas.dirfig, "Longitudinal_impedance"), 'png');
+    saveas(gcf, fullfile(cas.dirfig, "Longitudinal_impedance_"+DNS.case), 'png');
     save(fullfile(cas.dirmat, "DNS_" + DNS.case + ".mat"), 'DNS');
 
     % Display completion message

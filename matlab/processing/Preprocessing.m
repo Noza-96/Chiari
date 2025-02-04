@@ -4,13 +4,15 @@ clear; close all;
 % Choose subject
 subject = "s101";
 session = 'before';
-DNS.case = "c2";
+DNS.case = "c2"; %c1 for zero pressure, c2 for two inlets
 
 % Define MRI data path
 load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
 
 % full ansys folder path
 DNS.ansys_path = "C:/Users/guill/Documents/chiari/computations/ansys";
+
+DNS.TUI_path = fullfile(cas.diransys_in, DNS.case);
 
 % ansys working folder
 DNS.path_out_report = fullfile(cas.diransys, cas.subj+"_files", "dp0", "FLTG", "Fluent", DNS.case+"_variables.out");
@@ -19,6 +21,7 @@ DNS.path_out_report = fullfile(cas.diransys, cas.subj+"_files", "dp0", "FLTG", "
 DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
 DNS.slices.locations = [cas.locations(1:end-1), "bottom", "FM-25", "top"]';
 % DNS.locz = [dat_PC.locz{1:end}, dat_PC.locz{1}+2.5, NaN];
+DNS.mesh_size = 0.0005;
 DNS.cycles = 3;
 DNS.delta_h_FM = 25;
 DNS.iterations_ts = 20;
@@ -40,14 +43,26 @@ Q0_ansys(dat_PC, cas, 30, DNS.ts_cycle);
 velocity_profiles (dat_PC, cas, DNS.ts_cycle);
 
 %% 5. TUIs to be loaded in ANSYS
+if ~isfolder(DNS.TUI_path)
+    mkdir(DNS.TUI_path);
+end
 
 % TODO: create TUI to setup simulation 
 
+%
+create_mesh_journal(dat_PC, cas, DNS)
+
 % Create pcmri surfaces in ansys and surface
-create_surfaces_journal_TUI(dat_PC, cas);
+create_surfaces_journal_TUI(dat_PC, cas, DNS.TUI_path);
 
 % Reports
 reports_journal_TUI(cas, DNS)
 
-% Script to run simulation
-run_simulation_TUI(dat_PC, cas, DNS.cycles, DNS.iterations_ts, DNS.ts_cycle, DNS.ansys_path)
+if contains(DNS.case, 'c1')
+    % Script to run simulation
+    zero_pressure_simulation_TUI(dat_PC, cas, DNS.cycles, DNS.iterations_ts, DNS.ts_cycle, DNS.ansys_path, DNS.TUI_path)
+elseif contains(DNS.case, 'c2')
+    two_inlets_simulation_TUI(dat_PC, cas, DNS.cycles, DNS.iterations_ts, DNS.ts_cycle, DNS.ansys_path, DNS.TUI_path)
+else
+error('DNS case should start with "c1" or "c2"...');
+end

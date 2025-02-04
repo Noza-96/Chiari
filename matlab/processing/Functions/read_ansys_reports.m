@@ -137,7 +137,7 @@ function read_ansys_reports(cas, dat_PC,DNS_case)
     % Save updated DNS structure
     save(fullfile(cas.dirmat, "DNS_"+DNS_case+".mat"), 'DNS');
 
-    %% load output report
+%% load output report
 % Check if the file exists
 if exist(DNS.path_out_report, 'file') == 2 % 'file' ensures it checks for files only
     % Open and read the file
