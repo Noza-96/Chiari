@@ -3,7 +3,7 @@ clear; close all;
 
 cas.subj = 's101';
 cas.sess = 'before';
-cas.model = 'SIEMENS'; %GE (Utah) or SIEMENS (Granada)
+cas.model = 'SIEMENS'; % GE (Utah) or SIEMENS (Granada)
 
 cas.dircloud = '../../../computations'; % (do not include ending "/" in cas.dirdat)
 
