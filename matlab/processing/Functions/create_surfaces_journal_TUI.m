@@ -9,11 +9,10 @@ function create_surfaces_journal_TUI(dat_PC, cas, TUI_path)
     % Create slices of PC measurements
     for loc = 1:(N-1) %skip FM and last location
         XYZ = three_point_plane(dat_PC, loc);
+        create_plane (fileID,XYZ,cas.locations{loc})
         if loc == 1
             XYZ(:,3) = XYZ(:,3) - 0.025; % create plane 25mm lower FM
             create_plane (fileID,XYZ,"FM-25")
-        else
-        create_plane (fileID,XYZ,cas.locations{loc})
         end
     end
 
@@ -29,11 +28,11 @@ end
 
 
 function create_plane (fileID, XYZ, sstt)
-    fprintf(fileID,"/surface/plane-surface "+sstt+" three-points");
+    fprintf(fileID,"/surface/plane-surface "+sstt+" three-points ");
     % Loop through the points (1 to 3) and print their XYZ coordinates
     for point = 1:3
         % Print each coordinate, multiplied by 1e3 (in one line)
-        fprintf(fileID, '%f %f %f ', XYZ(point, 1) * 1e3, XYZ(point, 2) * 1e3, XYZ(point, 3) * 1e3);
+        fprintf(fileID, '%f %f %f ', XYZ(point, 1), XYZ(point, 2), XYZ(point, 3)); % [m]
     end
     fprintf(fileID,"no\n");
 end

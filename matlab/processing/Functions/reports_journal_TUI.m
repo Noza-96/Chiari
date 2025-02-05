@@ -18,13 +18,14 @@ function reports_journal_TUI(cas, DNS)
         % flow rate bottom
         fprintf(fileID,'/solve/report-definitions/add q_bottom surface-volumeflowrate surface-names bottom () q \n' );
         fprintf(fileID,'/solve/report-definitions/add q_top surface-volumeflowrate surface-names top () q \n' );
+        fprintf(fileID,'/solve/report-definitions/add q_cord surface-volumeflowrate surface-names cord () q \n' );
         % Create expression
         expression =  "Average(StaticPressure,['fm'], Weight ='Area') - Average(StaticPressure,['fm-25'], Weight ='Area')";
         TUI_sstt = sprintf('/solve/report-definitions/add dp single-val-expression define "%s" q \n', expression);
         fprintf(fileID,TUI_sstt);
 
     % report files
-    variables = {'flow-time', 'dp','q_bottom', 'q_top', 'u_max'};
+    variables = {'flow-time', 'dp','q_bottom', 'q_top', 'q_cord', 'u_max'};
     report_file (fileID, variables, DNS.case, 1);
 
     %% Save verlocity and pressure at specific locations every time-step
