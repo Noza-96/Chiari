@@ -72,7 +72,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
 
         %% ANSYS profiles
         if any(loc_ID == ii)
-            index = find(loc_ID == 4);
+            index = find(loc_ID == ii);
             % Open the file for writing
             filename = cas.diransys_in + "/"+sstt{index}+"_plane.txt";
             fileID = fopen(filename, 'w');
@@ -100,9 +100,15 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
     
             data(8, 1) = {strcat(sstt{index}, "_vel")};
     
+            if sstt{index} == "top"
+                normal_v = -uu;
+            elseif sstt{index} == "bottom"
+                normal_v = uu;
+            end
+
             for n=1:ts_cycle
                 % Read the CSV file as a cell array to handle mixed types
-                data(row + (1:n_data), 4) = num2cell(uu(:, n)); % Update column 3       
+                data(row + (1:n_data), 4) = num2cell(normal_v(:, n));       
     
                 % Convert the cell array to a table
                 dataTable = cell2table(data);

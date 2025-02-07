@@ -142,7 +142,7 @@ function read_ansys_reports(cas, dat_PC,DNS_case)
 if exist(DNS.path_out_report, 'file') == 2 % 'file' ensures it checks for files only
     % Open and read the file
     fileID = fopen(DNS.path_out_report, 'r');
-    data = textscan(fileID, '%d %f %f %f %f', 'HeaderLines', 4);
+    data = textscan(fileID, '%d %f %f %f %f %f %f', 'HeaderLines', 4);
     fclose(fileID);
 
     % Assign the columns to variables
@@ -150,8 +150,10 @@ if exist(DNS.path_out_report, 'file') == 2 % 'file' ensures it checks for files 
     DNS.out.t = data{2};         % Second column - flow-time
     DNS.out.dp = data{3};        % Third column - dp
     DNS.out.q_bottom = data{4};  % Fourth column - q_bottom
-    DNS.out.u_max = data{5};     % Fifth column - u_max
-
+    DNS.out.q_top = data{5};  
+    DNS.out.q_cord = data{6}; 
+    DNS.out.u_max = data{7};  
+    
     % Save updated DNS structure
     save(fullfile(cas.dirmat, "DNS_" + DNS_case + ".mat"), 'DNS');
 else
