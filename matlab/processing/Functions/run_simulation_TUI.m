@@ -1,10 +1,14 @@
-function run_simulation_TUI(dat_PC, cas, DNS)
+function run_simulation_TUI(dat_PC, cas, DNS, fileID)
 
-    fileID = fopen(DNS.TUI_path+"/run_simulation_TUI.jou", 'w');
+    if nargin < 4
+        fileID = fopen(DNS.TUI_path+"/run_simulation_TUI.jou", 'w');
+        fprintf(fileID,'/file/set-tui-version "24.1"\n' );
+    end
+
+    fprintf(fileID,';run simulation \n' );
+
     profile_dir = DNS.ansys_path+"/"+cas.subj+"/inputs/profiles/";
     surface_path = DNS.ansys_path+"/"+cas.subj+"/outputs/surface_mesh";
-
-    fprintf(fileID,'/file/set-tui-version "24.1"\n' );
 
     % set time-step
     time_step = dat_PC.T{end}/DNS.ts_cycle;
@@ -32,16 +36,17 @@ function run_simulation_TUI(dat_PC, cas, DNS)
                 fprintf(fileID,"/solve/initialize/hyb-initialization yes \n");
 
                 % export surface mesh
-                fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n",surface_path));
+                fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n", surface_path));
 
                 % run first iteration, with yes to continue
                 fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok \n \n");
             else
                 % next iterations
-                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" 1 ok ok \n \n");
+                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n \n");
             end
         end
     end
 
     fclose(fileID);
+
 end

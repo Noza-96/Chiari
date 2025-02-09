@@ -1,7 +1,21 @@
 %Create-planes journal
-function setup_case_TUI(DNS)
+function setup_case_TUI(DNS, fileID)
 
-    fileID = fopen(fullfile(DNS.TUI_path,"setup_case_TUI.jou"), 'w');
+    if nargin < 2
+        fileID = fopen(fullfile(DNS.TUI_path,"setup_case_TUI.jou"), 'w');
+    end
+    fprintf(fileID,'/file/set-tui-version "24.1"\n' );
+
+    fprintf(fileID,';setup case \n' );
+
+    % read case
+    case_path = DNS.ansys_path +"/" + DNS.subject +"/inputs/"+ DNS.case + "_0.cas.gz";
+
+    fprintf(fileID,"/file read-case "+case_path+"\n" );
+
+    % setup viscous laminar model
+    fprintf(fileID,"/define/models/viscous laminar yes\n" );
+
 
     named_expression (fileID, "rho", "1000 [kg/m^3]")
     named_expression (fileID, "mu", "0.0007 [kg/(m*s)]")
@@ -17,6 +31,10 @@ function setup_case_TUI(DNS)
     if contains(DNS.case,"c2") 
         named_expression (fileID, "v_cord", "-(MassFlow(['top'])+MassFlow(['bottom']))/(rho*Area(['cord']))")
         fprintf(fileID,'/define/boundary-conditions/velocity-inlet cord no no yes yes no "v_cord" no 0  q \n');
+    end
+
+    if nargin < 2
+        fclose(fileID);
     end
 
 end

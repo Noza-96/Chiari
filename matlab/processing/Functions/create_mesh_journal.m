@@ -1,6 +1,5 @@
 function create_mesh_journal(cas, DNS_cases)
 
-DNS_cases = reshape(DNS_cases.', 1, []); %reshape into a single row
 
 fileID = fopen(cas.diransys_in+"/create_mesh.jou", 'w');
 
@@ -18,7 +17,10 @@ for ii = 1:length(DNS_cases)
 
     if ii == 1
         fprintf(fileID,'/file/set-tui-version "24.1"\n' );
+    else
+        fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Import Geometry'].Revert()"") \n" );
     end
+
 
     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Import Geometry'].Arguments.set_state({r'FileName': r'"+strrep(filename, '/', '\\')+"',r'ImportCadPreferences': {r'MaxFacetLength': 0,},r'LengthUnit': r'm',})"") \n");
     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Import Geometry'].Execute()"")\n" );
@@ -68,8 +70,7 @@ for ii = 1:length(DNS_cases)
     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Improve Volume Mesh'].Arguments.set_state({r'CellQualityLimit': 0.3,r'QualityMethod': r'Orthogonal',r'VMImprovePreferences': {r'ShowVMImprovePreferences': False,r'VIQualityIterations': 5,r'VIQualityMinAngle': 0,r'VIgnoreFeature': r'yes',},})"")\n" );
     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Improve Volume Mesh'].Execute()"")\n" );
     fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*ExportSubMenu*Case..."") \n" );
-    fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+DNS.ansys_path+"/"+cas.subj+"/"+case_name+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n" );
-    fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Import Geometry'].Revert()"") \n\n" );
+    fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+DNS.ansys_path+"/"+cas.subj+"/inputs/"+case_name+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n\n" );
 
     % fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*WriteSubMenu*Stop Journal"")\n" );
 end

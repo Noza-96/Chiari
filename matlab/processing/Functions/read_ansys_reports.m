@@ -36,7 +36,7 @@ function read_ansys_reports(cas, dat_PC,DNS_case)
         N = N0 + n;
         
         % Define file path for velocity data
-        filePath = fullfile(cas.diransys_out, DNS.case + "_report-" + sprintf('%04d', N)); 
+        filePath = fullfile(cas.diransys_out, DNS.case, DNS.case + "_report-" + sprintf('%04d', N)); 
         if ~exist(filePath, 'file')
             error('File "%s" does not exist.', filePath);
         end

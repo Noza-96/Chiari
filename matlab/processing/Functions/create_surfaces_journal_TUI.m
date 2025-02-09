@@ -1,10 +1,14 @@
 %Create-planes journal
-function create_surfaces_journal_TUI(dat_PC, cas, TUI_path)
+function create_surfaces_journal_TUI(dat_PC, cas, DNS, fileID)
+
+    if nargin < 4
+        fileID = fopen(fullfile(DNS.TUI_path,"create_surfaces_journal_TUI.jou"), 'w');
+        fprintf(fileID,'/file/set-tui-version "24.1"\n' );
+    end
+    
+    fprintf(fileID,';create surfaces\n' );
 
     N = dat_PC.Ndat;
-    fileID = fopen(fullfile(TUI_path,"create_surfaces_journal_TUI.jou"), 'w');
-    
-    fprintf(fileID,'/file/set-tui-version "24.1"\n' );
     
     % Create slices of PC measurements
     for loc = 1:(N-1) %skip FM and last location
@@ -23,7 +27,9 @@ function create_surfaces_journal_TUI(dat_PC, cas, TUI_path)
     end
     fprintf(fileID,sprintf('/surface/group-surfaces %s () wall  q \n', strjoin(append(zone_names,'_s'),' ')));
 
-    fclose(fileID);
+    if nargin < 4
+        fclose(fileID);
+    end
 end
 
 

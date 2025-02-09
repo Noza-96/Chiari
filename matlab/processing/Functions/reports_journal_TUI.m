@@ -1,6 +1,11 @@
-function reports_journal_TUI(cas, DNS)
-    fileID = fopen(DNS.TUI_path+"/reports_journal_TUI.jou", 'w');
-    fprintf(fileID,'/file/set-tui-version "24.1"\n' );
+function reports_journal_TUI(cas, DNS, fileID)
+
+    if nargin < 3
+        fileID = fopen(DNS.TUI_path+"/reports_journal_TUI.jou", 'w');
+        fprintf(fileID,'/file/set-tui-version "24.1"\n' );
+    end
+
+    fprintf(fileID,';reports \n' );
 
     % create dummy files
         fprintf(fileID,'/solve/report-definitions/add pilot volume-max field velocity-magnitude zone-names fluid () q \n' );
@@ -31,7 +36,12 @@ function reports_journal_TUI(cas, DNS)
     %% Save verlocity and pressure at specific locations every time-step
     report_name = DNS.case + '_report';
 
-    directory = DNS.ansys_path+"/"+cas.subj+"/outputs/"+report_name;
+    folder = DNS.ansys_path+"/"+cas.subj+"/outputs/"+DNS.case;
+    directory = folder + "/" + report_name;
+
+    if ~exist(folder, 'dir')
+        mkdir(folder);
+    end
 
     fprintf(fileID,'/file/set-tui-version "24.1"\n' );
 
@@ -50,14 +60,15 @@ function reports_journal_TUI(cas, DNS)
 
     fprintf(fileID,TUI_sstt);
 
-    fclose(fileID);
-
+    if nargin < 3
+        fclose(fileID);
+    end
     
 end
 
 function report_file (fileID, variables, report_case, freq)
 
-    TUI_sstt = sprintf('/solve/report-files/add %s_variables frequency %d name "%s_variables" report-defs %s () q \n', ...
+    TUI_sstt = sprintf('/solve/report-files/add %s_variables frequency %d name "%s_variables" report-defs %s () print? yes q \n', ...
          report_case, freq, report_case, strjoin(variables, ' '));
 
     fprintf(fileID,TUI_sstt);
