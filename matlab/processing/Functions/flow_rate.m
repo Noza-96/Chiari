@@ -3,6 +3,9 @@ function flow_rate(Q, n)
     if Q(1) ~= Q(end)
         Q = [Q(:);Q(1)]';
     end
+    if nargin == 1
+        n=0;
+    end
     % Define color schemes
     blue = [116, 124, 187] / 255;  
     red = [241, 126, 126] / 255;
@@ -23,11 +26,7 @@ function flow_rate(Q, n)
 
     % Highlight the specific point if n is greater than 0
     if n > 0
-        plot(t(n+1), Q(n+1), 'o', ...
-            'MarkerFaceColor', [0.7, 0.7, 0.7], ...
-            'MarkerEdgeColor', 'k', ...
-            'MarkerSize', 8, ...
-            'LineWidth', 1);
+        xline(t(n+1), 'LineWidth', 1);
     end
 
     % Plot a horizontal line at y=0
@@ -35,7 +34,7 @@ function flow_rate(Q, n)
     
     % Add labels if needed (optional)
     xlabel('$t/T$', 'Interpreter', 'latex', 'FontSize', fs);
-    ylabel('$Q\left[{\rm ml/s}\right]$', 'Interpreter', 'latex', 'FontSize', fs);
+    % ylabel('$Q\left[{\rm ml/s}\right]$', 'Interpreter', 'latex', 'FontSize', fs);
     ylim([-ceil(max(abs(Q))),ceil(max(abs(Q)))])
     hold off
 end

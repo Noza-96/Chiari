@@ -1,5 +1,5 @@
 %Create-planes journal
-function setup_case_TUI(DNS, fileID)
+function setup_Fluent_case_TUI(DNS, fileID)
 
     if nargin < 2
         fileID = fopen(fullfile(DNS.TUI_path,"setup_case_TUI.jou"), 'w');

@@ -36,7 +36,7 @@ function read_ansys_reports(cas, dat_PC,DNS_case)
         N = N0 + n;
         
         % Define file path for velocity data
-        filePath = fullfile(cas.diransys_out, DNS.case, DNS.case + "_report-" + sprintf('%04d', N)); 
+        filePath = fullfile(DNS.path_out_report, DNS.case + "_report-" + sprintf('%04d', N)); 
         if ~exist(filePath, 'file')
             error('File "%s" does not exist.', filePath);
         end
@@ -139,9 +139,9 @@ function read_ansys_reports(cas, dat_PC,DNS_case)
 
 %% load output report
 % Check if the file exists
-if exist(DNS.path_out_report, 'file') == 2 % 'file' ensures it checks for files only
+if exist(fullfile(DNS.path_out_report, DNS.case + "_report.out"), 'file') == 2 % 'file' ensures it checks for files only
     % Open and read the file
-    fileID = fopen(DNS.path_out_report, 'r');
+    fileID = fopen(fullfile(DNS.path_out_report, DNS.case + "_report.out"), 'r');
     data = textscan(fileID, '%d %f %f %f %f %f %f', 'HeaderLines', 4);
     fclose(fileID);
 

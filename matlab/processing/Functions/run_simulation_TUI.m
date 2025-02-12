@@ -39,14 +39,16 @@ function run_simulation_TUI(dat_PC, cas, DNS, fileID)
                 fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n", surface_path));
 
                 % run first iteration, with yes to continue
-                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok \n \n");
+                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
             else
-                % next iterations
-                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n \n");
+                % next iterationsss
+                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
             end
         end
     end
 
+    % close fluent in the terminal
+	fprintf(fileID,"exit ok \n");
     fclose(fileID);
 
 end

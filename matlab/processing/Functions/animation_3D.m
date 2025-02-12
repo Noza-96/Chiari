@@ -1,14 +1,12 @@
 function animation_3D(cas, dat_PC, DNS)
 
     % 3D Animation for Velocity Output
-
-    N0 = (DNS.cycles-1) * DNS.ts_cycle;
-    tt = linspace(0, 1, DNS.ts_cycle);
     
     % animation settings
-    azimuth = [-45, 0];
-    elevation = [10, 5];
-    opacity_val = 0.2;
+    azimuth = -45;
+    % azimuth = [-45, 0];
+    elevation = [10];
+    opacity_val = 0.1;
     fs = 10; % fontsize
     sc = 5; % Scale factor for velocity vectors
 
@@ -33,71 +31,56 @@ function animation_3D(cas, dat_PC, DNS)
     v = vertcat(DNS.slices.v{1:dat_PC.Ndat}) * 100;
     w = vertcat(DNS.slices.w{1:dat_PC.Ndat}) * 100;
 
+    load(fullfile(cas.dirmat, "bottom_velocity.mat"),'q');
+
     figure;
-    tiledlayout(1, length(azimuth), "Padding", "loose", "TileSpacing", "loose");
-    set(gcf, 'Position', [200, 100, 800, 800]);
-        
+    set(gcf, 'Position', [200, 100, 400, 800], 'Color', 'w');
+    % Main plot (3D quiver)
+    main_axis = axes; % Define main axis before the loop
+
+    % Create ax1 (inset) only once
+    ax1 = axes('Position', [0.25 0.25 0.2 0.08], 'Box', 'on', 'Color', 'w');
+    flow_rate(q, 0);
+    ylim([-2,2]);
+    ylabel("$Q\left[{\rm ml/s}\right]$", 'interpreter', 'latex', 'FontSize', fs);
+    xlabel("$t/T$", 'interpreter', 'latex', 'FontSize', fs);
+
     for n = 1:DNS.ts_cycle
-        % Plot the velocity data from different views
-        
-            for k = 1:length(azimuth)
-                nexttile(k);
-                quiver3(x, y, z, u(:,n), v(:,n), w(:,n), sc);
-                hold on;
-                scatter3(X_mesh, Y_mesh, Z_mesh, 1, 'filled');
-                alpha(opacity_val);
-
-                view(azimuth(k), elevation(k));
-                xlim(XL);
-                ylim(YL);
-                zlim(ZL);
-
-                set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01]);
-                xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', fs);
-                ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
-                zlabel('Z [cm]', 'Interpreter', 'latex', 'FontSize', fs);
-
-                if k > 1
-                    set(gca, 'YColor', 'none');
-                    xlabel([]);
-                end
-                grid off;
-                box off;    
-                hold off;
-                set(gca, 'Color', 'w');
-            % Update the title for the current frame
-            title(sprintf('$t/T = %.2f$', tt(n)), 'Interpreter', 'latex', 'FontSize', fs+4);
+        axes(main_axis); 
+        quiver3(x, y, z, u(:,n), v(:,n), w(:,n), sc);
+        hold on;
+        scatter3(X_mesh, Y_mesh, Z_mesh, 1, 'filled');
+        alpha(opacity_val);
+        set(gca,'LineWidth', 1, 'TickLength', [0.01 0.01]);
+        xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+        ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+        zlabel('Z [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+        xlim(XL); ylim(YL); zlim(ZL);
+        view(azimuth,elevation)
+        grid off; box off; 
+        hold off;
     
-            % Save the current axis handle
-            prev_ax = gca; % Save the current axis before switching
-            load(fullfile(cas.dirmat, "bottom_velocity.mat"),'q');
-            
-            % Switch to ax1 and plot - to be completed
-            ax1 = axes('Position', [0.35 0.25 0.15 0.10]);
-            flow_rate(q, 0)
-            ylim([-2,2])
-            hold on 
-            xline(n/100,LineWidth=1)
-            hold off
-            set(gca,"FontSize",8)
-            ylabel("$Q\left[{\rm ml/s}\right]$",'interpreter','latex','FontSize',12)
-            xlabel("$t/T$",'interpreter','latex','FontSize',12)
-            hold off
-       
-            % Return to the previous axis after plotting in ax1
-            axes(prev_ax);  % Restore the previous axis
-            
-            movieVector(n) = getframe(gcf);
-        end
-        drawnow;
-         
+        % Switch to ax1 and update the flow plot
+        axes(ax1);
+        h = xline(n/DNS.ts_cycle, 'k', 'LineWidth', 1); % time
+    
+        movieVector(n) = getframe(gcf);
+        drawnow;  
+
+        delete(h); % Remove the previous xline
+        % Return to main axis
     end
 
     % Save the animation as a video
-    video_filename = "3D_velocity_animation_"+DNS.case;
-    myWriter = VideoWriter(fullfile(cas.dirvid, video_filename));
-    myWriter.FrameRate = 10;
-    open(myWriter);
-    writeVideo(myWriter, movieVector);
-    close(myWriter);
+    video_filename = fullfile(cas.dirvid,"3D_velocity_animation_"+DNS.case);
+    save_animation(movieVector, video_filename)
+end
+
+function save_animation(movieVector, fileName)
+    % Save the animation as a video
+    writer = VideoWriter(fileName, 'MPEG-4');
+    writer.FrameRate = 5;
+    open(writer);
+    writeVideo(writer, movieVector);
+    close(writer);
 end

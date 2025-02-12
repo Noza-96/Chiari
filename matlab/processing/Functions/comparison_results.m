@@ -1,11 +1,14 @@
 function comparison_results(cas, data_a, case_b, case_c, case_d)
 
+    if nargin > 2
     load(fullfile(cas.dirmat, "DNS_" + case_b + ".mat"), 'DNS');
     data_b = DNS.slices;
+    end
     if nargin > 3
         load(fullfile(cas.dirmat, "DNS_" + case_c + ".mat"), 'DNS');
         data_c = DNS.slices;
-    elseif nargin > 4
+    end
+    if nargin > 4
         load(fullfile(cas.dirmat, "DNS_" + case_d + ".mat"), 'DNS');
         data_d = DNS.slices;        
     end
@@ -30,15 +33,16 @@ function comparison_results(cas, data_a, case_b, case_c, case_d)
                 xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', 12);
             end
             ii = ii + 1;
-            
-            % Plot data_b data/results
-            create_animation_ansys(data_b, loc, n, ii, Ncases);
-            ylabel('');
-            ii = ii + 1;
-            if loc == Ndat
-                xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', 12);
-            end
 
+            if nargin > 2  
+                % Plot data_b data/results
+                create_animation_ansys(data_b, loc, n, ii, Ncases);
+                ylabel('');
+                ii = ii + 1;
+                if loc == Ndat
+                    xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', 12);
+                end
+            end
             if nargin > 3
                 % Plot data_b data/results
                 create_animation_ansys(data_c, loc, n, ii, Ncases);
@@ -80,10 +84,11 @@ function comparison_results(cas, data_a, case_b, case_c, case_d)
         
 
         % Add title to the entire layout
-        title(tiledLayout, sprintf('$t/T = %.2f$', n / numFrames), ...
-            'Interpreter', 'latex', 'FontSize', 20);
+        % title(tiledLayout, sprintf('$t/T = %.2f$', n / numFrames), ...
+        %     'Interpreter', 'latex', 'FontSize', 20);
 
         % Capture the frame
+        set(gcf, 'Color', 'w')
         movieVector(n) = getframe(fig);
         drawnow;
     end
@@ -113,7 +118,7 @@ function create_animation_ansys(data, loc, n, ii, Ncases)
 
     % Plot in the specified tile
     nexttile(ii);
-    scatter(x, y, 8, w, 'filled', 'd');
+    scatter(x, y, 10, w, 'filled', 'd');
     % contourf(Xq, Yq, Wq, 40, 'LineColor', 'none');
     colorbar;
     bluetored(6);
@@ -134,7 +139,7 @@ function create_animation_ansys(data, loc, n, ii, Ncases)
     if ii < Ncases + 1
         sstt = data.case;  % Assuming 'data.case' is a string
         if ~strcmp(sstt, 'PC-MRI')  % Use strcmp to compare strings
-            sstt = sstt + " DNS";  % Concatenate with " DNS"
+            sstt = extractBetween(sstt,1,2) + " DNS";  % Concatenate with " DNS"
         end
         title(sstt)
     end
