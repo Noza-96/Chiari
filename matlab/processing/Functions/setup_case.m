@@ -1,6 +1,18 @@
-function DNS_cases = setup_case(cas, case_name, mesh_size, ts_cycle, iterations_ts, cycles, delta_h_FM, ansys_path)
+function [DNS_cases, cas, dat_PC] = setup_case(subject, session, case_name, mesh_size, ts_cycle, iterations_ts, cycles, delta_h_FM, ansys_path)
 
-DNS_cases = cell(length(case_name),length(mesh_size));
+    load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"), 'cas','dat_PC');
+    
+    DNS_cases = cell(length(case_name),length(mesh_size));
+    
+    % Check if it is the first time to run postprocessing or ts_cycle!=100
+    if isempty(dir(fullfile(cas.dirmat, 'DNS*'))) || ts_cycle ~= 100
+        disp('first time to run this subject, creating files...')
+        % Create CSV files with velocity field information and pcmri.mat
+        velocity_profiles (dat_PC, cas, ts_cycle);
+        
+        % Create Fourier flow rate data for ANSYS input - Uniform
+        Q0_ansys(dat_PC, cas, 30, ts_cycle);
+    end
 
     for i = 1:length(case_name)     
         for j = 1:length(mesh_size)
@@ -20,7 +32,7 @@ DNS_cases = cell(length(case_name),length(mesh_size));
             
             
             DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
-            DNS.slices.locations = [cas.locations(1:end-1), "bottom", "FM-25", "top"]';
+            DNS.slices.locations = [cas.locations(1:end-1), "bottom", "FM-"+delta_h_FM, "top"]';
             DNS.cycles = cycles;
             DNS.delta_h_FM = delta_h_FM;
             DNS.iterations_ts = iterations_ts;
@@ -29,10 +41,7 @@ DNS_cases = cell(length(case_name),length(mesh_size));
             
             DNS_cases{i,j} = DNS.case;
 
-            % Check if the case file exists
-            if ~isfile(fullfile(cas.diransys_in, DNS.case + "_0.cas.gz"))
-                fprintf('Case file %s needs to be created ...\n', DNS.case);
-            end
+
 
             save(fullfile(cas.dirmat,"DNS_"+DNS.case+".mat"),'DNS')
             clear DNS

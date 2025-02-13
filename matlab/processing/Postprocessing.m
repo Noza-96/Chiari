@@ -8,8 +8,9 @@ addpath('Functions/Others/')
 subject = "s101";
 session = 'before';
 
-case_name = {"c2","c1"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
-mesh_size = [0.0002,0.2];
+%c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
+case_name = {"c2","c1"}; 
+mesh_size = [0.0302,0.2];
 
 
 case_reports = case_name+"_dx"+formatDecimal(mesh_size)';
@@ -18,8 +19,9 @@ case_reports = case_name+"_dx"+formatDecimal(mesh_size)';
 load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
 
 % read ansys reports and save solution in .mat file
-read_ansys_reports(cas, dat_PC, case_reports) % last number is in case output is not available
+read_ansys_reports(cas, dat_PC, case_reports) 
 
+%% 
 load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
 load(fullfile(cas.dirmat, "DNS_"+case_report+".mat"), 'DNS');
 %% 2. Create 3D animations with velocity results into spinal canal geometry
@@ -27,6 +29,9 @@ animation_3D(cas, dat_PC, DNS)
 
 %% 3. Longitudinal impedance - Pressure drop and Flow rate
 longitudinal_impedance(cas, DNS)
+
+%% 3. Calculate flow rate from PC-MRI measurements and visualize locations
+MRI_locations(dat_PC, cas, ts_cycle);
 
 %% 4. Comparison PC-MRI with Ansys solution -- Animation
 case_name = {"c1", "c2"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
@@ -130,22 +135,3 @@ saveas(gcf, fullfile(cas.dirfig, "phase_pressure_"+DNS.case), 'png');
 
 %% Create animations ANSYS simulations - uniform velocity field
 
-function formattedStrs = formatDecimal(numArray)
-    formattedStrs = cell(1, length(numArray)); % Preallocate cell array
-    
-    for i = 1:length(numArray)
-        % Convert number to string without scientific notation
-        strNum = sprintf('%.10f', numArray(i));  
-        strNum(strNum == '.') = ''; % Remove decimal point
-        
-        % Remove trailing zeros
-        strNum = regexprep(strNum, '0+$', '');
-        
-        % Ensure at least one leading zero remains
-        if isempty(strNum)
-            formattedStrs{i} = '0';
-        else
-            formattedStrs{i} = strNum;
-        end
-    end
-end
