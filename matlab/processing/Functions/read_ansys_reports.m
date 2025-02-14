@@ -1,4 +1,10 @@
-function read_ansys_reports(cas, dat_PC,DNS_cases)
+function [cas, dat_PC, DNS_cases] = read_ansys_reports(subject, session, case_name, mesh_size)
+
+    % load MRI data for subject
+    load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
+
+    DNS_cases = case_name+"_dx"+formatDecimal(mesh_size)';
+
     for DNS_case = DNS_cases
         % Load DNS files
         if ~exist(fullfile(cas.dirmat, "DNS_"+DNS_case{1}+".mat"), 'file')
@@ -140,6 +146,7 @@ function read_ansys_reports(cas, dat_PC,DNS_cases)
         DNS.slices.normal_v = normal_v;
         DNS.slices.u_normal = un_combined;
         DNS.slices.case = DNS_case{1};
+        
         % Save updated DNS structure
         save(fullfile(cas.dirmat, "DNS_"+DNS_case{1}+".mat"), 'DNS');
     

@@ -7,11 +7,15 @@ function [DNS_cases, cas, dat_PC] = setup_case(subject, session, case_name, mesh
     % Check if it is the first time to run postprocessing or ts_cycle!=100
     if isempty(dir(fullfile(cas.dirmat, 'DNS*'))) || ts_cycle ~= 100
         disp('first time to run this subject, creating files...')
+
         % Create CSV files with velocity field information and pcmri.mat
         velocity_profiles (dat_PC, cas, ts_cycle);
         
         % Create Fourier flow rate data for ANSYS input - Uniform
         Q0_ansys(dat_PC, cas, 30, ts_cycle);
+
+        % PC-MRI measurements animation u, Q, and Vs
+        MRI_locations(dat_PC, cas, ts_cycle);
     end
 
     for i = 1:length(case_name)     

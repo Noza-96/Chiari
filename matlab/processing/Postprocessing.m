@@ -8,37 +8,30 @@ addpath('Functions/Others/')
 subject = "s101";
 session = 'before';
 
-%c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
+% c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 case_name = {"c2","c1"}; 
-mesh_size = [0.0302,0.2];
-
-
-case_reports = case_name+"_dx"+formatDecimal(mesh_size)';
-
-% Define MRI data path
-load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
+mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file
-read_ansys_reports(cas, dat_PC, case_reports) 
+[cas, dat_PC, case_reports] = read_ansys_reports(subject, session, case_name, mesh_size);
 
-%% 
 load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
-load(fullfile(cas.dirmat, "DNS_"+case_report+".mat"), 'DNS');
-%% 2. Create 3D animations with velocity results into spinal canal geometry
-animation_3D(cas, dat_PC, DNS)
 
-%% 3. Longitudinal impedance - Pressure drop and Flow rate
-longitudinal_impedance(cas, DNS)
+for case_DNS = case_reports
+    load(fullfile(cas.dirmat, "DNS_"+case_DNS{1}+".mat"), 'DNS');
+    
+    % 2. Create 3D animations with velocity results into spinal canal geometry
+    animation_3D(cas, dat_PC, DNS)
 
-%% 3. Calculate flow rate from PC-MRI measurements and visualize locations
-MRI_locations(dat_PC, cas, ts_cycle);
+    % 3. Longitudinal impedance - Pressure drop and Flow rate
+    longitudinal_impedance(cas, DNS)
+end
 
 %% 4. Comparison PC-MRI with Ansys solution -- Animation
-case_name = {"c1", "c2"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
+case_name = {"c1", "c1", "c2"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 mesh_size = [0.0002];
-load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
 
-comparison_results(cas, pcmri, case_name{1}+"_dx"+formatDecimal(mesh_size(1)), case_name{2}+"_dx"+formatDecimal(mesh_size(1)))
+comparison_results(cas, case_name, mesh_size)
 
 %% flow rates 
 close all

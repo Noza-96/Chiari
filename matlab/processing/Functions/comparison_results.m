@@ -1,110 +1,50 @@
-function comparison_results(cas, data_a, case_b, case_c, case_d)
+function comparison_results(cas, case_name, mesh_size)
 
-    if nargin > 2
-    load(fullfile(cas.dirmat, "DNS_" + case_b + ".mat"), 'DNS');
-    data_b = DNS.slices;
+    DNS_cases = reshape(case_name+"_dx"+formatDecimal(mesh_size)', 1, []);
+
+    load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
+    Ndat = length(pcmri.locations); % number of slices
+    Ncases = length(DNS_cases); 
+    
+    st_DNS = cell (1,Ncases);
+    
+    for kk = 1:Ncases
+        load(fullfile(cas.dirmat, "DNS_" + DNS_cases{kk} + ".mat"), 'DNS');
+        st_DNS{kk} = DNS;
+        clear DNS
     end
-    if nargin > 3
-        load(fullfile(cas.dirmat, "DNS_" + case_c + ".mat"), 'DNS');
-        data_c = DNS.slices;
-    end
-    if nargin > 4
-        load(fullfile(cas.dirmat, "DNS_" + case_d + ".mat"), 'DNS');
-        data_d = DNS.slices;        
-    end
-    % Initialize figure and tiled layout
-    Ndat = length(data_a.x);
-    Ncases = nargin-1;
-    fig = figure('Position', [100, 100, 300*Ncases, 800]);
-    tiledLayout = tiledlayout(Ndat, Ncases, "TileSpacing", "compact", "Padding", "loose");
+    
+    fig = figure('Position', [100, 100, 300*(Ncases+1), 800]);
+    tiledlayout(Ndat, Ncases + 1, "TileSpacing", "compact", "Padding", "loose");
 
     % Preallocate movie vector
-    numFrames = 100;
+    numFrames = st_DNS{1}.ts_cycle;
     movieVector(numFrames) = struct('cdata', [], 'colormap', []);
+    load(fullfile(cas.dirmat, "bottom_velocity.mat"),'q');
 
     % Loop through time steps
     for n = 1:numFrames
-        ii = 1;
         for loc = 1:Ndat
             % Plot PC-MRI data/results
-            create_animation_ansys(data_a, loc, n, ii, Ncases);
-            ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', 12);
-            if loc == Ndat
-                xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', 12);
-            end
-            ii = ii + 1;
+            create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-1), Ncases);
 
-            if nargin > 2  
-                % Plot data_b data/results
-                create_animation_ansys(data_b, loc, n, ii, Ncases);
-                ylabel('');
-                ii = ii + 1;
-                if loc == Ndat
-                    xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', 12);
-                end
+            for kk = 1:length(DNS_cases)
+                create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases);
             end
-            if nargin > 3
-                % Plot data_b data/results
-                create_animation_ansys(data_c, loc, n, ii, Ncases);
-                ylabel('');
-                ii = ii + 1;
-                if loc == Ndat
-                    xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', 12);
-                end
-            end
-            if nargin > 4
-                % Plot data_b data/results
-                create_animation_ansys(data_d, loc, n, ii, Ncases);
-                ylabel('');
-                ii = ii + 1;
-                if loc == Ndat
-                    xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', 12);
-                end
-            end
-
         end
 
-            prev_ax = gca; % Save the current axis before switching
-            load(fullfile(cas.dirmat, "bottom_velocity.mat"),'q');
-            
-            % Switch to ax1 and plot - to be completed
-            ax1 = axes('Position', [0.15 0.12 0.08 0.04]);
-            flow_rate(data_a.q{Ndat}, 0)
-            ylim([-2,2])
-            hold on 
-            xline(n/100,LineWidth=1)
-            hold off
-            set(gca,"FontSize",8)
-            ylabel(''); xticks('');
-            xlabel(''); yticks('');
-            hold off
-       
-            % Return to the previous axis after plotting in ax1
-            axes(prev_ax);  % Restore the previous axis
+        plot_flow_rate (pcmri.q{Ndat},n)
         
-
-        % Add title to the entire layout
-        % title(tiledLayout, sprintf('$t/T = %.2f$', n / numFrames), ...
-        %     'Interpreter', 'latex', 'FontSize', 20);
-
         % Capture the frame
-        set(gcf, 'Color', 'w')
         movieVector(n) = getframe(fig);
-        drawnow;
     end
 
-    % Save the animation
-    if nargin == 5
-        outputFileName = fullfile(cas.dirvid, "2D_comparison_" + string(data_b.case) + "_" + string(data_c.case) + "_" + string(data_d.case));
-    elseif nargin == 4
-        outputFileName = fullfile(cas.dirvid, "2D_comparison_" + string(data_b.case) + "_" + string(data_c.case));
-    else
-    outputFileName = fullfile(cas.dirvid, "2D_comparison_" + data_b.case);
-    end
-    save_animation(movieVector, outputFileName);
+    save_animation(movieVector, fullfile(cas.dirvid, "2D_comparison_" + strjoin(string([DNS_cases{:}]), '_vs_')));
 end
 
-function create_animation_ansys(data, loc, n, ii, Ncases)
+%% auxiliary functions
+function create_animation_ansys(data, loc, Ndat, n, ii, Ncases)
+    fs = 12;
     % Extract data and rescale
     x = data.x{loc} * 1e2; % [cm]
     y = data.y{loc} * 1e2; % [cm]
@@ -130,19 +70,29 @@ function create_animation_ansys(data, loc, n, ii, Ncases)
     ylim([min(y) - 0.1 * Dy, max(y) + 0.1 * Dy]);
     set(gca, 'XDir', 'reverse', 'YDir', 'reverse', 'LineWidth', 1, 'TickLength', [0.01, 0.01]);
     box on;
-    if n==1 && mod(ii-1, Ncases) == 0 
-        named_location (gca, data.locations{loc})
+    if n==1 && ii == 1 + (Ncases+1)*(loc-1) 
+        named_location (gca, data.locations{loc}, fs)
     end
-    if mod(ii, Ncases) ~= 0 
+    if ii ~= 1 + Ncases + (Ncases+1)*(loc-1) 
         colorbar off;
     end
-    if ii < Ncases + 1
+    if ii <= Ncases + 1
         sstt = data.case;  % Assuming 'data.case' is a string
         if ~strcmp(sstt, 'PC-MRI')  % Use strcmp to compare strings
             sstt = extractBetween(sstt,1,2) + " DNS";  % Concatenate with " DNS"
         end
         title(sstt)
     end
+    if ii == 1 + (Ncases+1)*(loc-1)
+        ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+    else
+        ylabel('');
+    end
+
+    if loc == Ndat
+        xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+    end
+    set(gcf, 'Color', 'w')
 end
 
 function save_animation(movieVector, fileName)
@@ -154,7 +104,7 @@ function save_animation(movieVector, fileName)
     close(writer);
 end
 
-function named_location (gca, sstt)
+function named_location (gca, sstt, fs)
         % Get the position of the current tile (in normalized figure coordinates)
     ax = gca;  % Get the current axis handle
     axPos = ax.Position;  % Position of the axis [left, bottom, width, height]
@@ -170,6 +120,25 @@ function named_location (gca, sstt)
    dim = [xPos, yPos, width, height];
     
     % Create the textbox
-    annotation('textbox', dim, 'String', sstt, 'FontSize', 12, 'Color', 'black', ...
+    annotation('textbox', dim, 'String', sstt, 'FontSize', fs, 'Color', 'black', ...
                'EdgeColor', 'none', 'BackgroundColor', 'none', 'Interpreter', 'latex');
+end
+
+function plot_flow_rate(q,n)
+    prev_ax = gca; % Save the current axis before switching
+    
+    % Switch to ax1 and plot - to be completed
+    ax1 = axes('Position', [0.15 0.12 0.08 0.04]);
+    flow_rate(q, 0)
+    % ylim([-2,2])
+    hold on 
+    xline(n/100,LineWidth=1)
+    set(gca,"FontSize",8)
+    ylabel(''); xticks('');
+    xlabel(''); yticks('');
+    hold off
+    % Return to the previous axis after plotting in ax1
+    axes(prev_ax);  % Restore the previous axis
+    drawnow;
+
 end
