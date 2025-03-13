@@ -181,14 +181,22 @@ nii_filename = sys.argv[2]
 chiari_path = sys.argv[3]
 
 segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
-pcMRI_path = os.path.join(chiari_path, f'patient-data/{pid}/flow/csf_flow_puls_C1C2_venc08_54')
+pcMRI_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
 
 # Load the segmentation file and visualize it in 3D
 segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_canal_seg.nii.gz"))
-segmentation_node.SetName("canal")
+segmentation = segmentation_node.GetSegmentation()
+segmentation.GetSegment(segmentation.GetNthSegmentID(0)).SetName("canal")
 segmentation_node_2 = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_seg.nii.gz"))
-segmentation_node_2.SetName("cord")
+segmentation_2 = segmentation_node_2.GetSegmentation()
+segmentation_2.GetSegment(segmentation_2.GetNthSegmentID(0)).SetName("cord")
+
 display_segmentation_3D(segmentation_node)
+
+# Get the segmentation object inside the node
+
+
+volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, f"{nii_filename}.nii.gz"))
 
 
 def import_and_load_dicom(pcMRI_path):
@@ -205,15 +213,16 @@ def import_and_load_dicom(pcMRI_path):
     slicer.app.processEvents()
 
     # Load only if the dataset hasn't been loaded before
-    patientUIDs = slicer.dicomDatabase.patients()
-    DICOMUtils.loadPatientByUID(patientUIDs[0])
+    # patientUIDs = slicer.dicomDatabase.patients()
+    # DICOMUtils.loadPatientByUID(patientUIDs[0])
 
     print(f"Successfully imported all DICOM files from: {pcMRI_path}")
 
 
 import_and_load_dicom(pcMRI_path)
 
-
+# Save the MRML scene
+slicer.mrmlScene.Commit(os.path.join(segmentation_path, "segmentation_scene.mrml"))
 
 
 # Get all .nrrd files in the directory pcMRI and load them as Sequence

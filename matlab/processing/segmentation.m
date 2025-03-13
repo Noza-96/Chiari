@@ -4,7 +4,7 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s102";
+subject = "s101_a";
 
 
 dir_chiari = full_path(fullfile(pwd, '..', '..', '..'));
