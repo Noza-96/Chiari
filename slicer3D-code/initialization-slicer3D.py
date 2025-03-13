@@ -4,6 +4,7 @@ import os
 import slicer
 import vtk
 import DICOMLib
+from DICOMLib import DICOMUtils
 
 # Suppress VTK warnings and errors
 vtk.vtkObject.GlobalWarningDisplayOff()
@@ -179,16 +180,8 @@ pid = sys.argv[1]
 nii_filename = sys.argv[2]
 chiari_path = sys.argv[3]
 
-# Get Patient ID from the user
-# pid = get_patient_id()
-# if not pid:
-    # print("Operation canceled due to missing Patient ID.")
-    # exit()
-
-# Get the local path to the Chiari folder
-# chiari_path = get_local_chiari_path()
 segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
-pcMRI_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
+pcMRI_path = os.path.join(chiari_path, f'patient-data/{pid}/flow/csf_flow_puls_C1C2_venc08_54')
 
 # Load the segmentation file and visualize it in 3D
 segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_canal_seg.nii.gz"))
@@ -198,14 +191,7 @@ segmentation_node_2.SetName("cord")
 display_segmentation_3D(segmentation_node)
 
 
-import sys
-import slicer
-import DICOMLib
-
-# Load DICOMUtils dynamically (not a built-in module)
-from DICOMLib import DICOMUtils
-
-def import_and_load_dicom(dicom_folder):
+def import_and_load_dicom(pcMRI_path):
     # Open the DICOM module to initialize the database
     slicer.util.selectModule('DICOM')
 
@@ -214,63 +200,20 @@ def import_and_load_dicom(dicom_folder):
         dicomDatabaseDir = slicer.app.temporaryPath + "/DICOM"
         slicer.dicomDatabase.openDatabase(dicomDatabaseDir)
 
-    # Import the DICOM files
-    with DICOMUtils.TemporaryDICOMDatabase() as db:
-        DICOMUtils.importDicom(dicom_folder, db)
-        slicer.app.processEvents()
+    # Import the DICOM files using the existing database (without using TemporaryDICOMDatabase)
+    DICOMUtils.importDicom(pcMRI_path, slicer.dicomDatabase)
+    slicer.app.processEvents()
 
-        # Load all series from the imported DICOM database
-        patientUIDs = db.patients()
-        for patientUID in patientUIDs:
-            studyUIDs = db.studiesForPatient(patientUID)
-            for studyUID in studyUIDs:
-                seriesUIDs = db.seriesForStudy(studyUID)
-                for seriesUID in seriesUIDs:
-                    slicer.util.loadSeriesByUID([seriesUID])
+    # Load only if the dataset hasn't been loaded before
+    patientUIDs = slicer.dicomDatabase.patients()
+    DICOMUtils.loadPatientByUID(patientUIDs[0])
 
-    print(f"Successfully loaded all DICOM files from: {dicom_folder}")
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Error: No DICOM folder provided.")
-        sys.exit(1)
-
-    dicom_path = sys.argv[1]
-    import_and_load_dicom(dicom_path)
+    print(f"Successfully imported all DICOM files from: {pcMRI_path}")
 
 
+import_and_load_dicom(pcMRI_path)
 
 
-
-# def import_and_load_dicom(dicom_folder):
-#     # Open the DICOM module (ensures database is initialized)
-#     slicer.util.selectModule('DICOM')
-
-#     # Get DICOM database and import directory
-#     dicomDatabaseDir = slicer.dicomDatabase.databaseDirectory
-#     DICOMLib.importDicom(dicom_folder, dicomDatabaseDir)
-
-#     # Process events to ensure UI updates
-#     slicer.app.processEvents()
-
-#     # Load all available DICOM series
-#     patientUIDs = slicer.dicomDatabase.patients()
-#     for patientUID in patientUIDs:
-#         studyUIDs = slicer.dicomDatabase.studiesForPatient(patientUID)
-#         for studyUID in studyUIDs:
-#             seriesUIDs = slicer.dicomDatabase.seriesForStudy(studyUID)
-#             for seriesUID in seriesUIDs:
-#                 slicer.util.loadSeriesByUID([seriesUID])
-    
-#     print(f"Successfully loaded all DICOM files from: {dicom_folder}")
-
-# if __name__ == "__main__":
-#     if len(sys.argv) < 2:
-#         print("Error: No DICOM folder provided.")
-#         sys.exit(1)
-
-#     dicom_path = sys.argv[1]
-#     import_and_load_dicom(dicom_path)
 
 
 # Get all .nrrd files in the directory pcMRI and load them as Sequence
@@ -285,7 +228,7 @@ if __name__ == "__main__":
 # assign_to_slices(volume_with_max_z, volume_with_min_z, volume_with_mid_z)
 
 # Adjust the slice views
-adjust_slice_views()
+# adjust_slice_views()
 
 # Save the plane points to a text file -- FAILS TO GIVE CORRECT POINTS
 # save_plane_points(segmentation_path)
