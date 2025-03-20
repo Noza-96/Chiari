@@ -147,7 +147,7 @@ def save_transformation_matrix(transform_node, save_path):
     # Save matrix to a file
     with open(save_path, "w") as f:
         for row in range(4):
-            f.write(" ".join(f"{matrix.GetElement(row, col):.6f}" for col in range(4)) + "\n")
+            f.write(" ".join(f"{matrix.GetElement(row, col):.2f}" for col in range(4)) + "\n")
 
 # Save plane points to a text file
 def save_plane_points(segmentation_path):
@@ -253,12 +253,13 @@ if response == QMessageBox.Yes:
     segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
     segmentation_display_node = segmentation_node.GetDisplayNode()
     display_segmentation_3D(segmentation_node, opacity2D=0.2)
+
     while True:
         user_input = input('Type "ok" when you have finished the manual transformation: ')
         if user_input.lower() == 'ok':
 
             # Export the transformed segmentation as an STL file
-            response = QMessageBox.question(None, 'Export STL', 'Do you want to export transformation matrix and segmentation as STL?', QMessageBox.Yes | QMessageBox.No)
+            response = QMessageBox.question(None, 'Export STL', 'Do you want to save results?', QMessageBox.Yes | QMessageBox.No)
             if response == QMessageBox.Yes:
                 export_folder = os.path.join(segmentation_path, 'stl')
                 if not os.path.exists(export_folder):
@@ -271,12 +272,22 @@ if response == QMessageBox.Yes:
                 transform_matrix_path = os.path.join(segmentation_path, 'stl', 'transformation_matrix.txt')
                 save_transformation_matrix(transform_node, transform_matrix_path)
 
+                # Apply the transformation to the volume
+                volume_node.SetAndObserveTransformNodeID(transform_node.GetID())
+
+                # Harden the transformation (apply it permanently)
+                slicer.vtkSlicerTransformLogic().hardenTransform(volume_node)
+
+                # Save the transformed volume in the STL folder
+                transformed_anatomy_path = os.path.join(segmentation_path, 'stl', 'transformed_anatomy.nrrd')
+                slicer.util.saveNode(volume_node, transformed_anatomy_path)
+
                 # Export the segmentation to STL
                 exporter = slicer.vtkSlicerSegmentationsModuleLogic()
                 exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
 
                 # Find the exported STL file (it should be the only STL file in the folder)
-                exported_files = [f for f in os.listdir(export_folder) if f.endswith(".stl")]
+                exported_files = [f for f in os.listdir(export_folder) if f.endswith(".stl") and not f.startswith("._")]
 
                 # If only one STL file is found, rename it
                 default_filename = os.path.join(export_folder, exported_files[0])  # Get the exported STL file
@@ -284,7 +295,7 @@ if response == QMessageBox.Yes:
                 os.rename(default_filename, new_filename)
 
                 # Output the results
-                print("transformation_matrix.txt and segmentation.stl saved in stl folder")
+                print("transformation_matrix.txt, segmentation.stl and transformed_anatomy.nrrd saved in stl folder")
             break
 
     
