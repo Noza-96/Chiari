@@ -4,7 +4,7 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_a";
+subject = "s101_b";
 
 
 dir_chiari = full_path(fullfile(pwd, '..', '..', '..'));
@@ -63,9 +63,14 @@ end
 % Check if the file exists
 if ~isfile(fullfile(segmentation_path, anatomy_dicom + "_seg.nii.gz"))
 
+    % segmentation spinal cord
     system( "sct_deepseg -task seg_sc_contrast_agnostic -i " + nii_file);
     
+    % segmentation canal
     system( "sct_deepseg -task canal_t2w -i " + nii_file);
+
+    % segmentation rootlets
+    system( "sct_deepseg -task seg_spinal_rootlets_t2w -i " + nii_file) 
 else
     disp("Segmentation already exists. Skipping automated segmentation.");
 end   

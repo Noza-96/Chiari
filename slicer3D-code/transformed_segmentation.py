@@ -3,8 +3,6 @@ import platform
 import os
 import slicer
 import vtk
-import DICOMLib
-from DICOMLib import DICOMUtils
 
 # Suppress VTK warnings and errors
 vtk.vtkObject.GlobalWarningDisplayOff()
@@ -26,7 +24,7 @@ def get_volumes_with_extreme_and_mid_z():
     # Iterate over all volume nodes in the scene
     for node in slicer.util.getNodesByClass("vtkMRMLScalarVolumeNode"):
         # Skip the segmentation_v volume
-        if node.GetName() == "segmentation_v":
+        if node.GetName() == "anatomy":
             continue
 
         # Get the IJK-to-RAS transformation matrix
@@ -91,7 +89,7 @@ def get_patient_id():
     raise ValueError("No valid Patient ID entered.")
 
 # Function to get the local path to the Chiari folder based on the hostname
-# def get_local_chiari_path():
+def get_local_chiari_path():
     hostname = platform.node()
     if hostname == 'Guillermos-MacBook-Pro.local' or hostname == 'Guillermos-MBP':
         chiari_path = '/Users/noza/Documents/chiari'
@@ -137,6 +135,20 @@ def display_segmentation_3D(segmentation_node, opacity2D=0.4):
     segmentation_display_node.SetOpacity2DFill(opacity2D)
     segmentation_display_node.SetOpacity2DOutline(opacity2D)
 
+def save_transformation_matrix(transform_node, save_path):
+    if not transform_node:
+        print("Error: No transform node found.")
+        return
+
+    # Get the transformation matrix
+    matrix = vtk.vtkMatrix4x4()
+    transform_node.GetMatrixTransformToParent(matrix)
+
+    # Save matrix to a file
+    with open(save_path, "w") as f:
+        for row in range(4):
+            f.write(" ".join(f"{matrix.GetElement(row, col):.6f}" for col in range(4)) + "\n")
+
 # Save plane points to a text file
 def save_plane_points(segmentation_path):
     for color, plane_name in zip(['Red', 'Yellow'], ['top_plane', 'bottom_plane']):
@@ -176,133 +188,103 @@ def save_plane_points(segmentation_path):
     # Output the results
     print("plane data saved to .txt files")
 
-pid = sys.argv[1]
-nii_filename = sys.argv[2]
-chiari_path = sys.argv[3]
+def clear_stl_files_only(stl_folder):
+    """Deletes files inside the stl folder"""
+    if os.path.exists(stl_folder):
+        [os.remove(os.path.join(stl_folder, f)) for f in os.listdir(stl_folder) if os.path.isfile(os.path.join(stl_folder, f))]
 
+# Get Patient ID from the user
+pid = get_patient_id()
+if not pid:
+    print("Operation canceled due to missing Patient ID.")
+    exit()
+
+# Get the local path to the Chiari folder
+chiari_path = get_local_chiari_path()
 segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
-pcMRI_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
+pcMRI_path = os.path.join(segmentation_path, "pcMRI")
 
-# Load the segmentation file and visualize it in 3D
-segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_canal_seg.nii.gz"))
-segmentation = segmentation_node.GetSegmentation()
-segmentation_node.SetName("automatic_segmentation")
-segmentation.GetSegment(segmentation.GetNthSegmentID(0)).SetName("canal")
-
-segmentation_node_2 = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_seg.nii.gz"))
-segmentation_2 = segmentation_node_2.GetSegmentation()
-segment_id_2 = segmentation_2.GetNthSegmentID(0)  # Get the ID of the segment to move
-segmentation_2.GetSegment(segment_id_2).SetName("cord")
-
-# # Copy the segment from segmentation_node_2 to segmentation_node
-# segment_to_move = segmentation_2.GetSegment(segment_id_2)  # Get the segment object
-# segmentation.CopySegmentFromSegmentation(segmentation_2, segment_id_2)  # Copy segment
-
-# # Remove the second segmentation node from the scene
-# slicer.mrmlScene.RemoveNode(segmentation_node_2)
-
-display_segmentation_3D(segmentation_node)
-
-# Get the segmentation object inside the node
-
-
-volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, f"{nii_filename}.nii.gz"))
-
-
-def import_and_load_dicom(pcMRI_path):
-    # Open the DICOM module to initialize the database
-    slicer.util.selectModule('DICOM')
-
-    # Ensure the DICOM database is open
-    if not slicer.dicomDatabase.isOpen:
-        dicomDatabaseDir = slicer.app.temporaryPath + "/DICOM"
-        slicer.dicomDatabase.openDatabase(dicomDatabaseDir)
-
-    # Import the DICOM files using the existing database (without using TemporaryDICOMDatabase)
-    DICOMUtils.importDicom(pcMRI_path, slicer.dicomDatabase)
-    slicer.app.processEvents()
-
-    # Load only if the dataset hasn't been loaded before
-    # patientUIDs = slicer.dicomDatabase.patients()
-    # DICOMUtils.loadPatientByUID(patientUIDs[0])
-
-    print(f"Successfully imported all DICOM files from: {pcMRI_path}")
-
-
-import_and_load_dicom(pcMRI_path)
-
-# Save the MRML scene
-slicer.mrmlScene.Commit(os.path.join(segmentation_path, "segmentation_scene.mrml"))
-
-
-# Get all .nrrd files in the directory pcMRI and load them as Sequence
-# files = os.listdir(pcMRI_path)
-# nrrd_files = [file for file in files if file != '.DS_Store' and file.lower().endswith('.nrrd')]
-# for file_name in nrrd_files:
-#     file_path = os.path.join(pcMRI_path, file_name)
-#     slicer.util.loadSequence(file_path)
-
-# Assign each view to the corresponding segment based on the relative z-location
-# volume_with_max_z, volume_with_min_z, volume_with_mid_z = get_volumes_with_extreme_and_mid_z()
-# assign_to_slices(volume_with_max_z, volume_with_min_z, volume_with_mid_z)
-
-# Adjust the slice views
-# adjust_slice_views()
 
 # Save the plane points to a text file -- FAILS TO GIVE CORRECT POINTS
 # save_plane_points(segmentation_path)
+volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, "anatomy.nrrd"))
 
+# Load the segmentation file and visualize it in 3D
+segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, 'raw_segmentation.seg.nrrd'))
+segmentation_node.SetName("segmentation")
+display_segmentation_3D(segmentation_node)
+
+# Get all .nrrd files in the directory pcMRI and load them as Sequence
+files = os.listdir(pcMRI_path)
+nrrd_files = [file for file in files if file != '.DS_Store' and file.lower().endswith('.nrrd')]
+for file_name in nrrd_files:
+    file_path = os.path.join(pcMRI_path, file_name)
+    slicer.util.loadSequence(file_path)
+
+# Assign each view to the corresponding segment based on the relative z-location
+volume_with_max_z, volume_with_min_z, volume_with_mid_z = get_volumes_with_extreme_and_mid_z()
+assign_to_slices(volume_with_max_z, volume_with_min_z, volume_with_mid_z)
+
+# Adjust the slice views
+adjust_slice_views()
 
 # Apply a linear transformation to the segmentation to align it with the sequence segmentation
 # 1. Load existing transformed segmentation, if it exists
-# transformed_geometry_path = os.path.join(segmentation_path, 'stl', 'segmentation.stl')
-# if os.path.exists(transformed_geometry_path):
-#     response = QMessageBox.question(None, 'Load Existing Transformation', 'Do you want to load the existing transformed segmentation?', QMessageBox.Yes | QMessageBox.No)
-#     if response == QMessageBox.Yes:
-#         slicer.mrmlScene.RemoveNode(segmentation_node)
-#         segmentation_node = slicer.util.loadSegmentation(transformed_geometry_path)
-#         segmentation_node.SetName("segmentation")
-#         display_segmentation_3D(segmentation_node)
-# # 2. Manually adjust the transformation if desired
-# response = QMessageBox.question(None, 'Manual Linear Transformation', 'Do you want to adjust the transformation manually?', QMessageBox.Yes | QMessageBox.No)
-# if response == QMessageBox.Yes:
-#     # Open the GUI Module Transforms on Slicer3D
-#     slicer.util.selectModule('Transforms')
-#     # Create a new transform node
-#     transform_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ManualTransform")
-#     # Create a vtkTransform object
-#     vtk_transform = vtk.vtkTransform()
-#     # TODO: set the Active Transform to the new transform node
-#     # Apply the transform to the segmentation node
-#     segmentation_node = slicer.util.getNode('segmentation')
-#     segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
-#     segmentation_display_node = segmentation_node.GetDisplayNode()
-#     display_segmentation_3D(segmentation_node, opacity2D=0.2)
-#     while True:
-#         user_input = input('Type "ok" when you have finished the manual transformation: ')
-#         if user_input.lower() == 'ok':
-#             # Export the transformed segmentation as an STL file
-#             response = QMessageBox.question(None, 'Export STL', 'Do you want to export the transformed segmentation as STL?', QMessageBox.Yes | QMessageBox.No)
-#             if response == QMessageBox.Yes:
-#                 export_folder = os.path.join(segmentation_path, 'stl')
-#                 if not os.path.exists(export_folder):
-#                     os.makedirs(export_folder)
+transformed_geometry_path = os.path.join(segmentation_path, 'stl', 'segmentation.stl')
+if os.path.exists(transformed_geometry_path):
+    response = QMessageBox.question(None, 'Load Existing Transformation', 'Do you want to load the existing transformed segmentation?', QMessageBox.Yes | QMessageBox.No)
+    if response == QMessageBox.Yes:
+        slicer.mrmlScene.RemoveNode(segmentation_node)
+        segmentation_node = slicer.util.loadSegmentation(transformed_geometry_path)
+        segmentation_node.SetName("segmentation")
+        display_segmentation_3D(segmentation_node)
+# 2. Manually adjust the transformation if desired
+response = QMessageBox.question(None, 'Manual Linear Transformation', 'Do you want to adjust the transformation manually?', QMessageBox.Yes | QMessageBox.No)
+if response == QMessageBox.Yes:
+    # Open the GUI Module Transforms on Slicer3D
+    slicer.util.selectModule('Transforms')
+    # Create a new transform node
+    transform_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ManualTransform")
+    # Create a vtkTransform object
+    vtk_transform = vtk.vtkTransform()
+    # TODO: set the Active Transform to the new transform node
+    # Apply the transform to the segmentation node
+    segmentation_node = slicer.util.getNode('segmentation')
+    segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
+    segmentation_display_node = segmentation_node.GetDisplayNode()
+    display_segmentation_3D(segmentation_node, opacity2D=0.2)
+    while True:
+        user_input = input('Type "ok" when you have finished the manual transformation: ')
+        if user_input.lower() == 'ok':
 
-#                 exporter = slicer.vtkSlicerSegmentationsModuleLogic()
-#                 exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
+            # Export the transformed segmentation as an STL file
+            response = QMessageBox.question(None, 'Export STL', 'Do you want to export transformation matrix and segmentation as STL?', QMessageBox.Yes | QMessageBox.No)
+            if response == QMessageBox.Yes:
+                export_folder = os.path.join(segmentation_path, 'stl')
+                if not os.path.exists(export_folder):
+                    os.makedirs(export_folder)
 
-#                 # Rename the exported file
-#                 old_filename = os.path.join(export_folder, "segmentation_Segment_1.stl")
-#                 new_filename = os.path.join(export_folder, "segmentation.stl")
-#                 if os.path.exists(old_filename):
-#                     os.replace(old_filename, new_filename)
-#                 else:
-#                     raise FileNotFoundError(f"File not found: {old_filename}")
-                
-#                 # Output the results
-#                 print("segmentation.stl saved in stl folder")
-#             break
+                # Clear the STL folder before saving the new file
+                clear_stl_files_only(export_folder)
+
+                # Save transformation matrix
+                transform_matrix_path = os.path.join(segmentation_path, 'stl', 'transformation_matrix.txt')
+                save_transformation_matrix(transform_node, transform_matrix_path)
+
+                # Export the segmentation to STL
+                exporter = slicer.vtkSlicerSegmentationsModuleLogic()
+                exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
+
+                # Find the exported STL file (it should be the only STL file in the folder)
+                exported_files = [f for f in os.listdir(export_folder) if f.endswith(".stl")]
+
+                # If only one STL file is found, rename it
+                default_filename = os.path.join(export_folder, exported_files[0])  # Get the exported STL file
+                new_filename = os.path.join(export_folder, "segmentation.stl")
+                os.rename(default_filename, new_filename)
+
+                # Output the results
+                print("transformation_matrix.txt and segmentation.stl saved in stl folder")
+            break
 
     
-
-
