@@ -1,10 +1,18 @@
 function cas = scan_folders_set_cas(cas)
+
+
+
+cas.dircloud = full_path(fullfile(pwd, '..', '..', '..','computations'));
+
+cas.dirdat = full_path(fullfile(cas.dircloud,'pc-mri'));
+
+cas.dir_fullpath_ansys =  full_path(fullfile(cas.dircloud,'ansys'));
+
 % Define directories with a modular structure
 cas.dirgeo = fullfile(cas.dirdat, cas.subj, 'geom');
-commonPath = fullfile(cas.dirdat, cas.subj, cas.anal, cas.sess);
-cas.dirdcm = fullfile(commonPath, 'dcm');
-cas.dirmat = fullfile(commonPath, 'mat');
-cas.dirflm = fullfile(commonPath, 'flm');
+cas.dirdcm = fullfile(cas.dirdat, cas.subj, 'dcm');
+cas.dirmat = fullfile(cas.dirdat, cas.subj, 'mat');
+cas.dirflm = fullfile(cas.dirdat, cas.subj, 'flm');
 cas.dirvid = fullfile(cas.dircloud, 'videos', cas.subj);
 cas.dirfig = fullfile(cas.dircloud, 'figures', cas.subj);
 
