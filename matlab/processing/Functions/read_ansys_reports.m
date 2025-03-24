@@ -1,7 +1,7 @@
-function [cas, dat_PC, DNS_cases] = read_ansys_reports(subject, session, case_name, mesh_size)
+function [cas, dat_PC, DNS_cases] = read_ansys_reports(subject, case_name, mesh_size)
 
     % load MRI data for subject
-    load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"));
+    load(fullfile("../../../computations", "pc-mri", subject, "mat","03-apply_roi_compute_Q.mat"));
 
     DNS_cases = case_name+"_dx"+formatDecimal(mesh_size)';
 

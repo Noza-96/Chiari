@@ -1,6 +1,9 @@
-function [DNS_cases, cas, dat_PC] = setup_case(subject, session, case_name, mesh_size, ts_cycle, iterations_ts, cycles, delta_h_FM, ansys_path)
+function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts_cycle, iterations_ts, cycles, delta_h_FM)
 
-    load(fullfile("../../../computations", "pc-mri", subject, 'flow', session,"mat","03-apply_roi_compute_Q.mat"), 'cas','dat_PC');
+
+    ansys_path = full_path(fullfile(pwd, '..', '..', '..','computations','ansys'));
+
+    load(fullfile("../../../computations", "pc-mri", subject, "mat","03-apply_roi_compute_Q.mat"), 'cas','dat_PC');
     
     DNS_cases = cell(length(case_name),length(mesh_size));
     

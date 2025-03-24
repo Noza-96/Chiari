@@ -74,7 +74,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
         if any(loc_ID == ii)
             index = find(loc_ID == ii);
             % Open the file for writing
-            filename = cas.diransys_in + "/"+sstt{index}+"_plane.txt";
+            filename = cas.diransys_in + "/"+sstt{index}+"_plane.txt"
             fileID = fopen(filename, 'w');
             % Write the headers
             fprintf(fileID, '3d=True\n');

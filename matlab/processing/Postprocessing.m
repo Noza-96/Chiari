@@ -5,15 +5,14 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101";
-session = 'before';
+subject = "s101_b";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 case_name = {"c2","c1"}; 
 mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file
-[cas, dat_PC, case_reports] = read_ansys_reports(subject, session, case_name, mesh_size);
+[cas, dat_PC, case_reports] = read_ansys_reports(subject, case_name, mesh_size);
 
 load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
 
