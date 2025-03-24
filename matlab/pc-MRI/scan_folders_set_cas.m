@@ -4,13 +4,16 @@ function cas = scan_folders_set_cas(cas)
 
 cas.dircloud = full_path(fullfile(pwd, '..', '..', '..','computations'));
 
+cas.dirdcm = full_path(fullfile(pwd, '..', '..', '..','patient-data',cas.subj,'flow'));
+
+
 cas.dirdat = full_path(fullfile(cas.dircloud,'pc-mri'));
 
 cas.dir_fullpath_ansys =  full_path(fullfile(cas.dircloud,'ansys'));
 
 % Define directories with a modular structure
-cas.dirgeo = fullfile(cas.dirdat, cas.subj, 'geom');
-cas.dirdcm = fullfile(cas.dirdat, cas.subj, 'dcm');
+cas.dirgeo = fullfile(cas.dirdat, cas.subj,'segmentation','geom');
+% cas.dirdcm = fullfile(cas.dirdat, cas.subj, 'dcm');
 cas.dirmat = fullfile(cas.dirdat, cas.subj, 'mat');
 cas.dirflm = fullfile(cas.dirdat, cas.subj, 'flm');
 cas.dirvid = fullfile(cas.dircloud, 'videos', cas.subj);
@@ -23,7 +26,7 @@ cas.diransys_profiles = fullfile(cas.diransys_in, 'profiles');
 cas.dirseg = fullfile(cas.dircloud, 'segmentation', cas.subj);
 
 % List of directories to ensure exist
-dirsToCreate = {cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, cas.dirseg, cas.dirfig};
+dirsToCreate = {cas.dirgeo, cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, cas.dirseg, cas.dirfig};
 
 % Create directories if not present
 for i = 1:length(dirsToCreate)
@@ -241,3 +244,6 @@ function createOrCleanDir(dirPath)
     end
 end
 
+function absolutePath = full_path(folder_path)
+    absolutePath = char(java.io.File(folder_path).getCanonicalPath());
+end
