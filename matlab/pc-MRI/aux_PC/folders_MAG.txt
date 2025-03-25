@@ -1,4 +1,4 @@
-C1C2/01PC/csf_flow_puls_C1C2_venc08_MAG_58
-C2C3/01PC/csf_flow_puls_C2C3_venc08_MAG_61
-C3C4/01PC/csf_flow_puls_C3C4_venc08_MAG_64
-FM/01PC/csf_flow_puls_FM_venc08_MAG_55
+C1C2/01PC/csf_flow_puls_C1C2_venc08_MAG_39
+C2C3/01PC/csf_flow_puls_C2C3_venc08_MAG_42
+C3C4/01PC/csf_flow_puls_C3C4_venc08_MAG_45
+FM/01PC/csf_flow_puls_UPFM_venc08_MAG_33
