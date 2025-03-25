@@ -3,17 +3,18 @@ function all_simulations = create_mesh_journal(cas, DNS_cases)
 fileID = fopen(cas.diransys_in+"/create_mesh.jou", 'w');
 all_simulations = true; % Initialize flag
 
+local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local sizing
+
     for ii = 1:length(DNS_cases)
     
         load(fullfile(cas.dirmat, "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
     
         case_name = DNS.case + "_0";
     
-        local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local sizing
         sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
     
-    
-        filename = DNS.ansys_path+"/"+cas.subj+"/"+cas.subj+"_files/dp0/Geom/DM/Geom.scdoc";
+        filename = fullfile(DNS.ansys_path, cas.subj, cas.subj+"_files","dp0","Geom","DM","Geom.scdoc");
+        strrep(strrep(filename, '\', '\\'), '/', '\\')
     
         if ii == 1
             fprintf(fileID,'/file/set-tui-version "24.1"\n' );
@@ -21,8 +22,7 @@ all_simulations = true; % Initialize flag
             fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Import Geometry'].Revert()"") \n" );
         end
     
-    
-        fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Import Geometry'].Arguments.set_state({r'FileName': r'"+strrep(filename, '/', '\\')+"',r'ImportCadPreferences': {r'MaxFacetLength': 0,},r'LengthUnit': r'm',})"") \n");
+        fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Import Geometry'].Arguments.set_state({r'FileName': r'"+strrep(strrep(filename, '\', '\\'), '/', '\\')+"',r'ImportCadPreferences': {r'MaxFacetLength': 0,},r'LengthUnit': r'm',})"") \n");
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Import Geometry'].Execute()"")\n" );
         fprintf(fileID,"(newline)\n");
         if ii == 1
@@ -70,7 +70,8 @@ all_simulations = true; % Initialize flag
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Improve Volume Mesh'].Arguments.set_state({r'CellQualityLimit': 0.3,r'QualityMethod': r'Orthogonal',r'VMImprovePreferences': {r'ShowVMImprovePreferences': False,r'VIQualityIterations': 5,r'VIQualityMinAngle': 0,r'VIgnoreFeature': r'yes',},})"")\n" );
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Improve Volume Mesh'].Execute()"")\n" );
         fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*ExportSubMenu*Case..."") \n" );
-        fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+DNS.ansys_path+"/"+cas.subj+"/inputs/"+case_name+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n\n" );
+        filename_2 = fullfile(DNS.ansys_path, cas.subj, "inputs",case_name);
+        fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+strrep(strrep(filename_2, '\', '\\'), '/', '\\')+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n\n" );
     
             % Check if the case file exists
         if ~isfile(fullfile(cas.diransys_in, DNS.case + "_0.cas.gz"))
