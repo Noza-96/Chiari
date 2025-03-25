@@ -1,19 +1,14 @@
 function cas = scan_folders_set_cas(cas)
 
-
-
-cas.dircloud = full_path(fullfile(pwd, '..', '..', '..','computations'));
-
-cas.dirdcm = full_path(fullfile(pwd, '..', '..', '..','patient-data',cas.subj,'flow'));
-
-
-cas.dirdat = full_path(fullfile(cas.dircloud,'pc-mri'));
-
-cas.dir_fullpath_ansys =  full_path(fullfile(cas.dircloud,'ansys'));
+% Computations folder
+cas.dircloud = fullfile('..', '..', '..','computations');
+% DICOM folder
+cas.dirdcm = fullfile('..', '..', '..','patient-data',cas.subj,'flow');
+% Save data folder
+cas.dirdat = fullfile(cas.dircloud,'pc-mri');
 
 % Define directories with a modular structure
 cas.dirgeo = fullfile(cas.dirdat, cas.subj,'segmentation','geom');
-% cas.dirdcm = fullfile(cas.dirdat, cas.subj, 'dcm');
 cas.dirmat = fullfile(cas.dirdat, cas.subj, 'mat');
 cas.dirflm = fullfile(cas.dirdat, cas.subj, 'flm');
 cas.dirvid = fullfile(cas.dircloud, 'videos', cas.subj);
