@@ -74,7 +74,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
         if any(loc_ID == ii)
             index = find(loc_ID == ii);
             % Open the file for writing
-            filename = fullfile(cas.diransys_in, sstt{index}+"_plane.txt")
+            filename = fullfile(cas.diransys_in, sstt{index}+"_plane.txt");
             fileID = fopen(filename, 'w');
             % Write the headers
             fprintf(fileID, '3d=True\n');
@@ -87,7 +87,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
             % Close the file
             fclose(fileID);
         
-            fprintf('%s_plane.txt created ... \n ', sstt{index});
+            fprintf('%s_plane.txt created ... \n', sstt{index});
 
             % Create CSV file
             filename = "empty_inlet_vel.csv";  

@@ -14,7 +14,6 @@ local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local si
         sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
     
         filename = fullfile(DNS.ansys_path, cas.subj, cas.subj+"_files","dp0","Geom","DM","Geom.scdoc");
-        strrep(strrep(filename, '\', '\\'), '/', '\\')
     
         if ii == 1
             fprintf(fileID,'/file/set-tui-version "24.1"\n' );
