@@ -4,14 +4,14 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_a";
+subject = "s101_b";
 
 % c: geometry bounded with 2 pcMRI planes. c0/c1 for zero pressure top and bottom flow rate/velocity, c2 for two inlet velocities and permeable cord
 % b: 60 mm geometry with bottom pcMRI plane. b0/b1 for zero pressure top and bottom flow rate/velocity
 % cn or bn simmilar but with nerve roots. 
 
 case_name = "c1";
-mesh_size = [0.0005,0.0002];
+mesh_size = [0.0002];
 
 ts_cycle = 100;     % number of time steps per cycle
 iterations_ts = 20; % iterations per time step
