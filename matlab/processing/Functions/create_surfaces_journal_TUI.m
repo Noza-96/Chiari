@@ -15,13 +15,13 @@ function create_surfaces_journal_TUI(dat_PC, cas, DNS, fileID)
         XYZ = three_point_plane(dat_PC, loc);
         create_plane (fileID,XYZ,cas.locations{loc})
         if loc == 1
-            XYZ(:,3) = XYZ(:,3) - 0.025; % create plane 25mm lower FM
-            create_plane (fileID,XYZ,"FM-25")
+            XYZ(:,3) = XYZ(:,3) - DNS.delta_h_FM/1000; % create plane DNS.delta_h_FM/1000 lower FM (default 25 mm)
+            create_plane (fileID,XYZ,"FM-"+num2str(DNS.delta_h_FM))
         end
     end
 
     % Create surface to export later
-    zone_names = {'cord', 'dura', 'tonsils'};
+    zone_names = {'cord', 'dura'};
     for k = 1:length(zone_names)
         fprintf(fileID,sprintf('/surface/zone-surface %s_s "%s" q \n', zone_names{k}, zone_names{k}));
     end

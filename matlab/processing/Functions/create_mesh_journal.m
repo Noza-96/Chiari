@@ -1,9 +1,9 @@
 function all_simulations = create_mesh_journal(cas, DNS_cases)
 
-fileID = fopen(cas.diransys_in+"/create_mesh.jou", 'w');
+fileID = fopen(fullfile(cas.diransys_in,"create_mesh.jou"), 'w');
 all_simulations = true; % Initialize flag
 
-local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local sizing
+local_sizing = {"cord", "dura"}; % to which boundaries apply local sizing
 
     for ii = 1:length(DNS_cases)
     
@@ -13,7 +13,7 @@ local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local si
     
         sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
     
-        filename = fullfile(DNS.ansys_path, cas.subj, cas.subj+"_files","dp0","Geom","DM","Geom.scdoc");
+        filename = fullfile(DNS.ansys_path, cas.subj, "geometry",DNS.geom+"_geometry.scdoc");
     
         if ii == 1
             fprintf(fileID,'/file/set-tui-version "24.1"\n' );
@@ -44,12 +44,12 @@ local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local si
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].Arguments.set_state({r'NonConformal': r'No',r'SetupType': r'The geometry consists of only fluid regions with no voids',})"")\n" );
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].UpdateChildTasks(SetupTypeChanged=True)"")\n" );
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].Execute()"")\n" );
-        if contains(DNS.case,"c1")
+        if ismember(DNS.sim, [0, 1])
             fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom'],r'BoundaryLabelTypeList': [r'pressure-outlet', r'velocity-inlet'],r'OldBoundaryLabelList': [r'top', r'bottom'],r'OldBoundaryLabelTypeList': [r'wall', r'wall'],})"")\n" );
-        elseif contains(DNS.case,"c2")
+        elseif DNS.sim == 2
             fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom', r'cord'],r'BoundaryLabelTypeList': [r'velocity-inlet', r'velocity-inlet', r'velocity-inlet'],r'OldBoundaryLabelList': [r'top', r'bottom', r'cord'],r'OldBoundaryLabelTypeList': [r'wall', r'wall', r'wall'],})"")\n" );
         else
-            error('Error: case needs to be defined as ''c1'' or ''c2''');
+            error('Error: case needs to be defined as ''0'', ''1'' or ''2''');
         end
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Execute()"")\n" );
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Regions'].Arguments.set_state({r'OldRegionNameList': [r'patch-body1'],r'OldRegionTypeList': [r'fluid'],r'RegionNameList': [r'fluid'],r'RegionTypeList': [r'fluid'],})"")\n" );
@@ -74,15 +74,14 @@ local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local si
     
             % Check if the case file exists
         if ~isfile(fullfile(cas.diransys_in, DNS.case + "_0.cas.gz"))
-            fprintf(2, 'Case file %s needs to be created.\n', DNS.case);
+            fprintf('Case file %s needs to be created.\n', DNS.case);
             all_simulations = false;
         end
         % fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*WriteSubMenu*Stop Journal"")\n" );
     end
 
     if all_simulations
-        fprintf('All fluent cases already exist. Ready to run simulation.');
+        fprintf('All fluent cases already exist. Ready to run simulation!');
     end
-
-
 end
+

@@ -28,6 +28,7 @@ function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts
 
             DNS.mesh_size = mesh_j;
             DNS.case = case_i+"_dx"+formatDecimal(DNS.mesh_size); 
+            [DNS.geom, DNS.sim] = get_type_simulation(case_i);
             
             % full ansys folder path
             DNS.ansys_path = ansys_path;
@@ -55,4 +56,9 @@ function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts
         end
     end
     DNS_cases = reshape(DNS_cases.', 1, []); %reshape into a single row
+end
+
+function [type_geometry, type_simulation] = get_type_simulation(DNS_case)
+    type_geometry = regexp(DNS_case, '^[a-zA-Z]+', 'match', 'once');
+    type_simulation = str2double(regexp(DNS_case, '\d+', 'match', 'once'));
 end

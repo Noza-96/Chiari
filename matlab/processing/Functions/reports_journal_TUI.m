@@ -25,7 +25,7 @@ function reports_journal_TUI(cas, DNS, fileID)
         fprintf(fileID,'/solve/report-definitions/add q_top surface-volumeflowrate surface-names top () q \n' );
         fprintf(fileID,'/solve/report-definitions/add q_cord surface-volumeflowrate surface-names cord () q \n' );
         % Create expression
-        expression =  "Average(StaticPressure,['fm'], Weight ='Area') - Average(StaticPressure,['fm-25'], Weight ='Area')";
+        expression =  "Average(StaticPressure,['fm'], Weight ='Area') - Average(StaticPressure,['fm-"+num2str(DNS.delta_h_FM)+"'], Weight ='Area')";
         TUI_sstt = sprintf('/solve/report-definitions/add dp single-val-expression define "%s" q \n', expression);
         fprintf(fileID,TUI_sstt);
 

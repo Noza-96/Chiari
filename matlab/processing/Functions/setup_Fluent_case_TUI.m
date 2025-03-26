@@ -28,7 +28,7 @@ function setup_Fluent_case_TUI(DNS, fileID)
     
     % Set pressure-velocity coupled scheme
     fprintf(fileID,'/solve/set p-v-coupling 24 q  \n');
-    if contains(DNS.case,"c2") 
+    if DNS.sim == 2
         named_expression (fileID, "v_cord", "-(MassFlow(['top'])+MassFlow(['bottom']))/(rho*Area(['cord']))")
         fprintf(fileID,'/define/boundary-conditions/velocity-inlet cord no no yes yes no "v_cord" no 0  q \n');
     end

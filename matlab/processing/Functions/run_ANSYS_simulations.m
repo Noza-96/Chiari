@@ -67,7 +67,7 @@ function create_journal(dat_PC, cas, DNS)
     fileID = fopen(cas.diransys_in + "/" + DNS.case + ".jou", 'w');
     
     % Setup simulation
-    setup_case_TUI(DNS, fileID);
+    setup_Fluent_case_TUI(DNS, fileID);
     
     % Create PCMRI surfaces and other necessary setups
     create_surfaces_journal_TUI(dat_PC, cas, DNS, fileID);

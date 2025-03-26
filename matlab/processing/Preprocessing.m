@@ -10,8 +10,10 @@ subject = "s101_b";
 % b: 60 mm geometry with bottom pcMRI plane. b0/b1 for zero pressure top and bottom flow rate/velocity
 % cn or bn simmilar but with nerve roots. 
 
-case_name = "c1";
-mesh_size = [0.0002];
+case_name = {"c1","b1"}; % Array with the kind of simulations to do
+mesh_size = [0.0002];    % Array with the different mesh sizes to be simulated
+
+check_valid(case_name)
 
 ts_cycle = 100;     % number of time steps per cycle
 iterations_ts = 20; % iterations per time step
@@ -33,5 +35,18 @@ if cases_ready == true
         disp('Running ANSYS simulation...');
         run_ANSYS_simulations (cas, dat_PC, DNS_cases, n_cores)
     else
+    end
+end
+
+function check_valid(case_names)
+    valid_cases = ["c0","c1","c2","b0","b1","cn0","cn1","cn2","bn0","bn1"];
+
+    % Loop through each case to see if its valid
+    for i = 1:length(case_names)
+        this_case = string(case_names{i});
+        if ~ismember(this_case, valid_cases)
+            error("Invalid case name: '%s'. Must be one of: %s", ...
+                  this_case, strjoin(valid_cases, ", "));
+        end
     end
 end

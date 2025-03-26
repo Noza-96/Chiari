@@ -14,9 +14,9 @@ function run_simulation_TUI(dat_PC, cas, DNS, fileID)
     time_step = dat_PC.T{end}/DNS.ts_cycle;
     fprintf(fileID,"time-step "+time_step+" \n");
 
-    if contains(DNS.case, "c1")
+    if DNS.sim == 1
         prof_bound = {"bottom"}; % Only assign profile to bottom
-    elseif contains(DNS.case, "c2")
+    elseif DNS.sim == 2
         prof_bound = {"bottom", "top"}; % Two inlets
     end
 
