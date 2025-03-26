@@ -1,4 +1,4 @@
-function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores)
+function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_output)
     % Flag to stop program if any case file is missing
     stopProgram = false;
 
@@ -23,7 +23,7 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores)
 
         % Create and run the ANSYS journal
         create_journal(dat_PC, cas, DNS);
-        runFluentSimulation(DNS, DNS_cases{k}, n_cores);
+        runFluentSimulation(DNS, DNS_cases{k}, n_cores, visualize_output);
 
         % Finalize after simulation
         elapsed_time = toc;
@@ -46,9 +46,12 @@ function DNS = loadDNSData(cas, case_name)
 end
 
 % Helper function to run the Fluent simulation through terminal
-function runFluentSimulation(DNS, case_name, n_cores)
+function runFluentSimulation(DNS, case_name, n_cores, visualize_output)
     fluent_cmd = "fluent 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", case_name + ".jou") + """";
-    system(fluent_cmd + " > nul"); % Run with "> nul" to suppress terminal output
+    if visualize_output == 0
+        fluent_cmd = fluent_cmd + " > nul";
+    end
+    system(fluent_cmd); % Run with "> nul" to suppress terminal output
 end
 
 % Helper function to finalize simulation and save results
@@ -64,7 +67,7 @@ end
 
 % Function to create the ANSYS journal
 function create_journal(dat_PC, cas, DNS)
-    fileID = fopen(cas.diransys_in + "/" + DNS.case + ".jou", 'w');
+    fileID = fopen(fullfile(cas.diransys_in, DNS.case + ".jou"), 'w');
     
     % Setup simulation
     setup_Fluent_case_TUI(DNS, fileID);

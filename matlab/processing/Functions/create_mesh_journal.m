@@ -81,7 +81,7 @@ local_sizing = {"cord", "dura"}; % to which boundaries apply local sizing
     end
 
     if all_simulations
-        fprintf('All fluent cases already exist. Ready to run simulation!');
+        fprintf('All fluent cases already exist. Ready to run simulation!\n');
     end
 end
 
