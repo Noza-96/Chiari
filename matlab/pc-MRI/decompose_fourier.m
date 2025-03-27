@@ -68,9 +68,6 @@ function dat = decompose_fourier(cas, dat)
         drawnow
 
     end
-
-    disp("Paused... hit enter.")
-    pause
     
     dat.fou.M  = M;
     dat.fou.fm = fmidat;

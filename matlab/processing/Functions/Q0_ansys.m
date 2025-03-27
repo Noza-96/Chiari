@@ -45,7 +45,7 @@ function Q0_ansys(dat_PC, cas, modes, ts_cycle)
     plotFlowRates(QQ, cas, dat_PC);
 
     % Completion message
-    disp('3. Created text files with flow rates to introduce in ANSYS...');
+    disp('created .txt files with flow rates to introduce in ANSYS...');
 end
 
 function writeToFile(file_path, content)

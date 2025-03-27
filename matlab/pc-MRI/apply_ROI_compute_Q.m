@@ -39,7 +39,7 @@ function dat = apply_ROI_compute_Q(dat)
                 
                 UU = squeeze(U_SAS{idat}(:, :, it));
                 
-                UU_corr = (venc{idat}/pi) * unwrap_phase((pi/venc{idat}) * UU);
+                UU_corr = (venc{idat}/pi) * unwrap_phase(pi/venc{idat} * UU);
 
                 diffUUcorrUU = double(abs(UU_corr - UU) > 1.0e-6);
 

@@ -91,7 +91,7 @@ function MRI_locations(dat_PC, cas, ts_cycle)
 
     % Set x-ticks for all flow rate tiles
 
-    save_animation(movieVector, fullfile(cas.dirvid, "flow_measurements"));
+    save_animation(movieVector, fullfile(cas.dirvid, "flow_measurements.mp4"));
 
 end
 

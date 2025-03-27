@@ -1,4 +1,4 @@
-function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts_cycle, iterations_ts, cycles, delta_h_FM)
+function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts_cycle, iterations_ts, cycles, delta_h_FM, redo_initialization)
 
 
     ansys_path = full_path(fullfile(pwd, '..', '..', '..','computations','ansys'));
@@ -9,7 +9,7 @@ function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts
     DNS_cases = cell(length(case_name),length(mesh_size));
     
     % Check if it is the first time to run postprocessing or ts_cycle!=100
-    if isempty(dir(fullfile(cas.dirmat, 'DNS*'))) || ts_cycle ~= 100
+    if isempty(dir(fullfile(cas.dirmat, 'DNS*'))) || ts_cycle ~= 100 || redo_initialization
         disp('first time to run this subject, creating files...')
 
         % Create CSV files with velocity field information and pcmri.mat
