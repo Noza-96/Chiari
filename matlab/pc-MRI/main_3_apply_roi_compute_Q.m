@@ -1,14 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% cas.subj = 's101_b';
-% 
-% cas.model = 'SIEMENS'; % GE (Utah) or SIEMENS (Granada)
-% 
-% cas = scan_folders_set_cas(cas);
-% 
-% load([cas.dirmat, '/02-crop_set_roi.mat'], 'aux', 'cas', 'dat_PC');
-
-%% Above to be deleted
+if isempty(who)
+    [aux, cas, dat_PC] = run_if_empty('s101_b', 'SIEMENS');  % if skipping previous steps
+end
 
 disp([newline + "Applying ROIs and computing Q ..." + newline])
 
@@ -32,4 +25,9 @@ save([cas.dirmat, '/03-apply_roi_compute_Q.mat'], 'aux', 'cas', 'dat_PC');
 
 disp([newline + "Done!" + newline])
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [aux, cas, dat_PC] = run_if_empty(subject, model)
+        cas.subj = subject;
+        cas.model = model; % GE (Utah) or SIEMENS (Granada)
+        cas = scan_folders_set_cas(cas);
+        load([cas.dirmat, '/02-crop_set_roi.mat'], 'aux', 'cas', 'dat_PC');
+end
