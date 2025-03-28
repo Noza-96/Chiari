@@ -1,4 +1,0 @@
-z0-FM/01PC/csf_flow_puls_FM_venc08_P_56
-z1-C1C2/01PC/csf_flow_puls_C1C2_venc08_P_59
-z1-C2C3/01PC/csf_flow_puls_C2C3_venc08_P_62
-z1-C3C4/01PC/csf_flow_puls_C3C4_venc08_P_65
