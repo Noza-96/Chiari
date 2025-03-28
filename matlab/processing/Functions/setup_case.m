@@ -34,7 +34,7 @@ function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts
             % full ansys folder path
             DNS.ansys_path = ansys_path;
             
-            DNS.TUI_path = fullfile(cas.diransys_in, DNS.case);
+            DNS.TUI_path = fullfile(cas.diransys_in);
             
             % ansys working folder
             DNS.path_out_report = fullfile(cas.diransys_out,DNS.case);

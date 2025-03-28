@@ -1,0 +1,13 @@
+# encoding: utf-8
+# 2024 R1
+SetScriptVersion(Version="24.1.144")
+system1 = GetSystem(Name="Geom")
+geometry1 = system1.GetContainer(ComponentName="Geometry")
+geometry1.SetFile(FilePath="H:/My Drive/chiari-computations/segmentation/s101/ansys geometry/ansys_geometry.scdoc")
+geometryComponent1 = system1.GetComponent(Name="Geometry")
+geometryComponent1.Reset()
+geometry1.Edit(IsSpaceClaimGeometry=True)
+Save(Overwrite=True)
+Save(Overwrite=True)
+Save(Overwrite=True)
+geometry1.Exit()

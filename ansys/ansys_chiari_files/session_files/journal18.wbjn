@@ -1,0 +1,8 @@
+# encoding: utf-8
+# 2024 R1
+SetScriptVersion(Version="24.1.144")
+system1 = GetSystem(Name="FLTG 2")
+setup1 = system1.GetContainer(ComponentName="Setup")
+fluentLauncherSettings1 = setup1.GetFluentLauncherSettings()
+fluentLauncherSettings1.SetEntityProperties(Properties=Set(EnvPath={}))
+setup1.Edit()

@@ -30,6 +30,9 @@ function Q0_ansys(dat_PC, cas, modes, ts_cycle)
         % Assemble equation string
         equation_str = sprintf("(%s)*2E-6[m^3/s]", strjoin(equation_terms, ' '));
 
+        equation_str = regexprep(equation_str, '\+-', '- ');
+        equation_str = regexprep(equation_str, '-\s*-', '+ ');
+
         % Write equation to file
         file_path = fullfile(cas.diransys_in, file_names(k));
         writeToFile(file_path, equation_str);
@@ -43,14 +46,13 @@ function Q0_ansys(dat_PC, cas, modes, ts_cycle)
 
     % Plot flow rates
     plotFlowRates(QQ, cas, dat_PC);
-
     % Completion message
     disp('created .txt files with flow rates to introduce in ANSYS...');
 end
 
 function writeToFile(file_path, content)
     fid = fopen(file_path, 'wt');
-    fprintf(fid, '%s\n', content);
+    fprintf(fid, '%s', content);
     fclose(fid);
 end
 
@@ -70,4 +72,5 @@ function plotFlowRates(QQ, cas, dat_PC)
 
     % Set background color to white
     set(gcf, 'Color', 'w');
+    saveas(gcf, fullfile(cas.dirfig, "flow_rate_cord"), 'png');
 end
