@@ -24,39 +24,32 @@ function run_simulation_TUI(dat_PC, cas, DNS, fileID)
 
         
     for k=1:DNS.cycles
-       
-        if DNS.sim == 0  % Run simulation
-        % run full cycle 
-        fprintf(fileID,"/solve/dual-time-iterate "+DNS.ts_cycle+" "+DNS.iterations_ts+" ok ok \n");
-        else % Otherwise need to go iteration by iteration to load profiles
-            for n = 1:DNS.ts_cycle   
-                for boundary = prof_bound
-                    % load profile data
-                    fprintf(fileID,"/file/read-profile """+profile_dir+""+boundary{1}+"_prof_"+n+".csv"" \n");
+        for n = 1:DNS.ts_cycle   
+            for boundary = prof_bound
+                % load profile data
+                fprintf(fileID,"/file/read-profile """+profile_dir+""+boundary{1}+"_prof_"+n+".csv"" \n");
 
-                    % setup inlet velocity boundary condition 
-                    ID_prof = boundary+"_vel";
-                    fprintf(fileID,"/define/boundary-conditions/velocity-inlet "+boundary{1}+" no no yes yes yes no """+ID_prof+""" ""u1"" no 0. \n");
-                end
-                
-                % We have to proceed time step by time step
-                if (k==1) && (n==1)
-                    % hybrid initialization
-                    fprintf(fileID,"/solve/initialize/ initialize-flow \n");
-                    fprintf(fileID,"/solve/initialize/hyb-initialization yes \n");
-    
-                    % export surface mesh
-                    fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n", surface_path));
-    
-                    % run first iteration, with yes to continue
-                    fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
-                else
-                    % next iterationsss
-                    fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
-                end
+                % setup inlet velocity boundary condition 
+                ID_prof = boundary+"_vel";
+                fprintf(fileID,"/define/boundary-conditions/velocity-inlet "+boundary{1}+" no no yes yes yes no """+ID_prof+""" ""u1"" no 0. \n");
             end
-        end
-        
+            
+            % We have to proceed time step by time step
+            if (k==1) && (n==1)
+                % hybrid initialization
+                fprintf(fileID,"/solve/initialize/ initialize-flow \n");
+                fprintf(fileID,"/solve/initialize/hyb-initialization yes \n");
+
+                % export surface mesh
+                fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n", surface_path));
+
+                % run first iteration, with yes to continue
+                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
+            else
+                % next iterationsss
+                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
+            end
+        end         
     end
 
     % close fluent in the terminal
