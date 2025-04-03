@@ -1,4 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if isempty(who)
+    [aux, cas, dat_PC] = run_if_empty('s101_a', 'SIEMENS');  % if skipping previous steps
+end
 
 reference_location = 'C03C04'; 
 % (set to 'zero' to set location to 0.0)
@@ -37,3 +40,10 @@ save([cas.dirmat, '/02-crop_set_roi.mat'], 'aux', 'cas', 'dat_PC');
 disp([newline + "Done!" + newline])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [aux, cas, dat_PC] = run_if_empty(subject, model)
+        cas.subj = subject;
+        cas.model = model; % GE (Utah) or SIEMENS (Granada)
+        cas = scan_folders_set_cas(cas);
+        load([cas.dirmat, '/01-read_dat.mat'], 'aux', 'cas', 'dat_PC');
+end
