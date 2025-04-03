@@ -70,7 +70,28 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
         % Normalize the normal vector
         nv{ii} = nn / norm(nn);
 
-        %% ANSYS profiles
+        %% Create plane pcMRI location
+    
+        % Open the file for writing                                 
+        filename = fullfile(cas.diransys_in, "planes", cas.locations{ii}+".txt");
+        % Create directory if it doesn't exist
+        if ~exist(fileparts(filename), 'dir')
+            mkdir(folderpath);
+        end
+    
+        fileID = fopen(filename, 'w');
+        % Write the headers
+        fprintf(fileID, '3d=True\n');
+        fprintf(fileID, 'polyline=False\n\n');
+    
+        % Write the coordinates column by column
+        data = [z_coords(:), x_coords(:), y_coords(:)];
+        fprintf(fileID, '%f %f %f\n', data.');
+    
+        % Close the file
+        fclose(fileID);
+
+        %% ANSYS profiles and clip planes
         if any(loc_ID == ii)
             index = find(loc_ID == ii);
             % Open the file for writing
@@ -119,7 +140,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
             end
             fprintf('profile saved for %s pc-MRI measurement ...  \n', sstt{index});
         end
-        
+
     end
 
 % Create the structure
