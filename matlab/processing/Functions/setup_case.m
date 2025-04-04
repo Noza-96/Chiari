@@ -39,9 +39,9 @@ function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts
             % ansys working folder
             DNS.path_out_report = fullfile(cas.diransys_out,DNS.case);
             
-            
+            % reports at each time step 
             DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
-            DNS.slices.locations = [cas.locations(1:end-1), "bottom", "FM-"+delta_h_FM, "top"]';
+            DNS.slices.locations = [cas.locations(1:end-1), "bottom", "top"]';
             DNS.cycles = cycles;
             DNS.delta_h_FM = delta_h_FM;
             DNS.iterations_ts = iterations_ts;

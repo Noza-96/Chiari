@@ -188,11 +188,17 @@ def save_plane_points(segmentation_path):
     # Output the results
     print("plane data saved to .txt files")
 
-def clear_stl_files_only(stl_folder):
+def clear_stl_folde(stl_folder):
     """Deletes files inside the stl folder"""
     if os.path.exists(stl_folder):
         [os.remove(os.path.join(stl_folder, f)) for f in os.listdir(stl_folder) if os.path.isfile(os.path.join(stl_folder, f))]
 
+# Function to remove all .stl files in the export folder
+def clear_stl_files(stl_folder):
+    if os.path.exists(export_folder):
+        for file in os.listdir(export_folder):
+            if file.endswith(".stl"):
+                os.remove(os.path.join(export_folder, file))
 # Get Patient ID from the user
 pid = get_patient_id()
 if not pid:
@@ -228,6 +234,7 @@ assign_to_slices(volume_with_max_z, volume_with_min_z, volume_with_mid_z)
 # Adjust the slice views
 adjust_slice_views()
 
+file_saved = False
 # Apply a linear transformation to the segmentation to align it with the sequence segmentation
 # 1. Load existing transformed segmentation, if it exists
 transformed_geometry_path = os.path.join(segmentation_path, 'stl', 'segmentation.stl')
@@ -238,64 +245,95 @@ if os.path.exists(transformed_geometry_path):
         segmentation_node = slicer.util.loadSegmentation(transformed_geometry_path)
         segmentation_node.SetName("segmentation")
         display_segmentation_3D(segmentation_node)
-# 2. Manually adjust the transformation if desired
-response = QMessageBox.question(None, 'Manual Linear Transformation', 'Do you want to adjust the transformation manually?', QMessageBox.Yes | QMessageBox.No)
-if response == QMessageBox.Yes:
-    # Open the GUI Module Transforms on Slicer3D
-    slicer.util.selectModule('Transforms')
-    # Create a new transform node
-    transform_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ManualTransform")
-    # Create a vtkTransform object
-    vtk_transform = vtk.vtkTransform()
-    # TODO: set the Active Transform to the new transform node
-    # Apply the transform to the segmentation node
-    segmentation_node = slicer.util.getNode('segmentation')
-    segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
-    segmentation_display_node = segmentation_node.GetDisplayNode()
-    display_segmentation_3D(segmentation_node, opacity2D=0.2)
 
-    while True:
-        user_input = input('Type "ok" when you have finished the manual transformation: ')
-        if user_input.lower() == 'ok':
+        # # Export the transformed segmentation as an STL file
+        # response = QMessageBox.question(None, 'Export STL', 'Do you want update stl file?', QMessageBox.Yes | QMessageBox.No)
+        # if response == QMessageBox.Yes:
+        #     export_folder = os.path.join(segmentation_path, 'stl')
+        #     if not os.path.exists(export_folder):
+        #         os.makedirs(export_folder)
 
-            # Export the transformed segmentation as an STL file
-            response = QMessageBox.question(None, 'Export STL', 'Do you want to save results?', QMessageBox.Yes | QMessageBox.No)
-            if response == QMessageBox.Yes:
-                export_folder = os.path.join(segmentation_path, 'stl')
-                if not os.path.exists(export_folder):
-                    os.makedirs(export_folder)
+        #     clear_stl_files(export_folder)
 
-                # Clear the STL folder before saving the new file
-                clear_stl_files_only(export_folder)
+        #     # Ensure the segment inside the segmentation node has a unique name
+        #     segmentation = segmentation_node.GetSegmentation()
+        #     segment_id = segmentation.GetNthSegmentID(0)  # Get the first segment ID
+        #     segmentation.GetSegment(segment_id).SetName("main_segment")  # Rename the segment to avoid duplication
 
-                # Save transformation matrix
-                transform_matrix_path = os.path.join(segmentation_path, 'stl', 'transformation_matrix.txt')
-                save_transformation_matrix(transform_node, transform_matrix_path)
+        #     # Export the segmentation to STL
+        #     exporter = slicer.vtkSlicerSegmentationsModuleLogic()
+        #     exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
 
-                # Apply the transformation to the volume
-                volume_node.SetAndObserveTransformNodeID(transform_node.GetID())
+        #     # Find the exported STL file (it should be the only STL file in the folder)
+        #     exported_files = [f for f in os.listdir(export_folder) if f.endswith(".stl") and not f.startswith("._")]
 
-                # Harden the transformation (apply it permanently)
-                slicer.vtkSlicerTransformLogic().hardenTransform(volume_node)
+        #     # If only one STL file is found, rename it
+        #     if len(exported_files) == 1:
+        #         default_filename = os.path.join(export_folder, exported_files[0])  # Get the exported STL file
+        #         new_filename = os.path.join(export_folder, "segmentation.stl")
+        #         os.rename(default_filename, new_filename)
+        #         print("segmentation.stl updated in stl folder")
+        #         file_saved = True
 
-                # Save the transformed volume in the STL folder
-                transformed_anatomy_path = os.path.join(segmentation_path, 'stl', 'transformed_anatomy.nrrd')
-                slicer.util.saveNode(volume_node, transformed_anatomy_path)
+if not file_saved:
+    # 2. M  anually adjust the transformation if desired
+    response = QMessageBox.question(None, 'Manual Linear Transformation', 'Do you want to adjust the transformation manually?', QMessageBox.Yes | QMessageBox.No)
+    if response == QMessageBox.Yes:
+        # Open the GUI Module Transforms on Slicer3D
+        slicer.util.selectModule('Transforms')
+        # Create a new transform node
+        transform_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ManualTransform")
+        # Create a vtkTransform object
+        vtk_transform = vtk.vtkTransform()
+        # TODO: set the Active Transform to the new transform node
+        # Apply the transform to the segmentation node
+        segmentation_node = slicer.util.getNode('segmentation')
+        segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
+        segmentation_display_node = segmentation_node.GetDisplayNode()
+        display_segmentation_3D(segmentation_node, opacity2D=0.2)
 
-                # Export the segmentation to STL
-                exporter = slicer.vtkSlicerSegmentationsModuleLogic()
-                exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
+        while True:
+            user_input = input('Type "ok" when you have finished the manual transformation: ')
+            if user_input.lower() == 'ok':
 
-                # Find the exported STL file (it should be the only STL file in the folder)
-                exported_files = [f for f in os.listdir(export_folder) if f.endswith(".stl") and not f.startswith("._")]
+                # Export the transformed segmentation as an STL file
+                response = QMessageBox.question(None, 'Export STL', 'Do you want to save results?', QMessageBox.Yes | QMessageBox.No)
+                if response == QMessageBox.Yes:
+                    export_folder = os.path.join(segmentation_path, 'stl')
+                    if not os.path.exists(export_folder):
+                        os.makedirs(export_folder)
 
-                # If only one STL file is found, rename it
-                default_filename = os.path.join(export_folder, exported_files[0])  # Get the exported STL file
-                new_filename = os.path.join(export_folder, "segmentation.stl")
-                os.rename(default_filename, new_filename)
+                    # Clear the STL folder before saving the new file
+                    clear_stl_folde(export_folder)
 
-                # Output the results
-                print("transformation_matrix.txt, segmentation.stl and transformed_anatomy.nrrd saved in stl folder")
-            break
+                    # Save transformation matrix
+                    transform_matrix_path = os.path.join(segmentation_path, 'stl', 'transformation_matrix.txt')
+                    save_transformation_matrix(transform_node, transform_matrix_path)
+
+                    # Apply the transformation to the volume
+                    volume_node.SetAndObserveTransformNodeID(transform_node.GetID())
+
+                    # Harden the transformation (apply it permanently)
+                    slicer.vtkSlicerTransformLogic().hardenTransform(volume_node)
+
+                    # Save the transformed volume in the STL folder
+                    transformed_anatomy_path = os.path.join(segmentation_path, 'stl', 'transformed_anatomy.nrrd')
+                    slicer.util.saveNode(volume_node, transformed_anatomy_path)
+
+                    # Export the segmentation to STL
+                    exporter = slicer.vtkSlicerSegmentationsModuleLogic()
+                    exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
+
+                    # Find the exported STL file (it should be the only STL file in the folder)
+                    exported_files = [f for f in os.listdir(export_folder) if f.endswith(".stl") and not f.startswith("._")]
+
+                    # If only one STL file is found, rename it
+                    default_filename = os.path.join(export_folder, exported_files[0])  # Get the exported STL file
+                    new_filename = os.path.join(export_folder, "segmentation.stl")
+                    os.rename(default_filename, new_filename)
+
+                    # Output the results
+                    print("transformation_matrix.txt, segmentation.stl and transformed_anatomy.nrrd saved in stl folder")
+                break
 
     

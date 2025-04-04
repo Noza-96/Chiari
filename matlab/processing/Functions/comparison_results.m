@@ -20,7 +20,7 @@ function comparison_results(cas, case_name, mesh_size)
     % Preallocate movie vector
     numFrames = st_DNS{1}.ts_cycle;
     movieVector(numFrames) = struct('cdata', [], 'colormap', []);
-    load(fullfile(cas.dirmat, "bottom_velocity.mat"),'q');
+    % load(fullfile(cas.dirmat, "pcmri_vel.mat"),'pcmri');
 
     % Loop through time steps
     for n = 1:numFrames

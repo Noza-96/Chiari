@@ -8,8 +8,8 @@ addpath('Functions/Others/')
 subject = "s101_b";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
-case_name = {"c2","c1"}; 
-mesh_size = [0.0002];
+case_name = {"b1"}; 
+mesh_size = [0.0005];
 
 % read ansys reports and save solution in .mat file
 [cas, dat_PC, case_reports] = read_ansys_reports(subject, case_name, mesh_size);
@@ -20,15 +20,15 @@ for case_DNS = case_reports
     load(fullfile(cas.dirmat, "DNS_"+case_DNS{1}+".mat"), 'DNS');
     
     % 2. Create 3D animations with velocity results into spinal canal geometry
-    animation_3D(cas, dat_PC, DNS)
+    % animation_3D(cas, dat_PC, DNS)
 
     % 3. Longitudinal impedance - Pressure drop and Flow rate
     longitudinal_impedance(cas, DNS)
 end
 
 %% 4. Comparison PC-MRI with Ansys solution -- Animation
-case_name = {"c1", "c1", "c2"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
-mesh_size = [0.0002];
+case_name = {"b1"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
+mesh_size = [0.0005];
 
 comparison_results(cas, case_name, mesh_size)
 
@@ -36,8 +36,8 @@ comparison_results(cas, case_name, mesh_size)
 close all
 locations = cellfun(@(x) strrep(x, '0', ''), cas.locations, 'UniformOutput', false);
 
-case_name = {"c1","c2"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
-mesh_size = [0.0002];
+case_name = {"c2"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
+mesh_size = [0.0005];
 case_report = case_name+"_dx"+formatDecimal(mesh_size);
 
 figure
@@ -87,7 +87,7 @@ xlabel("$t/T$", 'Interpreter','latex', FontSize=12)
 saveas(gcf, fullfile(cas.dirfig, "u_max_mri"), 'png');
 %%
 
-case_name = {"c1","c2"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
+case_name = {"c2"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 mesh_size = [0.0002];
 case_report = case_name+"_dx"+formatDecimal(mesh_size);
 

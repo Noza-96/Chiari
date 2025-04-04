@@ -14,11 +14,20 @@ function create_surfaces_journal_TUI(dat_PC, cas, DNS, fileID)
     for loc = 1:(N-1) %skip FM and last location
         XYZ = three_point_plane(dat_PC, loc);
         create_plane (fileID,XYZ,cas.locations{loc})
-        if loc == 1
+        if loc == 1 && DNS.geom == 'c'
             XYZ(:,3) = XYZ(:,3) - DNS.delta_h_FM/1000; % create plane DNS.delta_h_FM/1000 lower FM (default 25 mm)
-            create_plane (fileID,XYZ,"FM-"+num2str(DNS.delta_h_FM))
+            create_plane (fileID,XYZ,"top-"+num2str(DNS.delta_h_FM))
         end
     end
+
+    if DNS.geom == 'b'
+        % get the coordinates of caudal inlet
+        XYZ = three_point_plane(dat_PC, dat_PC.Ndat);
+        % get plane 25 mm below top plane (60 mm above C3C4)
+        XYZ(:,3) = XYZ(:,3) + (60-DNS.delta_h_FM)/1000; 
+        create_plane (fileID,XYZ,"top-"+num2str(DNS.delta_h_FM))
+    end
+
 
     % Create surface to export later
     zone_names = {'cord', 'dura'};

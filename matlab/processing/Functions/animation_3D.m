@@ -31,7 +31,7 @@ function animation_3D(cas, dat_PC, DNS)
     v = vertcat(DNS.slices.v{1:dat_PC.Ndat}) * 100;
     w = vertcat(DNS.slices.w{1:dat_PC.Ndat}) * 100;
 
-    load(fullfile(cas.dirmat, "bottom_velocity.mat"),'q');
+    load(fullfile(cas.dirmat, "pcmri_vel.mat"),'pcmri');
 
     figure;
     set(gcf, 'Position', [200, 100, 400, 800], 'Color', 'w');
@@ -40,7 +40,7 @@ function animation_3D(cas, dat_PC, DNS)
 
     % Create ax1 (inset) only once
     ax1 = axes('Position', [0.25 0.25 0.2 0.08], 'Box', 'on', 'Color', 'w');
-    flow_rate(q, 0);
+    flow_rate(pcmri.q{end}, 0);
     ylim([-2,2]);
     ylabel("$Q\left[{\rm ml/s}\right]$", 'interpreter', 'latex', 'FontSize', fs);
     xlabel("$t/T$", 'interpreter', 'latex', 'FontSize', fs);

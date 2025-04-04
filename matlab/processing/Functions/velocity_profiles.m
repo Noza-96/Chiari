@@ -2,7 +2,7 @@
 function velocity_profiles (dat_PC, cas, ts_cycle)
 
     loc_ID = [1,dat_PC.Ndat];
-    sstt = {"top", "bottom"};
+    sstt = {"top_c", "bottom"};
 
     x = cell(1,dat_PC.Ndat);
     y = cell(1,dat_PC.Ndat);
@@ -76,7 +76,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
         filename = fullfile(cas.diransys_in, "planes", cas.locations{ii}+".txt");
         % Create directory if it doesn't exist
         if ~exist(fileparts(filename), 'dir')
-            mkdir(folderpath);
+            mkdir(fileparts(filename));
         end
     
         fileID = fopen(filename, 'w');
@@ -95,7 +95,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
         if any(loc_ID == ii)
             index = find(loc_ID == ii);
             % Open the file for writing
-            filename = fullfile(cas.diransys_in, sstt{index}+"_plane.txt");
+            filename = fullfile(cas.diransys_in, "planes", sstt{index}+"_plane.txt");
             fileID = fopen(filename, 'w');
             % Write the headers
             fprintf(fileID, '3d=True\n');
@@ -111,7 +111,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
             fprintf('%s_plane.txt created ... \n', sstt{index});
 
             % Create CSV file
-            filename = "empty_inlet_vel.csv";  
+            filename = fullfile("Functions","empty_inlet_vel.csv");  
             data = readcell(filename);
             row = 10; 
             n_data = length(x{ii});
@@ -121,7 +121,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
     
             data(8, 1) = {strcat(sstt{index}, "_vel")};
     
-            if sstt{index} == "top"
+            if sstt{index} == "top_c"
                 normal_v = -uu;
             elseif sstt{index} == "bottom"
                 normal_v = uu;
@@ -139,6 +139,25 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
                 writetable(dataTable, filename, 'WriteVariableNames', false);
             end
             fprintf('profile saved for %s pc-MRI measurement ...  \n', sstt{index});
+        end
+
+        % Create top plane b 60 mm from C3-C4
+        if ii == dat_PC.Ndat
+            % Open the file for writing
+            filename = fullfile(cas.diransys_in, "planes", "top_b_plane.txt");
+            fileID = fopen(filename, 'w');
+            % Write the headers
+            fprintf(fileID, '3d=True\n');
+            fprintf(fileID, 'polyline=False\n\n');
+    
+            % Write the coordinates column by column
+            data = [z_coords(:)+60, x_coords(:), y_coords(:)];
+            fprintf(fileID, '%f %f %f\n', data.');
+        
+            % Close the file
+            fclose(fileID);
+        
+            fprintf('top_b_plane.txt created ... \n');
         end
 
     end

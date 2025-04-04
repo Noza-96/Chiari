@@ -17,16 +17,18 @@ function longitudinal_impedance(cas, DNS)
 
     % Plot flow rate and pressure jump
     figure;
+    set(gcf, 'Position', [200, 100, 400, 200], 'Color', 'w');
     tiledlayout(1, 2);
 
     % Flow rate subplot
     nexttile;
     flow_rate(q * 1e6, 0); % Convert to [ml/s] and plot
+    ylabel("$Q [{\rm ml/s}]$", 'Interpreter', 'latex', 'FontSize', fs);
 
     % Pressure jump subplot
     nexttile;
     flow_rate(dp, 0);
-    ylabel("$\Delta p [{\rm Pa}]$", 'Interpreter', 'latex', 'FontSize', fs);
+    ylabel("$\Delta p_{25\,{\rm mm}} [{\rm Pa}]$", 'Interpreter', 'latex', 'FontSize', fs);
     ylim([min(dp(:)), max(dp(:))]);
 
     % Fourier analysis
