@@ -4,8 +4,10 @@ function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts
     ansys_path = full_path(fullfile(pwd, '..', '..', '..','computations','ansys'));
     ansys_path = replace(ansys_path, "\", "/");
     
-    load(fullfile("../../../computations", "pc-mri", subject, "mat","03-apply_roi_compute_Q.mat"), 'cas','dat_PC');
-    
+    % load(fullfile("../../../computations", "pc-mri", subject, "mat","03-apply_roi_compute_Q.mat"), 'cas','dat_PC');
+
+    load(fullfile("../../../computations", "pc-mri", subject, "mat","UPFM", "03-apply_roi_compute_Q.mat"), 'cas','dat_PC');
+
     DNS_cases = cell(length(case_name),length(mesh_size));
     
     % Check if it is the first time to run postprocessing or ts_cycle!=100

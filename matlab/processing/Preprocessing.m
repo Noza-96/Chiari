@@ -4,13 +4,13 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_b";
+subject = "s101_a";
 
 % c: geometry bounded with 2 pcMRI planes. c0/c1 for zero pressure top and bottom flow rate/velocity, c2 for two inlet velocities and permeable cord
 % b: 60 mm geometry with bottom pcMRI plane. b0/b1 for zero pressure top and bottom flow rate/velocity
 % cn or bn simmilar but with nerve roots. 
 
-case_name = {"c0", "b0", "b1", "c1", "c2"}; % Array with the kind of simulations to do
+case_name = {"c0"}; % Array with the kind of simulations to do
 mesh_size = [0.0005];    % Array with the different mesh sizes to be simulated
 
 
@@ -22,7 +22,7 @@ n_cores = 10;       % number of processors simulation
 
 check_valid_case(case_name)
 
-redo_initialization = 0 ; 
+redo_initialization = 1 ; 
 
 % Create DNS.mat files with the information
 [DNS_cases, cas, dat_PC]  = setup_case(subject, case_name, mesh_size, ts_cycle, iterations_ts, cycles, delta_h_FM, redo_initialization);
