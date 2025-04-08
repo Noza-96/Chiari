@@ -1,9 +1,10 @@
-function cas = scan_folders_set_cas(cas)
+function cas = scan_folders_set_cas(cas, single_reading)
 
 % Computations folder
 cas.dircloud = fullfile('..', '..', '..','computations');
 % DICOM folder
 cas.dirdcm = fullfile('..', '..', '..','patient-data',cas.subj,'flow');
+
 % Save data folder
 cas.dirdat = fullfile(cas.dircloud,'pc-mri');
 
@@ -102,13 +103,17 @@ end
     
     if Ncas_PC > 0
         for nn = 1:Ncas_PC
-            names_PC{nn} = strrep(folders_PC{nn},'/','-');
-            zones_PC{nn} = folders_PC{nn}(1:2);
+            % include only data 
             ind = strfind(folders_PC{nn}, '/')-1;
             ind = ind(1);
-            locations_PC{nn} = folders_PC{nn}(4:ind);
-            icas_PC{nn} = str2num(folders_PC{nn}(11:12));
-            tech_PC{nn} = 'PC';
+            location_PCMRI = folders_PC{nn}(4:ind);
+            if any(strcmp(folders_PC{nn}(4:ind), [single_reading{:}])) || isempty(single_reading)
+                locations_PC{nn} = location_PCMRI;
+                names_PC{nn} = strrep(folders_PC{nn},'/','-');
+                zones_PC{nn} = folders_PC{nn}(1:2);
+                icas_PC{nn} = str2num(folders_PC{nn}(11:12));
+                tech_PC{nn} = 'PC';
+            end
         end
     else
         folders_PC = {};

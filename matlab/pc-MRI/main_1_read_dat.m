@@ -5,6 +5,9 @@ cas.subj = 's101_a';
 
 cas.model = 'SIEMENS'; % GE (Utah) or SIEMENS (Granada)
 
+% choose which dicom files to read, for all use {}
+single_reading = {"FM1", "FM2"}; 
+
 resettimevector = false;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -14,7 +17,7 @@ aux.fig_opts = set_plotting_style;
 
 disp([newline + "Setting up folders ..." + newline])
 
-cas = scan_folders_set_cas(cas);
+cas = scan_folders_set_cas(cas, single_reading);
 
 if cas.Ncas_PC > 0
     disp([newline + "Reading PC DICOMS ..." + newline])
@@ -33,7 +36,14 @@ end
 
 disp([newline + "Saving everything in a .mat file ..." + newline])
 
-save([cas.dirmat, '/01-read_dat.mat'], 'aux', 'cas', 'dat_PC');
+
+if isempty(single_reading) 
+    sstt_name = {};
+else
+    sstt_name = strjoin(single_reading, '-');
+end
+
+save(fullfile(cas.dirmat, "01-"+sstt_name+"read_dat.mat"), 'aux', 'cas', 'dat_PC');
 
 % Figure to visualize locations pc-mri measurements in read_dicoms_pc
 

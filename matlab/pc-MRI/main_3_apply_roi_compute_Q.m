@@ -21,7 +21,7 @@ dat_PC = decompose_fourier(cas, dat_PC);
 
 disp([newline + "Saving everything in a .mat file ..." + newline])
 
-save([cas.dirmat, '/03-apply_roi_compute_Q.mat'], 'aux', 'cas', 'dat_PC');
+save([cas.dirmat, "/03-"+sstt_name+"apply_roi_compute_Q.mat"], 'aux', 'cas', 'dat_PC');
 
 disp([newline + "Done!" + newline])
 

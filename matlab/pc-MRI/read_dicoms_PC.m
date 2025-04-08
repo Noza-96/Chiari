@@ -1,4 +1,4 @@
-function dat = read_dicoms_PC(cas, resettimevector)
+function dat = read_dicoms_PC(cas, resettimevector, single_reading)
 
     Ndat = length(cas.folders_PC);
 

@@ -35,7 +35,7 @@ dat_PC = define_ROI_video(cas, dat_PC);
 
 disp([newline + "Saving everything in a .mat file ..." + newline])
 
-save([cas.dirmat, '/02-crop_set_roi.mat'], 'aux', 'cas', 'dat_PC');
+save([cas.dirmat, "/02-"+sstt_name+"crop_set_roi.mat"], 'aux', 'cas', 'dat_PC');
 
 disp([newline + "Done!" + newline])
 
@@ -45,5 +45,5 @@ function [aux, cas, dat_PC] = run_if_empty(subject, model)
         cas.subj = subject;
         cas.model = model; % GE (Utah) or SIEMENS (Granada)
         cas = scan_folders_set_cas(cas);
-        load([cas.dirmat, '/01-read_dat.mat'], 'aux', 'cas', 'dat_PC');
+        load([cas.dirmat, "01-"+sstt_name+"read_dat.mat"], 'aux', 'cas', 'dat_PC');
 end
