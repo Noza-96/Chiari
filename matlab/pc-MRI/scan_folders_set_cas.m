@@ -67,6 +67,14 @@ end
     folders_PC_MAG = regexp(strfolders_PC_MAG, '\r\n|\r|\n', 'split');
     folders_PC_MAG(end) = [];
 
+    % fileter folders to those containing single reading
+    if ~isempty(single_reading)
+        folders_PC = filter_folders_by_keywords(folders_PC, single_reading);
+        folders_PC_ = filter_folders_by_keywords(folders_PC_, single_reading);
+        folders_PC_P = filter_folders_by_keywords(folders_PC_P, single_reading);
+        folders_PC_MAG = filter_folders_by_keywords(folders_PC_MAG, single_reading);
+    end
+
     strfolders_RT = fileread('./aux_RT/folders.txt');
     folders_RT = regexp(strfolders_RT, '\r\n|\r|\n', 'split');
     folders_RT(end) = [];
@@ -106,14 +114,11 @@ end
             % include only data 
             ind = strfind(folders_PC{nn}, '/')-1;
             ind = ind(1);
-            location_PCMRI = folders_PC{nn}(4:ind);
-            if any(strcmp(folders_PC{nn}(4:ind), [single_reading{:}])) || isempty(single_reading)
-                locations_PC{nn} = location_PCMRI;
-                names_PC{nn} = strrep(folders_PC{nn},'/','-');
-                zones_PC{nn} = folders_PC{nn}(1:2);
-                icas_PC{nn} = str2num(folders_PC{nn}(11:12));
-                tech_PC{nn} = 'PC';
-            end
+            locations_PC{nn} = folders_PC{nn}(4:ind);
+            names_PC{nn} = strrep(folders_PC{nn},'/','-');
+            zones_PC{nn} = folders_PC{nn}(1:2);
+            icas_PC{nn} = str2num(folders_PC{nn}(11:12));
+            tech_PC{nn} = 'PC';
         end
     else
         folders_PC = {};
@@ -240,10 +245,39 @@ function createOrCleanDir(dirPath)
     if ~isfolder(dirPath)
         mkdir(dirPath);
     else
-        delete(fullfile(dirPath, '*'));
+        rmdir(fullfile(dirPath, '*'));
     end
 end
 
 function absolutePath = full_path(folder_path)
     absolutePath = char(java.io.File(folder_path).getCanonicalPath());
+end
+
+function filtered = filter_folders_by_keywords(folders, keywords)
+% FILTER_FOLDERS_BY_KEYWORDS Filters a cell array of folder paths
+%   Only matches keywords that appear directly after 'flow/z#-' in the path.
+
+    folders_str = string(folders);
+    keywords_str = string(keywords);
+
+    % Initialize logical index
+    keep_idx = false(size(folders_str));
+
+    % Loop through folder paths
+    for i = 1:numel(folders_str)
+        % Extract identifier after 'flow/z#-'
+        tokens = regexp(folders_str(i), "z\d+-(\w+)", "tokens");
+        if ~isempty(tokens)
+            id = tokens{1}{1}; % Get the matched part after 'z#-'
+            for j = 1:numel(keywords_str)
+                if strcmp(id, keywords_str(j)) % exact match only
+                    keep_idx(i) = true;
+                    break;
+                end
+            end
+        end
+    end
+
+    % Return filtered folders
+    filtered = cellstr(folders_str(keep_idx));
 end

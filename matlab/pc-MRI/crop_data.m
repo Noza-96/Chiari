@@ -1,6 +1,12 @@
-function dat = crop_data(cas, dat, croppedsize)
+function dat = crop_data(cas, dat, croppedsize, single_reading)
 
-    if exist([cas.dirmat, '/crop_xc_yc.mat']) == 0
+    if isempty(single_reading) 
+        sstt_name = {};
+    else
+        sstt_name = strjoin(cellstr(string(single_reading)), '-');
+    end
+
+    if exist(fullfile(cas.dirmat, sstt_name+"crop_xc_yc.mat")) == 0
 
         set_new_cropping = true;
         
@@ -13,7 +19,7 @@ function dat = crop_data(cas, dat, croppedsize)
         if answer == 'n'
             set_new_cropping = true;
         else
-            load([cas.dirmat, '/crop_xc_yc.mat']);
+            load(fullfile(cas.dirmat, sstt_name+"crop_xc_yc.mat"));
             set_new_cropping = false;
             disp("Using the previous cropping position.")
         end
@@ -52,7 +58,7 @@ function dat = crop_data(cas, dat, croppedsize)
 
         close(fh)
 
-        save([cas.dirmat, '/crop_xc_yc.mat'], 'crop_xc_yc')
+        save(fullfile(cas.dirmat, sstt_name+"crop_xc_yc.mat"), 'crop_xc_yc')
 
 
     end

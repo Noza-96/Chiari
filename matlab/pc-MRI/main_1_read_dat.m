@@ -6,7 +6,7 @@ cas.subj = 's101_a';
 cas.model = 'SIEMENS'; % GE (Utah) or SIEMENS (Granada)
 
 % choose which dicom files to read, for all use {}
-single_reading = {"FM1", "FM2"}; 
+single_reading = {"UPFM"}; 
 
 resettimevector = false;
 
@@ -20,27 +20,30 @@ disp([newline + "Setting up folders ..." + newline])
 cas = scan_folders_set_cas(cas, single_reading);
 
 if cas.Ncas_PC > 0
-    disp([newline + "Reading PC DICOMS ..." + newline])
+    disp(["Reading PC DICOMS ..." + newline])
     dat_PC = read_dicoms_PC(cas, resettimevector);
 end
 
 if cas.Ncas_RT > 0
-    disp([newline + "Reading RT DICOMS ..." + newline])
+    disp(["Reading RT DICOMS ..." + newline])
     dat_RT = read_dicoms_RT(cas, resettimevector);
 end
 
 if cas.Ncas_FM > 0
-    disp([newline + "Reading FM DICOMS ..." + newline])
+    disp(["Reading FM DICOMS ..." + newline])
     dat_FM = read_dicoms_FM(cas);
 end
 
-disp([newline + "Saving everything in a .mat file ..." + newline])
+disp(["Saving everything in a .mat file ..." + newline])
 
 
 if isempty(single_reading) 
     sstt_name = {};
 else
-    sstt_name = strjoin(single_reading, '-');
+    sstt_name = strjoin(cellstr(string(single_reading)), '-');
+    if ~endsWith(sstt_name, '-')
+    sstt_name = sstt_name + "-";
+    end
 end
 
 save(fullfile(cas.dirmat, "01-"+sstt_name+"read_dat.mat"), 'aux', 'cas', 'dat_PC');

@@ -1,9 +1,13 @@
-function dat = define_ROI_video(cas, dat)
+function dat = define_ROI_video(cas, dat, single_reading)
 
-    if exist([cas.dirmat, '/ROI.mat']) == 0
+    if isempty(single_reading) 
+        sstt_name = {};
+    else
+        sstt_name = strjoin(cellstr(string(single_reading)), '-');
+    end
 
-        set_new_ROI = true;
-        
+    if exist(fullfile(cas.dirmat, sstt_name+"ROI.mat")) == 0
+        set_new_ROI = true;       
     else
 
         disp("Previous ROI found.")
@@ -13,7 +17,7 @@ function dat = define_ROI_video(cas, dat)
         if answer == 'n'
             set_new_ROI = true;
         else
-            load([cas.dirmat, '/ROI.mat']);
+            load(fullfile(cas.dirmat, sstt_name+"ROI.mat"));
             set_new_ROI = false;
             disp("Using the previous ROI ...")
         end
@@ -185,7 +189,7 @@ function dat = define_ROI_video(cas, dat)
 
         end
 
-        save([cas.dirmat, '/ROI.mat'], 'ROI_SAS', 'ROI_SPC', 'ROI_COR')
+        save(fullfile(cas.dirmat, sstt_name+"ROI.mat"), 'ROI_SAS', 'ROI_SPC', 'ROI_COR')
     
     end
 
