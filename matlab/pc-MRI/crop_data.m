@@ -1,7 +1,7 @@
 function dat = crop_data(cas, dat, croppedsize, single_reading)
 
     if isempty(single_reading) 
-        sstt_name = {};
+        sstt_name = "";
     else
         sstt_name = strjoin(cellstr(string(single_reading)), '-');
     end

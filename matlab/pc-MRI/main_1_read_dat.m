@@ -5,8 +5,8 @@ cas.subj = 's101_a';
 
 cas.model = 'SIEMENS'; % GE (Utah) or SIEMENS (Granada)
 
-% choose which dicom files to read, for all use {}
-single_reading = {"UPFM"}; 
+% allow to filter folders. If single_reading = {} all cases
+single_reading = {}; 
 
 resettimevector = false;
 
@@ -38,7 +38,7 @@ disp(["Saving everything in a .mat file ..." + newline])
 
 
 if isempty(single_reading) 
-    sstt_name = {};
+    sstt_name = "";
 else
     sstt_name = strjoin(cellstr(string(single_reading)), '-');
     if ~endsWith(sstt_name, '-')

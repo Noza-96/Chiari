@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if isempty(who)
-    [aux, cas, dat_PC, single_reading] = run_if_empty('s101_a', 'SIEMENS');  % if skipping previous steps
-end
+clear; close all; 
 
-reference_location = 'C03C04'; 
+[aux, cas, dat_PC, single_reading] = run_if_empty('s101_a', 'SIEMENS');  % if skipping previous steps
+
+reference_location = 'C3C4'; 
 % (set to 'zero' to set location to 0.0)
 % (set to 'fromsag' to replace ljocations with those from sagittal geometry)
 % (e.g. 'C02C03' to shift all locations so that the C02C03 locations coincides with sagittal geometry)
@@ -31,9 +31,18 @@ end
 disp([newline + "Setting up ROIs ..." + newline])
 
 %dat_PC = define_ROI_freehand(cas, dat_PC);
-dat_PC = define_ROI_video(cas, dat_PC, single_reading);
+dat_PC = define_ROI_video(cas, dat_PC);
 
 disp([newline + "Saving everything in a .mat file ..." + newline])
+
+if isempty(single_reading) 
+    sstt_name = "";
+else
+    sstt_name = strjoin(cellstr(string(single_reading)), '-');
+    if ~endsWith(sstt_name, '-')
+    sstt_name = sstt_name + "-";
+    end
+end
 
 save(fullfile(cas.dirmat, "02-"+sstt_name+"crop_set_roi.mat"), 'aux', 'cas', 'dat_PC');
 
@@ -45,6 +54,6 @@ function [aux, cas, dat_PC, single_reading] = run_if_empty(subject, model)
         cas.subj = subject;
         cas.model = model; % GE (Utah) or SIEMENS (Granada)
         single_reading = {};
-        cas = scan_folders_set_cas(cas);
-        load([cas.dirmat, "01-"+sstt_name+"read_dat.mat"], 'aux', 'cas', 'dat_PC');
+        cas = scan_folders_set_cas(cas, single_reading);
+        load(fullfile(cas.dirmat, "01-read_dat.mat"), 'aux', 'cas', 'dat_PC');
 end

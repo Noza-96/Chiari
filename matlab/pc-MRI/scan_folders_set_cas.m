@@ -14,6 +14,8 @@ cas.dirmat = fullfile(cas.dirdat, cas.subj, 'mat');
 cas.dirflm = fullfile(cas.dirdat, cas.subj, 'flm');
 cas.dirvid = fullfile(cas.dircloud, 'videos', cas.subj);
 cas.dirfig = fullfile(cas.dircloud, 'figures', cas.subj);
+cas.dirROI = fullfile(cas.dirmat,'ROIs');
+
 
 cas.diransys = fullfile(cas.dircloud, 'ansys', cas.subj);
 cas.diransys_out = fullfile(cas.diransys, 'outputs');
@@ -22,7 +24,7 @@ cas.diransys_profiles = fullfile(cas.diransys_in, 'profiles');
 cas.dirseg = fullfile(cas.dircloud, 'segmentation', cas.subj);
 
 % List of directories to ensure exist
-dirsToCreate = {cas.dirgeo, cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, cas.dirseg, cas.dirfig};
+dirsToCreate = {cas.dirgeo, cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, cas.dirseg, cas.dirfig, cas.dirROI};
 
 % Create directories if not present
 for i = 1:length(dirsToCreate)
