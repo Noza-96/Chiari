@@ -101,6 +101,9 @@ function create_animation_ansys(data, loc, n, fan)
     y = data.y{loc} * 1e2; % [cm]
     w = data.u_normal{loc}(:, n) * 1e2; % [cm/s]
 
+    % z position with respect to C3-C4
+    Dz = 
+
     % Create interpolation grid
     xq = linspace(min(x), max(x), 1000);
     yq = linspace(min(y), max(y), 1000);

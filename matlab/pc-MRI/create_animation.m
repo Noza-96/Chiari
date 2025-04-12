@@ -8,6 +8,10 @@ addpath('../processing/Functions/Others/')
     fs = 12;
     fan = 8;
     locations = cellfun(@(x) strrep(x, '0', ''), cas.locations, 'UniformOutput', false);
+    % z-position compared to C3C4
+    locz_vals = cell2mat(dat_PC.locz);
+    Dz_loc = round(abs(locz_vals(end) - locz_vals)*10);
+    labels = cellfun(@(loc, dz) sprintf('%s (%d mm)', loc, dz), locations, num2cell(Dz_loc), 'UniformOutput', false)
 
     % Preallocate movie vector
     Ndata = dat_PC.Ndat;
@@ -76,6 +80,7 @@ pcmri.q = q;
         % Loop through each flow data set
         for k = 1:Ndata
             nexttile(1+(k-1)*rows, [1, 3]);
+
             create_animation_ansys(pcmri, k, n, fan);
             ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
             if k == Ndata
@@ -118,12 +123,13 @@ pcmri.q = q;
 
         end
 
+
         if n == 1
             % Plot volumes in the last tile
             nexttile(7,[Ndata, 2]);
             plot(Vs, Ndata:-1:1, 'o-', 'LineWidth', 1.5);
             yticks(1:Ndata);
-            yticklabels(flip(locations));
+            yticklabels(flip(labels));
         
             % Customize the appearance of the plot
             set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);

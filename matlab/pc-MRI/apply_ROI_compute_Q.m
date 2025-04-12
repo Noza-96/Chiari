@@ -1,7 +1,4 @@
-function dat = apply_ROI_compute_Q(dat)
-
-    correct_aliasing = true;
-    smooth_spatial_outliers = true;  % Flag to apply spatial outlier smoothing
+function dat = apply_ROI_compute_Q(dat, correct_aliasing, smooth_spatial_outliers, gauss_filter)
 
     Ndat = dat.Ndat;
     fcal_H_cm_px = dat.fcal_H_cm_px;
@@ -12,6 +9,7 @@ function dat = apply_ROI_compute_Q(dat)
     ROI_SAS = dat.ROI_SAS;
     ROI_COR = dat.ROI_COR;
     ROI_SPC = dat.ROI_SPC;
+
 
     U_tot = dat.U_tot;
 
@@ -45,16 +43,26 @@ function dat = apply_ROI_compute_Q(dat)
             U_SAS{idat} = UU_corr;
             pxpos_alias_idat = abs(UU_corr - UU) > 1.0e-6;
             pxpox_alias{idat} = pxpos_alias_idat;
+        else
+            pxpox_alias = 0;
         end
 
         % === Smooth spatial outliers based on local statistics ===
         if smooth_spatial_outliers
-            threshold = 0.5 * venc{idat}; 
+            threshold = 0.2 * venc{idat}; 
             [U_SAS{idat}, outlier_masks{idat}] = smooth_spatial_outliers_3D(U_SAS{idat}, threshold);
+
+            
         end
 
         % === Compute flow rates and mean velocities ===
         for it = 1:Nt{idat}
+
+        % gaussian smoothing in space
+        if gauss_filter 
+            U_SAS{idat}(:, :, it)=imgaussfilt(U_SAS{idat}(:, :, it), 0.8);
+        end
+
             Q_SAS{idat}(it) = sum(sum(U_SAS{idat}(:, :, it))) * onepxarea{idat};
             Q_COR{idat}(it) = sum(sum(U_COR{idat}(:, :, it))) * onepxarea{idat};
             Q_SPC{idat}(it) = sum(sum(U_SPC{idat}(:, :, it))) * onepxarea{idat};
@@ -89,9 +97,9 @@ function dat = apply_ROI_compute_Q(dat)
     dat.mean_U_COR = mean_U_COR;
     dat.mean_U_SPC = mean_U_SPC;
 
-    if smooth_spatial_outliers
-        dat.outlier_masks = outlier_masks;
-    end
+    % if smooth_spatial_outliers
+    %     dat.outlier_masks = outlier_masks;
+    % end
 
 end
 
