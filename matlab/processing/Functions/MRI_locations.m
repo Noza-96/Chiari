@@ -1,10 +1,15 @@
 % Create figure with segmentation together with MRI locations
 function MRI_locations(dat_PC, cas, ts_cycle)
    
+    load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
+
     fs = 12;
     fan = 8;
     locations = cellfun(@(x) strrep(x, '0', ''), cas.locations, 'UniformOutput', false);
     load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
+
+    locz_vals = cell2mat(dat_PC.locz);
+    Dz_loc = round(abs(locz_vals(end) - locz_vals)*10);
 
     % Preallocate movie vector
     Ndata = dat_PC.Ndat;
@@ -16,7 +21,7 @@ function MRI_locations(dat_PC, cas, ts_cycle)
     set(gcf, 'Position', [200, 200, 600, 600]);
     tt = tiledlayout(Ndata, rows, "TileSpacing", "tight", "Padding", "tight");
 
-    % Initialize variables
+     % Initialize variables
     Vs = zeros(1, length(dat_PC.Q_SAS));
 
     for n = 1:ts_cycle
@@ -24,10 +29,11 @@ function MRI_locations(dat_PC, cas, ts_cycle)
         % Loop through each flow data set
         for k = 1:Ndata
             nexttile(1+(k-1)*rows, [1, 3]);
+
             create_animation_ansys(pcmri, k, n, fan);
-            ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+            ylabel('$y \,[{\rm mm}]$', 'Interpreter', 'latex', 'FontSize', fs);
             if k == Ndata
-                xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', fs);
+                xlabel('$x \,[{\rm mm}]$', 'Interpreter', 'latex', 'FontSize', fs);
             end
 
             Q = pcmri.q{k};  % Get flow data
@@ -66,21 +72,32 @@ function MRI_locations(dat_PC, cas, ts_cycle)
 
         end
 
+
         if n == 1
             % Plot volumes in the last tile
             nexttile(7,[Ndata, 2]);
-            plot(Vs, Ndata:-1:1, 'o-', 'LineWidth', 1.5);
-            yticks(1:Ndata);
-            yticklabels(flip(locations));
+            plot(Vs, Dz_loc, '-', 'LineWidth', 1.5);
+            hold on
+            plot(Vs, Dz_loc, 'o', 'LineWidth', 1.5, 'MarkerFaceColor', 'w');
+
+            yticks(-20:5:100);
+
+            for i = 1:length(anatomy.Dz) - 2
+                yline(anatomy.Dz(i), '--', anatomy.location{i}, ...
+                    'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs);
+            end             
+
+            ylim([0, ceil(max(Dz_loc(:))/10)*10])
         
             % Customize the appearance of the plot
-            set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
-            title("$V_s {\rm [ml]}$", 'Interpreter', 'latex', 'FontSize', fs);
+            set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
+            xlabel("$V_s \,{\rm [ml]}$", 'Interpreter', 'latex', 'FontSize', fs);
+            ylabel("$z \,{\rm [mm]}$", 'Interpreter', 'latex', 'FontSize', fs);
             xlim([floor(min(Vs(:)) * 10) / 10, ceil(max(Vs(:)) * 10) / 10]);
             ax = gca; % Get current axes
             % ax.XAxis.TickLabelRotation = 90; % Rotate y-axis tick labels to vertical
             set(gcf, 'Color', 'w');  % Set background color to white for figures
-            grid on;
+            grid off;
         end
         % title(tt, sprintf('$t/T = %.2f$', n / ts_cycle), ...
         %         'Interpreter', 'latex', 'FontSize', fs);
@@ -91,18 +108,14 @@ function MRI_locations(dat_PC, cas, ts_cycle)
 
     % Set x-ticks for all flow rate tiles
 
-    save_animation(movieVector, fullfile(cas.dirvid, "flow_measurements.mp4"));
 
 end
 
 function create_animation_ansys(data, loc, n, fan)
     % Extract data and rescale
-    x = data.x{loc} * 1e2; % [cm]
-    y = data.y{loc} * 1e2; % [cm]
+    x = data.x{loc} * 1e3; % [mm]
+    y = data.y{loc} * 1e3; % [mm]
     w = data.u_normal{loc}(:, n) * 1e2; % [cm/s]
-
-    % z position with respect to C3-C4
-    Dz = 
 
     % Create interpolation grid
     xq = linspace(min(x), max(x), 1000);
@@ -125,12 +138,4 @@ function create_animation_ansys(data, loc, n, fan)
     box on;
 end
 
-function save_animation(movieVector, fileName)
-    % Save the animation as a video
-    writer = VideoWriter(fileName, 'MPEG-4');
-    writer.FrameRate = 5;
-    open(writer);
-    writeVideo(writer, movieVector);
-    close(writer);
-end
 

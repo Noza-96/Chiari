@@ -1,5 +1,5 @@
 z0-UPFM/01PC/csf_flow_puls_UPUPFM_venc08
 z1-FM/01PC/csf_flow_puls_UPFM_venc08
-z2-C1C2/01PC/csf_flow_puls_C1C2_venc08
+z2-C1C2/01PC/csf_flow_puls_FM_venc08
 z2-C2C3/01PC/csf_flow_puls_C2C3_venc08
 z2-C3C4/01PC/csf_flow_puls_C3C4_venc08

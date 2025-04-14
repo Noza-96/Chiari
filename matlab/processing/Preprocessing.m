@@ -28,6 +28,8 @@ redo_initialization = 1 ;
 [DNS_cases, cas, dat_PC]  = setup_case(subject, case_name, mesh_size, ts_cycle, iterations_ts, cycles, delta_h_FM, redo_initialization);
 
 
+% TODO: look at period T of ANSYS simulations. 
+
 % journal to be used for creating all meshes and corresponding .cas files
 cases_ready = create_mesh_journal(cas, DNS_cases);
 

@@ -9,7 +9,6 @@ cas.dirdcm = fullfile('..', '..', '..','patient-data',cas.subj,'flow');
 cas.dirdat = fullfile(cas.dircloud,'pc-mri');
 
 % Define directories with a modular structure
-cas.dirgeo = fullfile(cas.dirdat, cas.subj,'segmentation','geom');
 cas.dirmat = fullfile(cas.dirdat, cas.subj, 'mat');
 cas.dirflm = fullfile(cas.dirdat, cas.subj, 'flm');
 cas.dirvid = fullfile(cas.dircloud, 'videos', cas.subj);
@@ -24,7 +23,7 @@ cas.diransys_profiles = fullfile(cas.diransys_in, 'profiles');
 cas.dirseg = fullfile(cas.dircloud, 'segmentation', cas.subj);
 
 % List of directories to ensure exist
-dirsToCreate = {cas.dirgeo, cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, cas.dirseg, cas.dirfig, cas.dirROI};
+dirsToCreate = {cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, cas.dirseg, cas.dirfig, cas.dirROI};
 
 % Create directories if not present
 for i = 1:length(dirsToCreate)

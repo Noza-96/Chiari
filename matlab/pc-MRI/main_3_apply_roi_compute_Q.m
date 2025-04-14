@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if isempty(who)
-    [aux, cas, dat_PC, single_reading] = run_if_empty('s101_a', 'SIEMENS');  % if skipping previous steps
+    [aux, cas, dat_PC, single_reading] = run_if_empty('s101_b', 'SIEMENS');  % if skipping previous steps
 end
 
 disp([newline + "Applying ROIs and computing Q ..." + newline])
@@ -39,7 +39,8 @@ save(fullfile(cas.dirmat, "03-"+sstt_name+"apply_roi_compute_Q.mat"), 'aux', 'ca
 
 disp([newline + "Done!" + newline])
 
-movieVector = create_animation(dat_PC, cas, 40)
+
+movieVector = create_animation(dat_PC, cas, 40);
 
 save_animation(movieVector, fullfile(cas.dirvid, sstt_name+"flow_measurements_"+cas.subj+".mp4"));
 
