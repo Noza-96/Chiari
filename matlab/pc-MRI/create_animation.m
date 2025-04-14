@@ -190,7 +190,3 @@ function create_animation_ansys(data, loc, n, fan)
     set(gca, 'XDir', 'reverse', 'YDir', 'reverse', 'LineWidth', 1, 'TickLength', [0.01, 0.01], 'FontSize', fan);
     box on;
 end
-
-
-
-

@@ -1,6 +1,6 @@
 % Longitudinal evolution flow rate and stroke volume 
 
-subjects = {"s101_b", "s101_a", "s101_a"};
+subjects = {"s101_b", "s101_a", "s101_aa"};
 
 red   = [0.8500, 0.3250, 0.0980];  % warm red-orange
 blue  = [0.0000, 0.4470, 0.7410];  % deep blue

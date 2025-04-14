@@ -12,13 +12,10 @@ function [DNS_cases, cas, dat_PC] = setup_case(subject, case_name, mesh_size, ts
         disp('first time to run this subject, creating files...')
 
         % Create CSV files with velocity field information and pcmri.mat
-        velocity_profiles (dat_PC, cas, ts_cycle);
+        save_pcmri_data (dat_PC, cas, ts_cycle);
         
         % Create Fourier flow rate data for ANSYS input - Uniform
         Q0_ansys(dat_PC, cas, 30, ts_cycle);
-
-        % PC-MRI measurements animation u, Q, and Vs
-        % MRI_locations(dat_PC, cas, ts_cycle);
     end
 
     for i = 1:length(case_name)     

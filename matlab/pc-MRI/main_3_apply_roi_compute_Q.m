@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if isempty(who)
-    [aux, cas, dat_PC, single_reading] = run_if_empty('s101_b', 'SIEMENS');  % if skipping previous steps
+    [aux, cas, dat_PC, single_reading] = run_if_empty('s101_a', 'SIEMENS');  % if skipping previous steps
 end
 
-disp([newline + "Applying ROIs and computing Q ..." + newline])
+disp(["Applying ROIs and computing Q ..." + newline])
 
 
 correct_aliasing = true;
@@ -12,19 +12,19 @@ gauss_filter = true;
 
 dat_PC = apply_ROI_compute_Q(dat_PC, correct_aliasing, smooth_spatial_outliers, gauss_filter);
 
-disp([newline + "Repeating and interpolating Q ..." + newline])
+disp(["Repeating and interpolating Q ..." + newline])
 
 dat_PC = repeat_interpolate_Q(dat_PC);
 
-disp([newline + "Computing SV and zero correction ..." + newline])
+disp(["Computing SV and zero correction ..." + newline])
 
 dat_PC = compute_SVQ_zc(dat_PC);
 
-disp([newline + "Fourier decomposition ..." + newline])
+disp(["Fourier decomposition ..." + newline])
 
 dat_PC = decompose_fourier(cas, dat_PC);
 
-disp([newline + "Saving everything in a .mat file ..." + newline])
+disp(["Saving everything in a .mat file ..." + newline])
 
 if isempty(single_reading) 
     sstt_name = "";
@@ -37,13 +37,12 @@ end
 
 save(fullfile(cas.dirmat, "03-"+sstt_name+"apply_roi_compute_Q.mat"), 'aux', 'cas', 'dat_PC');
 
-disp([newline + "Done!" + newline])
-
-
-movieVector = create_animation(dat_PC, cas, 40);
+ts_cycle = 40; 
+movieVector = create_animation(dat_PC, cas, ts_cycle);
 
 save_animation(movieVector, fullfile(cas.dirvid, sstt_name+"flow_measurements_"+cas.subj+".mp4"));
 
+disp([ "Done!" + newline])
 
 function [aux, cas, dat_PC, single_reading] = run_if_empty(subject, model)
         cas.subj = subject;

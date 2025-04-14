@@ -6,7 +6,7 @@ clear; close all;
 reference_location = 'C3C4'; 
 % (set to 'zero' to set location to 0.0)
 % (set to 'fromsag' to replace ljocations with those from sagittal geometry)
-% (e.g. 'C02C03' to shift all locations so that the C02C03 locations coincides with sagittal geometry)
+% (e.g. 'C02C03' to shift all locationsy so that the C02C03 locations coincides with sagittal geometry)
 
 crop_size = 100; % Number of pixels to crop 256x256 image in
 
@@ -45,7 +45,7 @@ else
 end
 
 save(fullfile(cas.dirmat, "02-"+sstt_name+"crop_set_roi.mat"), 'aux', 'cas', 'dat_PC');
-
+kk
 disp([newline + "Done!" + newline])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

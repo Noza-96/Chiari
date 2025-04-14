@@ -1,15 +1,8 @@
-%Show animation velocity inlet together with flow rate measurement
-function velocity_profiles (dat_PC, cas, ts_cycle)
+% Create figure with segmentation together with MRI locations
+function save_pcmri_data(dat_PC, cas, ts_cycle)
 
     loc_ID = [1,dat_PC.Ndat];
-    sstt = {"top_c", "bottom"};
-
-    x = cell(1,dat_PC.Ndat);
-    y = cell(1,dat_PC.Ndat);
-    z = cell(1,dat_PC.Ndat);
-    u = cell(1,dat_PC.Ndat);
-    q = cell(1,dat_PC.Ndat);
-    nv = cell(1,dat_PC.Ndat);
+    sstt = {"top", "bottom"};
 
     for ii = 1:dat_PC.Ndat
 
@@ -17,7 +10,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
         U = -dat_PC.U_SAS{ii}*1e-2; % m/s
         xyz = dat_PC.pixel_coord{ii}*1e-3; %m
         Q = -dat_PC.Q_SAS{ii};  % Get flow data
-
+    
         % Identify rows and columns where all elements are zero
         zeroRows = all(U(:,:,1) == 0, 2); % Logical vector for rows
         zeroCols = all(U(:,:,1) == 0, 1); % Logical vector for columns
@@ -26,15 +19,15 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
         rowsToKeep = find(~zeroRows); 
         colsToKeep = find(~zeroCols);
         band = 1; 
-    	rowsToKeep = (rowsToKeep(1)-band):1:(rowsToKeep(end)+band);
-    	colsToKeep = (colsToKeep(1)-band):1:(colsToKeep(end)+band);
+	    rowsToKeep = (rowsToKeep(1)-band):1:(rowsToKeep(end)+band);
+	    colsToKeep = (colsToKeep(1)-band):1:(colsToKeep(end)+band);
         
         % Extract the submatrix and update vectors
         U = U(rowsToKeep, colsToKeep,:);
         xyz = xyz(rowsToKeep, colsToKeep,:);
         
         U = reshape(U,[size(U,1)*size(U,2),size(U,3)]);
-
+    
         %xyz coordinates
         xx = reshape(xyz(:,:,1),[],1);
         yy = reshape(xyz(:,:,2),[],1);
@@ -45,16 +38,20 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
             [uu(k,:), ~, ~] = four_approx(U(k,:), 20, 0, ts_cycle);
         end
 
-
         % Define points in millimeters
         x_coords = [xx(1), xx(floor(end/2)), xx(end)] * 1e3;
         y_coords = [yy(1), yy(floor(end/2)), yy(end)] * 1e3;
         z_coords = [zz(1), zz(floor(end/2)), zz(end)] * 1e3;
-
+    
         x{ii} = xx; y{ii} = yy; z{ii} = zz;
         u{ii} = uu;
+
         [q{ii}, ~, ~] = four_approx(Q, 20, 0, ts_cycle); 
-        
+
+        t = linspace(0, 1, ts_cycle);  % Create time vector
+        % Stroke volume
+        SV{ii} = 0.5 * simps(t, abs(q{ii}), 2);  
+
         % Points P1, P2, P3
         P1 = [x_coords(1), y_coords(1), z_coords(1)];
         P2 = [x_coords(2), y_coords(2), z_coords(2)];
@@ -91,7 +88,7 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
         % Close the file
         fclose(fileID);
 
-        %% ANSYS profiles and clip planes
+ %% ANSYS profiles and clip planes
         if any(loc_ID == ii)
             index = find(loc_ID == ii);
             % Open the file for writing
@@ -121,15 +118,15 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
     
             data(8, 1) = {strcat(sstt{index}, "_vel")};
     
-            if sstt{index} == "top_c"
-                normal_v = -uu;
+            if sstt{index} == "top"
+                normal_vel = -uu;
             elseif sstt{index} == "bottom"
-                normal_v = uu;
+                normal_vel = uu;
             end
 
             for n=1:ts_cycle
                 % Read the CSV file as a cell array to handle mixed types
-                data(row + (1:n_data), 4) = num2cell(normal_v(:, n));       
+                data(row + (1:n_data), 4) = num2cell(normal_vel(:, n));       
     
                 % Convert the cell array to a table
                 dataTable = cell2table(data);
@@ -141,43 +138,24 @@ function velocity_profiles (dat_PC, cas, ts_cycle)
             fprintf('profile saved for %s pc-MRI measurement ...  \n', sstt{index});
         end
 
-        % % Create top plane b 60 mm from C3-C4
-        % if ii == dat_PC.Ndat
-        %     % Open the file for writing
-        %     filename = fullfile(cas.diransys_in, "planes", "top_b_plane.txt");
-        %     fileID = fopen(filename, 'w');
-        %     % Write the headers
-        %     fprintf(fileID, '3d=True\n');
-        %     fprintf(fileID, 'polyline=False\n\n');
-        % 
-        %     % Write the coordinates column by column
-        %     data = [z_coords(:)+60, x_coords(:), y_coords(:)];
-        %     fprintf(fileID, '%f %f %f\n', data.');
-        % 
-        %     % Close the file
-        %     fclose(fileID);
-        % 
-        %     fprintf('top_b_plane.txt created ... \n');
-        % end
-
     end
+    % Create the structure
+    pcmri.x = x;
+    pcmri.y = y;
+    pcmri.z = z;
+    pcmri.SV = SV;
+    pcmri.u_normal = u;
+    pcmri.normal_v = nv;
+    pcmri.q = q;
+    pcmri.locations = cas.locations;
+    pcmri.locz = dat_PC.locz;
+    pcmri.Ndat = dat_PC.Ndat;
+    pcmri.Nt = ts_cycle;
+    pcmri.case = 'PC-MRI';
 
-% Create the structure
-pcmri.x = x;
-pcmri.y = y;
-pcmri.z = z;
-pcmri.u_normal = u;
-pcmri.normal_v = nv;
-pcmri.q = q;
-pcmri.locations = cas.locations;
-pcmri.case = 'PC-MRI';
-
-% Save the structure to a .mat file
-save(fullfile(cas.dirmat, "pcmri_vel"), 'pcmri');
+    % Save the structure to a .mat file
+    save(fullfile(cas.dirmat, "pcmri_vel"), 'pcmri');
 end
-
-
-
 
 
 
