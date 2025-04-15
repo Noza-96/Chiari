@@ -24,7 +24,7 @@ cas.dirseg = fullfile(cas.dircloud, 'segmentation', cas.subj);
 
 % List of directories to ensure exist
 dirsToCreate = {cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, ... 
-    cas.dirseg, cas.dirfig, cas.dirROI, fullfile(cas.diransys_in, "planes"), fullfile(cas.diransys_in, "flow-rates")};
+    cas.dirseg, cas.dirfig, cas.dirROI, fullfile(cas.diransys_in, "planes"), fullfile(cas.diransys_in, "flow-rates"), fullfile(cas.diransys_in, "case-files"), fullfile(cas.diransys_in, "journals")};
 
 % Create directories if not present
 for i = 1:length(dirsToCreate)

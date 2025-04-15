@@ -6,11 +6,11 @@ addpath('Functions/Others/')
 % Choose subject
 subject = "s101_b";
 
-% c: geometry bounded with 2 pcMRI planes. c0/c1 for zero pressure top and bottom flow rate/velocity, c2 for two inlet velocities and permeable cord
-% b: 60 mm geometry with bottom pcMRI plane. b0/b1 for zero pressure top and bottom flow rate/velocity
-% cn or bn simmilar but with nerve roots. 
+% c: geometry bounded with 2 pcMRI planes. 
+% c0/c1 for zero pressure top and bottom flow rate/velocity
+% c2 for two inlet velocities; continuity: normal velocity tonsils 
 
-case_name = {"c0"}; % Array with the kind of simulations to do
+case_name = {"c2"}; % Array with the kind of simulations to do
 mesh_size = [0.0005];    % Array with the different mesh sizes to be simulated
 
 ts_cycle = 100;     % number of time steps per cycle
@@ -25,18 +25,17 @@ check_valid_case(case_name)
 
 DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, delta_h_FM, iterations_ts, ts_cycle);
 
-% TODO: look at period T of ANSYS simulations. Changed location Q0 and
-% planes
-
 % journal to be used for creating all meshes and corresponding .cas files
-cases_ready = create_mesh_journal(cas, DNS_cases);
+cases_ready = GUI_create_mesh(cas, dat_PC, DNS_cases);
+
+% visualize output ANSYS console
+visualize_console = 1;
 
 if cases_ready == true
     answer = questdlg('Run ANSYS simulation?', 'Confirmation', 'Yes', 'No', 'No');
     if strcmp(answer, 'Yes')
-        disp('Running ANSYS simulation...');
-        visualize_output = 1;
-        run_ANSYS_simulations (cas, dat_PC, DNS_cases, n_cores, visualize_output)
+        disp('Running ANSYS simulation...');   
+        run_ANSYS_simulations (cas, dat_PC, DNS_cases, n_cores, visualize_console)
     else
     end
 end

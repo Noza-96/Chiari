@@ -1,19 +1,28 @@
-function all_simulations = create_mesh_journal(cas, DNS_cases)
+function all_simulations = GUI_create_mesh(cas, dat_PC, DNS_cases)
 
-fileID = fopen(fullfile(cas.diransys_in,"create_mesh.jou"), 'w');
+fileID = fopen(fullfile(cas.diransys_in, "journals", "create_mesh.jou"), 'w');
 all_simulations = true; % Initialize flag
 
-local_sizing = {"cord", "dura"}; % to which boundaries apply local sizing
+local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local sizing
 
     for ii = 1:length(DNS_cases)
     
         load(fullfile(cas.dirmat, "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
+
+        % TODO: define local sizing in nerves/ligaments
+        local_sizing_nerves = DNS.mesh_size/2;
+
+        % TODO: delete after debug 
+        TUI_setup_Fluent_case(DNS, cas)
+        TUI_reports_journal(cas, DNS)
+        TUI_run_simulation(dat_PC, cas, DNS)
+        TUI_create_surfaces_journal(dat_PC, cas, DNS)
     
         case_name = DNS.case + "_0";
     
         sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
     
-        filename = fullfile(DNS.ansys_path, cas.subj, "geometry","geometry.scdoc");
+        filename = fullfile(DNS.ansys_path, cas.subj, "geometry", "geometry.scdoc");
     
         if ii == 1
             fprintf(fileID,'/file/set-tui-version "24.1"\n' );
@@ -44,10 +53,14 @@ local_sizing = {"cord", "dura"}; % to which boundaries apply local sizing
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].Arguments.set_state({r'NonConformal': r'No',r'SetupType': r'The geometry consists of only fluid regions with no voids',})"")\n" );
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].UpdateChildTasks(SetupTypeChanged=True)"")\n" );
         fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].Execute()"")\n" );
+        
+        % 1: constant pressure top and inlet velocity bottom
         if ismember(DNS.sim, [0, 1])
             fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom'],r'BoundaryLabelTypeList': [r'pressure-outlet', r'velocity-inlet'],r'OldBoundaryLabelList': [r'top', r'bottom'],r'OldBoundaryLabelTypeList': [r'wall', r'wall'],})"")\n" );
+        
+            % 2: inlet velocity bottom, top, tonsils
         elseif DNS.sim == 2
-            fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom', r'cord'],r'BoundaryLabelTypeList': [r'velocity-inlet', r'velocity-inlet', r'velocity-inlet'],r'OldBoundaryLabelList': [r'top', r'bottom', r'cord'],r'OldBoundaryLabelTypeList': [r'wall', r'wall', r'wall'],})"")\n" );
+            fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom', r'tonsils'],r'BoundaryLabelTypeList': [r'velocity-inlet', r'velocity-inlet', r'velocity-inlet'],r'OldBoundaryLabelList': [r'top', r'bottom', r'tonsils'],r'OldBoundaryLabelTypeList': [r'wall', r'wall', r'wall'],})"")\n" );
         else
             error('Error: case needs to be defined as ''0'', ''1'' or ''2''');
         end
@@ -73,7 +86,7 @@ local_sizing = {"cord", "dura"}; % to which boundaries apply local sizing
         fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+strrep(strrep(filename_2, '\', '\\'), '/', '\\')+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n\n" );
     
             % Check if the case file exists
-        if ~isfile(fullfile(cas.diransys_in, DNS.case + "_0.cas.gz"))
+        if ~isfile(fullfile(cas.diransys_in, "case-files", DNS.case + "_0.cas.gz"))
             fprintf('case file %s needs to be created ...\n', DNS.case);
             all_simulations = false;
         end

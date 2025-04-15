@@ -1,11 +1,14 @@
 %Create-planes journal
-function create_surfaces_journal_TUI(dat_PC, cas, DNS, fileID)
+function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
 
     if nargin < 4
         fileID = fopen(fullfile(DNS.TUI_path,"create_surfaces_journal_TUI.jou"), 'w');
         fprintf(fileID,'/file/set-tui-version "24.1"\n' );
     end
-    
+
+    % data with anatomical positions
+    load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
+
     fprintf(fileID,';create surfaces\n' );
 
     N = dat_PC.Ndat;
@@ -14,23 +17,20 @@ function create_surfaces_journal_TUI(dat_PC, cas, DNS, fileID)
     for loc = 1:(N-1) %skip FM and last location
         XYZ = three_point_plane(dat_PC, loc);
         create_plane (fileID,XYZ,cas.locations{loc})
-        if loc == 1 && DNS.geom == 'c'
-            XYZ(:,3) = XYZ(:,3) - DNS.delta_h_FM/1000; % create plane DNS.delta_h_FM/1000 lower FM (default 25 mm)
-            create_plane (fileID,XYZ,"top-"+num2str(DNS.delta_h_FM))
+        if loc == 1 
+            % Dz foramen with respect to top pcmri location
+            Dz_foramen = (dat_PC.locz{end} - dat_PC.locz{1})/100 - anatomy.Dz(1)/1000; % [m]
+             % create plane at the location of the foramen_magnum
+            XYZ(:,3) = XYZ(:,3) - Dz_foramen;
+            create_plane (fileID,XYZ,"foramen_magnum")
+             % create plane at the location of the foramen_magnum - 25 mm
+            XYZ(:,3) = XYZ(:,3) - DNS.delta_h_FM/1000;
+            create_plane (fileID,XYZ,"foramen_magnum-"+num2str(DNS.delta_h_FM))
         end
     end
 
-    if DNS.geom == 'b'
-        % get the coordinates of caudal inlet
-        XYZ = three_point_plane(dat_PC, dat_PC.Ndat);
-        % get plane 25 mm below top plane (60 mm above C3C4)
-        XYZ(:,3) = XYZ(:,3) + (60-DNS.delta_h_FM)/1000; 
-        create_plane (fileID,XYZ,"top-"+num2str(DNS.delta_h_FM))
-    end
-
-
     % Create surface to export later
-    zone_names = {'cord', 'dura'};
+    zone_names = {'cord', 'dura', 'tonsils'};
     for k = 1:length(zone_names)
         fprintf(fileID,sprintf('/surface/zone-surface %s_s "%s" q \n', zone_names{k}, zone_names{k}));
     end

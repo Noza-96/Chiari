@@ -1,9 +1,11 @@
-function reports_journal_TUI(cas, DNS, fileID)
+function TUI_reports_journal(cas, DNS, fileID)
 
     if nargin < 3
         fileID = fopen(DNS.TUI_path+"/reports_journal_TUI.jou", 'w');
         fprintf(fileID,'/file/set-tui-version "24.1"\n' );
     end
+
+    inlet_locations = ["bottom", "top", "tonsils"];
 
     fprintf(fileID,';reports \n' );
 
@@ -20,17 +22,17 @@ function reports_journal_TUI(cas, DNS, fileID)
     % report definitions         
         % u_max
         fprintf(fileID,'/solve/report-definitions/add u_max volume-max field velocity-magnitude zone-names fluid () q \n' );
-        % flow rate bottom
-        fprintf(fileID,'/solve/report-definitions/add q_bottom surface-volumeflowrate surface-names bottom () q \n' );
-        fprintf(fileID,'/solve/report-definitions/add q_top surface-volumeflowrate surface-names top () q \n' );
-        fprintf(fileID,'/solve/report-definitions/add q_cord surface-volumeflowrate surface-names cord () q \n' );
+        % flow rate inlet locations
+        for location = inlet_locations
+            fprintf(fileID,"/solve/report-definitions/add q_" + location + "  surface-volumeflowrate surface-names " + location + " () q \n" );
+        end
         % Create expression
-        expression =  "Average(StaticPressure,['top'], Weight ='Area') - Average(StaticPressure,['top-"+num2str(DNS.delta_h_FM)+"'], Weight ='Area')";
+        expression =  "Average(StaticPressure,['foramen_magnum'], Weight ='Area') - Average(StaticPressure,['foramen_magnum-"+num2str(DNS.delta_h_FM)+"'], Weight ='Area')";
         TUI_sstt = sprintf('/solve/report-definitions/add dp single-val-expression define "%s" q \n', expression);
         fprintf(fileID,TUI_sstt);
 
     % report files
-    variables = {'flow-time', 'dp','q_bottom', 'q_top', 'q_cord', 'u_max'};
+    variables = ['flow-time', 'dp',"q_"+inlet_locations(1), "q_"+inlet_locations(2), "q_"+inlet_locations(3), 'u_max'];
     report_file (fileID, variables, DNS.case, 1);
 
     %% Save verlocity and pressure at specific locations every time-step

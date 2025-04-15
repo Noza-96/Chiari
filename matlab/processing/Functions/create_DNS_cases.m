@@ -10,10 +10,10 @@ function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, delta_
             [DNS.geom, DNS.sim] = get_type_simulation(case_i);
             
             % full ansys folder path
-            DNS.ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));  
-            DNS.TUI_path = fullfile(cas.diransys_in);       
+            DNS.ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));
+            DNS.TUI_path = fullfile(cas.diransys_in, "journals");       
             % ansys working folder
-            DNS.path_out_report = fullfile(cas.diransys_out,DNS.case);          
+            DNS.path_out_report = fullfile(cas.diransys_out, DNS.case);          
             % reports at each time step 
             DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
             DNS.slices.locations = [cas.locations(1:end-1), "bottom", "top"]';
@@ -39,5 +39,5 @@ function [type_geometry, type_simulation] = get_type_simulation(DNS_case)
 end
 
 function filepath = correct_path(filepath)
-    filepath = strrep(strrep(filepath, '\', '\\'), '/', '\\');
+    filepath = strrep(filepath, '\', '/');
 end

@@ -1,4 +1,4 @@
-function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_output)
+function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_console)
 
     % Run simulations for each DNS case
     for k = 1:length(DNS_cases)
@@ -9,20 +9,22 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_output
 
         % Create and run the ANSYS journal
         
-        fileID = fopen(fullfile(cas.diransys_in, DNS.case + ".jou"), 'w');
+        fileID = fopen(fullfile(cas.diransys_in, "journals", DNS.case + ".jou"), 'w');
         
         % Setup simulation
-        setup_Fluent_case_TUI(DNS, cas, fileID);
+        TUI_setup_Fluent_case(DNS, cas, fileID);
         
         % Create PCMRI surfaces and other necessary setups
-        create_surfaces_journal_TUI(dat_PC, cas, DNS, fileID);
+        TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID);
         
-        % Add reports and run the simulation
-        reports_journal_TUI(cas, DNS, fileID);
-        run_simulation_TUI(dat_PC, cas, DNS, fileID);
+        % Add reports 
+        TUI_reports_journal(cas, DNS, fileID);
+        
+        % run the simulation
+        TUI_run_simulation(dat_PC, cas, DNS, fileID);
 
 
-        runFluentSimulation(DNS, DNS_cases{k}, n_cores, visualize_output);
+        runFluentSimulation(DNS, DNS_cases{k}, n_cores, visualize_console);
 
         % Finalize after simulation
         elapsed_time = toc;
@@ -45,9 +47,9 @@ function DNS = loadDNSData(cas, case_name)
 end
 
 % Helper function to run the Fluent simulation through terminal
-function runFluentSimulation(DNS, case_name, n_cores, visualize_output)
-    fluent_cmd = "fluent 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", case_name + ".jou") + """";
-    if visualize_output == 0
+function runFluentSimulation(DNS, case_name, n_cores, visualize_console)
+    fluent_cmd = "fluent 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
+    if visualize_console == 0
         fluent_cmd = fluent_cmd + " > nul";
     end
     system(fluent_cmd); % Run with "> nul" to suppress terminal output
@@ -62,9 +64,4 @@ function finalizeSimulation(DNS, case_name, cas, elapsed_time)
     % Save the simulation time
     DNS.time = elapsed_time;
     save(fullfile(cas.dirmat, "DNS_" + DNS.case + ".mat"), 'DNS');
-end
-
-% Function to create the ANSYS journal
-function create_journal(dat_PC, cas, DNS)
-
 end

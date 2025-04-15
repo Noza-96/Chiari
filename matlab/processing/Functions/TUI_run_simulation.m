@@ -1,4 +1,4 @@
-function run_simulation_TUI(dat_PC, cas, DNS, fileID)
+function TUI_run_simulation(dat_PC, cas, DNS, fileID)
 
     if nargin < 4
         fileID = fopen(DNS.TUI_path+"/run_simulation_TUI.jou", 'w');
