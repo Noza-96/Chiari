@@ -13,7 +13,7 @@ local_sizing = {"cord", "dura"}; % to which boundaries apply local sizing
     
         sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
     
-        filename = fullfile(DNS.ansys_path, cas.subj, "geometry",DNS.geom+"_geometry.scdoc");
+        filename = fullfile(DNS.ansys_path, cas.subj, "geometry","geometry.scdoc");
     
         if ii == 1
             fprintf(fileID,'/file/set-tui-version "24.1"\n' );
@@ -74,14 +74,14 @@ local_sizing = {"cord", "dura"}; % to which boundaries apply local sizing
     
             % Check if the case file exists
         if ~isfile(fullfile(cas.diransys_in, DNS.case + "_0.cas.gz"))
-            fprintf('Case file %s needs to be created.\n', DNS.case);
+            fprintf('case file %s needs to be created ...\n', DNS.case);
             all_simulations = false;
         end
         % fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*WriteSubMenu*Stop Journal"")\n" );
     end
 
     if all_simulations
-        fprintf('All fluent cases already exist. Ready to run simulation!\n');
+        fprintf('all fluent cases already exist. Ready to run simulation!\n');
     end
 end
 

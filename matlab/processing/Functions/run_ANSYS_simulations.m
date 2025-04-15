@@ -1,18 +1,4 @@
 function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_output)
-    % Flag to stop program if any case file is missing
-    stopProgram = false;
-
-    % Check if the necessary case files exist
-    for k = 1:length(DNS_cases)
-        if ~checkCaseFile(cas, DNS_cases{k})
-            stopProgram = true;
-        end
-    end
-
-    % Terminate if any case file is missing
-    if stopProgram
-        error('Program terminated due to missing case files. Run ansys journal in fluent meshing.');
-    end
 
     % Run simulations for each DNS case
     for k = 1:length(DNS_cases)
@@ -22,7 +8,20 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_output
         DNS = loadDNSData(cas, DNS_cases{k});
 
         % Create and run the ANSYS journal
-        create_journal(dat_PC, cas, DNS);
+        
+        fileID = fopen(fullfile(cas.diransys_in, DNS.case + ".jou"), 'w');
+        
+        % Setup simulation
+        setup_Fluent_case_TUI(DNS, cas, fileID);
+        
+        % Create PCMRI surfaces and other necessary setups
+        create_surfaces_journal_TUI(dat_PC, cas, DNS, fileID);
+        
+        % Add reports and run the simulation
+        reports_journal_TUI(cas, DNS, fileID);
+        run_simulation_TUI(dat_PC, cas, DNS, fileID);
+
+
         runFluentSimulation(DNS, DNS_cases{k}, n_cores, visualize_output);
 
         % Finalize after simulation
@@ -67,15 +66,5 @@ end
 
 % Function to create the ANSYS journal
 function create_journal(dat_PC, cas, DNS)
-    fileID = fopen(fullfile(cas.diransys_in, DNS.case + ".jou"), 'w');
-    
-    % Setup simulation
-    setup_Fluent_case_TUI(DNS, cas, fileID);
-    
-    % Create PCMRI surfaces and other necessary setups
-    create_surfaces_journal_TUI(dat_PC, cas, DNS, fileID);
-    
-    % Add reports and run the simulation
-    reports_journal_TUI(cas, DNS, fileID);
-    run_simulation_TUI(dat_PC, cas, DNS, fileID);
+
 end

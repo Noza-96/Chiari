@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if isempty(who)
-    [aux, cas, dat_PC, single_reading] = run_if_empty('s101_a', 'SIEMENS');  % if skipping previous steps
+    [aux, cas, dat_PC, single_reading] = run_if_empty('s101_b', 'SIEMENS');  % if skipping previous steps
 end
 
 disp(["Applying ROIs and computing Q ..." + newline])
