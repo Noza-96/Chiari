@@ -108,9 +108,19 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
     end
 
     % Output structure
-    pcmri = struct( 'x', x, 'y', y, 'z', z, 'SV', SV, 'u_normal', u, 'normal_v', nv, ...
-        'q', q, 'T', dat_PC.T, 'locations', cas.locations, 'locz', dat_PC.locz, ...
-        'Ndat', dat_PC.Ndat, 'Nt', ts_cycle, 'case', 'PC-MRI');
+     pcmri.x = x;
+     pcmri.y = y;
+     pcmri.z = z;
+     pcmri.SV = SV;
+     pcmri.u_normal = u;
+     pcmri.normal_v = nv;
+     pcmri.q = q;
+     pcmri.locations = cas.locations;
+     pcmri.locz = dat_PC.locz;
+     pcmri.Ndat = dat_PC.Ndat;
+     pcmri.Nt = ts_cycle;
+     pcmri.case = 'PC-MRI';
+     pcmri.T = dat_PC.T;
 
     save(fullfile(cas.dirmat, "pcmri_vel"), 'pcmri');
 end

@@ -10,7 +10,7 @@ subject = "s101_b";
 % c0/c1 for zero pressure top and bottom flow rate/velocity
 % c2 for two inlet velocities; continuity: normal velocity tonsils 
 
-case_name = {"c2"}; % Array with the kind of simulations to do
+case_name = {"c2"};      % Array with the kind of simulations to do
 mesh_size = [0.0005];    % Array with the different mesh sizes to be simulated
 
 ts_cycle = 100;     % number of time steps per cycle
@@ -21,7 +21,7 @@ n_cores = 10;       % number of processors simulation
 
 check_valid_case(case_name) 
 
-[cas, dat_PC] = check_subject_initialization(subject);
+[cas, dat_PC] = check_subject_initialization(subject, ts_cycle);
 
 DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, delta_h_FM, iterations_ts, ts_cycle);
 
@@ -56,7 +56,7 @@ function check_valid_case(case_names)
     end
 end
 
-function [cas, dat_PC] = check_subject_initialization (subject)
+function [cas, dat_PC] = check_subject_initialization (subject, ts_cycle)
     % load data
     mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat","03-apply_roi_compute_Q.mat");
     load(mri_data_path, 'cas','dat_PC');

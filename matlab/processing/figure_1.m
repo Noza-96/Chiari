@@ -96,9 +96,9 @@ for s=1:length(subjects)
     
     % Plot volumes in the last tile
     nexttile(rows,[Ndata, 1]);
-    plot(Vs, Dz_loc, '-', 'LineWidth', 1.5, 'Color', color_m{s});
+    plot(Vs./[pcmri.T{:}], Dz_loc, '-', 'LineWidth', 1.5, 'Color', color_m{s});
     hold on
-    plot(Vs, Dz_loc, 'o', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'Color', color_m{s});
+    plot(Vs./[pcmri.T{:}], Dz_loc, 'o', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'Color', color_m{s});
     
     yticks(-20:5:100);
 
@@ -111,7 +111,7 @@ for s=1:length(subjects)
     
     % Customize the appearance of the plot
     set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
-    xlabel("$V_s \,{\rm [ml]}$", 'Interpreter', 'latex', 'FontSize', fs);
+    xlabel("$V_s/ T \,{\rm [ml/s]}$", 'Interpreter', 'latex', 'FontSize', fs);
     ylabel("z {\rm [mm]}", 'Interpreter', 'latex', 'FontSize', fs);
     xlim([floor(min(Vs(:)) * 10) / 10, ceil(max(Vs(:)) * 10) / 10]);
     ax = gca; % Get current axes
