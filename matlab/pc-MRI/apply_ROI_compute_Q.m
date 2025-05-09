@@ -1,4 +1,4 @@
-function dat = apply_ROI_compute_Q(dat, correct_aliasing, smooth_spatial_outliers, gauss_filter)
+function dat = apply_ROI_compute_Q(dat, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter)
 
     Ndat = dat.Ndat;
     fcal_H_cm_px = dat.fcal_H_cm_px;
@@ -36,9 +36,12 @@ function dat = apply_ROI_compute_Q(dat, correct_aliasing, smooth_spatial_outlier
         if correct_aliasing
             UU = U_SAS{idat};  
             wrapped_phase = (pi / venc{idat}) * UU;
+            % max(wrapped_phase(:))
+            % min(wrapped_phase(:))
 
-            % temporal unwrap to reduce aliasing
-            unwrapped_phase = unwrap_time_periodic(wrapped_phase);
+            % temporal unwrap to reduce aliasing, periodic
+            unwrapped_phase = unwrap_time_periodic(wrapped_phase, unwrap_periodic);
+
             UU_corr = (venc{idat} / pi) * unwrapped_phase;
             U_SAS{idat} = UU_corr;
             pxpos_alias_idat = abs(UU_corr - UU) > 1.0e-6;
@@ -142,7 +145,7 @@ function [U_smooth, outlier_mask_all] = smooth_spatial_outliers_3D(U, threshold)
     end
 end
 
-function unwrapped = unwrap_time_periodic(wrapped)
+function unwrapped = unwrap_time_periodic(wrapped, periodic)
     [Nx, Ny, Nt] = size(wrapped);
     unwrapped = wrapped;
 
@@ -152,11 +155,13 @@ function unwrapped = unwrap_time_periodic(wrapped)
         end
     end
 
-    % Enforce periodicity between first and last frames
-    dphi = unwrapped(:,:,1) - unwrapped(:,:,end);
-    nwrap = round(dphi / (2*pi));
-
-    for t = 1:Nt
-        unwrapped(:,:,t) = unwrapped(:,:,t) - 2*pi * nwrap;
+    if periodic == 1
+        % Enforce periodicity between first and last frames
+        dphi = unwrapped(:,:,1) - unwrapped(:,:,end);
+        nwrap = round(dphi / (2*pi));
+    
+        for t = 1:Nt
+            unwrapped(:,:,t) = unwrapped(:,:,t) - 2*pi * nwrap;
+        end
     end
 end

@@ -27,20 +27,20 @@ load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
         Q = -dat_PC.Q_SAS{ii};  % Get flow data
     
         % Identify rows and columns where all elements are zero
-        zeroRows = all(U(:,:,1) == 0, 2); % Logical vector for rows
-        zeroCols = all(U(:,:,1) == 0, 1); % Logical vector for columns
+        % zeroRows = all(U(:,:,1) == 0, 2); % Logical vector for rows
+        % zeroCols = all(U(:,:,1) == 0, 1); % Logical vector for columns
         
         % Find the indices of the rows and columns to retain
-        rowsToKeep = find(~zeroRows); 
-        colsToKeep = find(~zeroCols);
-        band = 1; 
-	    rowsToKeep = (rowsToKeep(1)-band):1:(rowsToKeep(end)+band);
-	    colsToKeep = (colsToKeep(1)-band):1:(colsToKeep(end)+band);
-        
+        % rowsToKeep = find(~zeroRows); 
+        % colsToKeep = find(~zeroCols);
+        % band = 1; 
+	    % rowsToKeep = (rowsToKeep(1)-band):1:(rowsToKeep(end)+band);
+	    % colsToKeep = (colsToKeep(1)-band):1:(colsToKeep(end)+band);
+        % 
         % Extract the submatrix and update vectors
-        U = U(rowsToKeep, colsToKeep,:);
-        xyz = xyz(rowsToKeep, colsToKeep,:);
-        
+        % U = U(rowsToKeep, colsToKeep,:);
+        % xyz = xyz(rowsToKeep, colsToKeep,:);
+        % 
         U = reshape(U,[size(U,1)*size(U,2),size(U,3)]);
     
         %xyz coordinates
@@ -82,8 +82,8 @@ pcmri.q = q;
         % Loop through each flow data set
         for k = 1:Ndata
             nexttile(1+(k-1)*rows, [1, 3]);
-
-            create_animation_ansys(pcmri, k, n, fan);
+          
+            create_animation_ansys(pcmri,length(dat_PC.U_SAS{ii}(:,1,1)), k, n, fan);
             ylabel('$y \,[{\rm mm}]$', 'Interpreter', 'latex', 'FontSize', fs);
             if k == Ndata
                 xlabel('$x \,[{\rm mm}]$', 'Interpreter', 'latex', 'FontSize', fs);
@@ -164,17 +164,23 @@ pcmri.q = q;
 
 end
 
-function create_animation_ansys(data, loc, n, fan)
+function create_animation_ansys(data, N_pixels, loc, n, fan)
     % Extract data and rescale
     x = data.x{loc} * 1e3; % [mm]
     y = data.y{loc} * 1e3; % [mm]
     w = data.u_normal{loc}(:, n) * 1e2; % [cm/s]
 
+    N_pixels
+
     % Create interpolation grid
-    xq = linspace(min(x), max(x), 1000);
-    yq = linspace(min(y), max(y), 1000);
-    [Xq, Yq] = meshgrid(xq, yq);
-    Wq = griddata(x, y, w, Xq, Yq, 'cubic');
+    % xq = linspace(min(x), max(x), 1000);
+    % yq = linspace(min(y), max(y), 1000);
+    % [Xq, Yq] = meshgrid(xq, yq);
+    % Wq = griddata(x, y, w, Xq, Yq, 'cubic');
+
+    rows = length(w)/N_pixels;
+    x = repmat(1:N_pixels, 1, rows);
+    y = repelem(1:N_pixels, rows);
 
     % Plot in the specified tile
     scatter(x, y, 8, w, 'filled', 'd');
@@ -185,8 +191,8 @@ function create_animation_ansys(data, loc, n, fan)
     % Set axis limits and properties
     Dx = max(x) - min(x);
     Dy = max(y) - min(y);
-    xlim([min(x) - 0.1 * Dx, max(x) + 0.1 * Dx]);
-    ylim([min(y) - 0.1 * Dy, max(y) + 0.1 * Dy]);
+    % xlim([min(x) - 0.1 * Dx, max(x) + 0.1 * Dx]);
+    % ylim([min(y) - 0.1 * Dy, max(y) + 0.1 * Dy]);
     set(gca, 'XDir', 'reverse', 'YDir', 'reverse', 'LineWidth', 1, 'TickLength', [0.01, 0.01], 'FontSize', fan);
     box on;
 end

@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all;
 
-cas.subj = 's101_a';
+cas.subj = 's101_aa';
 
 cas.model = 'SIEMENS'; % GE (Utah) or SIEMENS (Granada)
 
@@ -31,7 +31,7 @@ end
 
 if cas.Ncas_FM > 0
     disp(["Reading FM DICOMS ..." + newline])
-    dat_FM = read_dicoms_FM(cas);
+    dat_FM = read_dicoms_FM(cas);ilapps
 end
 
 disp(["Saving everything in a .mat file ..." + newline])
