@@ -21,6 +21,14 @@ function dat = define_ROI_video(cas, dat)
         end
         
         if set_new_ROI
+            % see if there is polygon created
+            vertex_file = fullfile(cas.dirmat, 'ROIs', sstt_name + "ROI_vertices.mat");
+            has_vertices = exist(vertex_file, 'file');
+            if has_vertices
+                disp('Loading previous vertices ...')
+            else
+                disp('No previous vertex data found. You will need to draw the contours.')
+            end
     
             Nt = dat.Nt{idat};
             
@@ -43,14 +51,18 @@ function dat = define_ROI_video(cas, dat)
             S_compl = imadjust(S_compl / max(max(S_compl)), [0.0, 0.9]);
     
             disp("Please click on left or right panel and contour the DURA ...")
-            
             show_composed_figure
             
-            waitforbuttonpress
-    
-            h = drawpolygon('Color', [1, 0, 0], 'FaceAlpha', 0);
+            if has_vertices
+                load(vertex_file, 'hvertices_dura');
+                h = drawpolygon('Position', hvertices_dura, 'Color', [1, 0, 0], 'FaceAlpha', 0);
+            else
+                waitforbuttonpress
+                h = drawpolygon('Color', [1, 0, 0], 'FaceAlpha', 0);
+            end
+            
             pause
-            hvertices = h.Position;
+            hvertices_dura = h.Position;
             BW_SPC = createMask(h);
             
             nshow = 0;
@@ -66,13 +78,13 @@ function dat = define_ROI_video(cas, dat)
                 show_composed_figure
                 
                 subaxis(1, 3, 1, 'Margin', 0, 'Spacing', 0)
-                h = drawpolygon('Position', hvertices, 'Color', [1, 0, 0], 'FaceAlpha', 0);
+                h = drawpolygon('Position', hvertices_dura, 'Color', [1, 0, 0], 'FaceAlpha', 0);
                 subaxis(1, 3, 2, 'Margin', 0, 'Spacing', 0)
-                h = drawpolygon('Position', hvertices, 'Color', [1, 0, 0], 'FaceAlpha', 0);
+                h = drawpolygon('Position', hvertices_dura, 'Color', [1, 0, 0], 'FaceAlpha', 0);
                 subaxis(1, 3, 3, 'Margin', 0, 'Spacing', 0)
-                h = drawpolygon('Position', hvertices, 'Color', [1, 0, 0], 'FaceAlpha', 0);
+                h = drawpolygon('Position', hvertices_dura, 'Color', [1, 0, 0], 'FaceAlpha', 0);
                 pause
-                hvertices = h.Position;
+                hvertices_dura = h.Position;
                 BW_SPC = createMask(h);
                 
                 disp("j: next frame   k: previous frame   s: save");
@@ -102,15 +114,19 @@ function dat = define_ROI_video(cas, dat)
             end
     
             disp("Please click on left or right panel and contour the PIA ...")
-    
             show_composed_figure_after_dura
             hold on
-    
-            waitforbuttonpress
-    
-            h = drawpolygon('Color', [1, 0, 0], 'FaceAlpha', 0)
+            
+            if has_vertices
+                load(vertex_file, 'hvertices_pia');
+                h = drawpolygon('Position', hvertices_pia, 'Color', [1, 0, 0], 'FaceAlpha', 0);
+            else
+                waitforbuttonpress
+                h = drawpolygon('Color', [1, 0, 0], 'FaceAlpha', 0);
+            end
+            
             pause
-            hvertices = h.Position;
+            hvertices_pia = h.Position;
             BW_COR = createMask(h);
             
             nshow = 0;
@@ -127,13 +143,13 @@ function dat = define_ROI_video(cas, dat)
                 show_composed_figure
                 
                 subaxis(1, 3, 1, 'Margin', 0, 'Spacing', 0)
-                h = drawpolygon('Position', hvertices, 'Color', [1, 0, 0], 'FaceAlpha', 0);
+                h = drawpolygon('Position', hvertices_pia, 'Color', [1, 0, 0], 'FaceAlpha', 0);
                 subaxis(1, 3, 2, 'Margin', 0, 'Spacing', 0)
-                h = drawpolygon('Position', hvertices, 'Color', [1, 0, 0], 'FaceAlpha', 0);
+                h = drawpolygon('Position', hvertices_pia, 'Color', [1, 0, 0], 'FaceAlpha', 0);
                 subaxis(1, 3, 3, 'Margin', 0, 'Spacing', 0)
-                h = drawpolygon('Position', hvertices, 'Color', [1, 0, 0], 'FaceAlpha', 0);
+                h = drawpolygon('Position', hvertices_pia, 'Color', [1, 0, 0], 'FaceAlpha', 0);
                 pause
-                hvertices = h.Position;
+                hvertices_pia = h.Position;
                 BW_COR = createMask(h);
                 
                 disp("j: next frame   k: previous frame   s: save");
@@ -180,6 +196,8 @@ function dat = define_ROI_video(cas, dat)
             imshow(fused, 'InitialMagnification', 400)
             pause
     
+            % save poligon data
+            save(vertex_file, 'hvertices_dura', 'hvertices_pia');
         end
     
         save(fullfile(cas.dirmat,'ROIs', sstt_name+"ROI.mat"), 'ROI_SAS', 'ROI_SPC', 'ROI_COR')

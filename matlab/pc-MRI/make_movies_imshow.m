@@ -44,6 +44,16 @@ function make_movies_imshow(cas, dat, whichfield, whichidat, showroi)
                     field = dat.U_tot{idat}(:, :, it);
                     imshow(field, dat.venc{idat}*[-1.0, 1.0], 'InitialMagnification', 1000);
                     crameri bam
+                case 'U_sas'
+                    field3 = 0.5 + dat.U_SAS{idat}(:, :, it)/(2.0*maxabsvel);
+                    cmap = crameri('vik', 256);
+                    field = ind2rgb(gray2ind(field3, 256), cmap);
+                    if showroi
+                        roi = edge(dat.ROI_SAS{idat}(:, :));
+                        roirgb = 1.0 - cat(3, 1.0*roi, 1.0*roi, 1.0*roi);
+                        field = roirgb.*field;
+                    end
+                    imshow(field, 'InitialMagnification', 1000);
                 case 'all3'
                     maxval1 = max(max(max(dat.compl{1}(:,:,:))));
                     field1 = squeeze(dat.compl{idat}(:, :, it))/maxval1;

@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all; 
 
-[aux, cas, dat_PC, single_reading] = run_if_empty('s101_aa', 'SIEMENS');  % if skipping previous steps
+[aux, cas, dat_PC, single_reading] = run_if_empty('s101_b', 'SIEMENS');  % if skipping previous steps
 
 disp(["Applying ROIs and computing Q ..." + newline])
 
@@ -11,24 +11,8 @@ unwrap_periodic = true;
 smooth_spatial_outliers = true;  % Flag to apply spatial outlier smoothing
 gauss_filter = true;
 
-ub=dat_PC.U_tot{end};
-
-figure
-tiledlayout(1,2)
-nexttile
-plot([1:40]',squeeze(ub(45,37,:))');
-nexttile
-plot([1:40]',squeeze(ub(46,61,:))');
-
 dat_PC = apply_ROI_compute_Q(dat_PC, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter);
 
-ub=dat_PC.U_SAS{end};
-figure
-tiledlayout(1,2)
-nexttile
-plot([1:40]',squeeze(ub(45,37,:))');
-nexttile
-plot([1:40]',squeeze(ub(46,61,:))');
 
 disp(["Repeating and interpolating Q ..." + newline])
 

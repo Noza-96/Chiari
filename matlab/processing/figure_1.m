@@ -1,6 +1,6 @@
 % Longitudinal evolution flow rate and stroke volume 
-
-subjects = {"s101_b", "s101_a", "s101_ab"};
+clear; close all
+subjects = {"s101_b", "s101_a", "s101_aa"};
 
 red   = [0.8500, 0.3250, 0.0980];  % warm red-orange
 blue  = [0.0000, 0.4470, 0.7410];  % deep blue
@@ -17,6 +17,8 @@ Ndata = 5;
 figure;
 set(gcf, 'Position', [200, 200, 1000, Ndata*100]);
 tiledlayout(Ndata, rows, "TileSpacing", "loose", "Padding", "tight");
+
+Y_l = zeros(1,Ndata);
 
 for s=1:length(subjects)
     subject = subjects{s};
@@ -37,6 +39,9 @@ for s=1:length(subjects)
     
     % Loop through each flow data set
     for k = 1:Ndata   
+        if k == 1 && (subject == "s101_a" || subject == "s101_aa")
+            continue
+        end
         Q = pcmri.q{k};
         t = linspace(0, 1, length(Q));  % Create time vector
         nexttile(1+(k-1)*rows, [1, 2]);
@@ -84,21 +89,25 @@ for s=1:length(subjects)
             xlabel("$t\, [{\rm s}]$", 'Interpreter', 'latex', 'FontSize', fs);
         end
         
-        Y_l = ceil(max(abs(max_vel(:))))+1;
+        Y_l(k) = max(ceil(max(abs(max_vel(:))))+1,Y_l(k));
 
-        ylim([-Y_l, Y_l]);
+        ylim([-Y_l(k), Y_l(k)]);
 
-        yticks([-Y_l,0,Y_l])
+        yticks([-Y_l(k),0,Y_l(k)])
 
     end
     
     Vs = [pcmri.SV{:}]; 
+    index = 1:length(Vs);
+    if subject == "s101_a" || subject == "s101_aa"
+        index = 2:length(Vs);
+    end
     
     % Plot volumes in the last tile
     nexttile(rows,[Ndata, 1]);
-    plot(Vs, Dz_loc, '-', 'LineWidth', 1.5, 'Color', color_m{s});
+    plot(Vs(index), Dz_loc(index), '-', 'LineWidth', 1.5, 'Color', color_m{s});
     hold on
-    plot(Vs, Dz_loc, 'o', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'Color', color_m{s});
+    plot(Vs(index), Dz_loc(index), 'o', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'Color', color_m{s});
     
     yticks(-20:5:100);
 
@@ -113,12 +122,12 @@ for s=1:length(subjects)
     set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
     xlabel("$V_s \,{\rm [ml]}$", 'Interpreter', 'latex', 'FontSize', fs);
     ylabel("z {\rm [mm]}", 'Interpreter', 'latex', 'FontSize', fs);
-    xlim([floor(min(Vs(:)) * 10) / 10, ceil(max(Vs(:)) * 10) / 10]);
     ax = gca; % Get current axes
     % ax.XAxis.TickLabelRotation = 90; % Rotate y-axis tick labels to vertical
     set(gcf, 'Color', 'w');  % Set background color to white for figures
     grid off; 
-    
+    xlim([0.3, 0.6]);
+
     set(gcf, 'Color', 'w')
     end
 end

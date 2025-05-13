@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all; 
 
-[aux, cas, dat_PC, single_reading] = run_if_empty('s101_aa', 'SIEMENS');  % if skipping previous steps
+[aux, cas, dat_PC, single_reading] = run_if_empty('s101_b', 'SIEMENS');  % if skipping previous steps
 
 reference_location = 'C3C4'; 
 % (set to 'zero' to set location to 0.0)

@@ -27,19 +27,19 @@ load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
         Q = -dat_PC.Q_SAS{ii};  % Get flow data
     
         % Identify rows and columns where all elements are zero
-        % zeroRows = all(U(:,:,1) == 0, 2); % Logical vector for rows
-        % zeroCols = all(U(:,:,1) == 0, 1); % Logical vector for columns
+        zeroRows = all(U(:,:,1) == 0, 2); % Logical vector for rows
+        zeroCols = all(U(:,:,1) == 0, 1); % Logical vector for columns
         
         % Find the indices of the rows and columns to retain
-        % rowsToKeep = find(~zeroRows); 
-        % colsToKeep = find(~zeroCols);
-        % band = 1; 
-	    % rowsToKeep = (rowsToKeep(1)-band):1:(rowsToKeep(end)+band);
-	    % colsToKeep = (colsToKeep(1)-band):1:(colsToKeep(end)+band);
-        % 
+        rowsToKeep = find(~zeroRows); 
+        colsToKeep = find(~zeroCols);
+        band = 1; 
+	    rowsToKeep = (rowsToKeep(1)-band):1:(rowsToKeep(end)+band);
+	    colsToKeep = (colsToKeep(1)-band):1:(colsToKeep(end)+band);
+
         % Extract the submatrix and update vectors
-        % U = U(rowsToKeep, colsToKeep,:);
-        % xyz = xyz(rowsToKeep, colsToKeep,:);
+        U = U(rowsToKeep, colsToKeep,:);
+        xyz = xyz(rowsToKeep, colsToKeep,:);
         % 
         U = reshape(U,[size(U,1)*size(U,2),size(U,3)]);
     
@@ -91,7 +91,7 @@ pcmri.q = q;
 
             Q = pcmri.q{k};  % Get flow data
             Nt = dat_PC.Nt{k};     % Get number of time points
-            t = linspace(0, 1, ts_cycle);  % Create time vector
+            t = linspace(0, 1, ts_cycle)*dat_PC.T{k};  % Create time vector
             if k == 1
                 title("$u\left[{\rm cm/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
             end
@@ -146,7 +146,8 @@ pcmri.q = q;
             set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
             xlabel("$V_s \,{\rm [ml]}$", 'Interpreter', 'latex', 'FontSize', fs);
             ylabel("$z \,{\rm [mm]}$", 'Interpreter', 'latex', 'FontSize', fs);
-            xlim([floor(min(Vs(:)) * 10) / 10, ceil(max(Vs(:)) * 10) / 10]);
+            % xlim([floor(min(Vs(:)) * 10) / 10, ceil(max(Vs(:)) * 10) / 10]);'\
+            xlim([0.3,0.6]);
             ax = gca; % Get current axes
             % ax.XAxis.TickLabelRotation = 90; % Rotate y-axis tick labels to vertical
             set(gcf, 'Color', 'w');  % Set background color to white for figures
@@ -170,18 +171,6 @@ function create_animation_ansys(data, N_pixels, loc, n, fan)
     y = data.y{loc} * 1e3; % [mm]
     w = data.u_normal{loc}(:, n) * 1e2; % [cm/s]
 
-    N_pixels
-
-    % Create interpolation grid
-    % xq = linspace(min(x), max(x), 1000);
-    % yq = linspace(min(y), max(y), 1000);
-    % [Xq, Yq] = meshgrid(xq, yq);
-    % Wq = griddata(x, y, w, Xq, Yq, 'cubic');
-
-    rows = length(w)/N_pixels;
-    x = repmat(1:N_pixels, 1, rows);
-    y = repelem(1:N_pixels, rows);
-
     % Plot in the specified tile
     scatter(x, y, 8, w, 'filled', 'd');
     % contourf(Xq, Yq, Wq, 40, 'LineColor', 'none');
@@ -191,8 +180,8 @@ function create_animation_ansys(data, N_pixels, loc, n, fan)
     % Set axis limits and properties
     Dx = max(x) - min(x);
     Dy = max(y) - min(y);
-    % xlim([min(x) - 0.1 * Dx, max(x) + 0.1 * Dx]);
-    % ylim([min(y) - 0.1 * Dy, max(y) + 0.1 * Dy]);
+    xlim([min(x) - 0.1 * Dx, max(x) + 0.1 * Dx]);
+    ylim([min(y) - 0.1 * Dy, max(y) + 0.1 * Dy]);
     set(gca, 'XDir', 'reverse', 'YDir', 'reverse', 'LineWidth', 1, 'TickLength', [0.01, 0.01], 'FontSize', fan);
     box on;
 end

@@ -44,7 +44,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
         x{ii} = xx; y{ii} = yy; z{ii} = zz;
         u{ii} = uu;
         [q{ii}, ~, ~] = four_approx(Q, modes, 0, ts_cycle);
-        SV{ii} = 0.5 * simps(t, abs(q{ii}), 2);
+        SV{ii} = 0.5 * simps(t*dat_PC.T{ii}, abs(q{ii}), 2);
 
         % Compute normal vector
         V1 = [x_coords(2), y_coords(2), z_coords(2)] - [x_coords(1), y_coords(1), z_coords(1)];
