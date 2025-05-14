@@ -209,6 +209,7 @@ if not pid:
 chiari_path = get_local_chiari_path()
 segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
 pcMRI_path = os.path.join(segmentation_path, "pcMRI")
+transformation_path = os.path.join(segmentation_path, "transformation")
 
 
 # Save the plane points to a text file -- FAILS TO GIVE CORRECT POINTS
@@ -237,7 +238,7 @@ adjust_slice_views()
 file_saved = False
 # Apply a linear transformation to the segmentation to align it with the sequence segmentation
 # 1. Load existing transformed segmentation, if it exists
-transformed_geometry_path = os.path.join(segmentation_path, 'stl', 'segmentation.stl')
+transformed_geometry_path = os.path.join(transformation_path, 'segmentation.stl')
 if os.path.exists(transformed_geometry_path):
     response = QMessageBox.question(None, 'Load Existing Transformation', 'Do you want to load the existing transformed segmentation?', QMessageBox.Yes | QMessageBox.No)
     if response == QMessageBox.Yes:
@@ -249,7 +250,7 @@ if os.path.exists(transformed_geometry_path):
         # # Export the transformed segmentation as an STL file
         # response = QMessageBox.question(None, 'Export STL', 'Do you want update stl file?', QMessageBox.Yes | QMessageBox.No)
         # if response == QMessageBox.Yes:
-        #     export_folder = os.path.join(segmentation_path, 'stl')
+        #     export_folder = os.path.join(transformation_path)
         #     if not os.path.exists(export_folder):
         #         os.makedirs(export_folder)
 
@@ -299,7 +300,7 @@ if not file_saved:
                 # Export the transformed segmentation as an STL file
                 response = QMessageBox.question(None, 'Export STL', 'Do you want to save results?', QMessageBox.Yes | QMessageBox.No)
                 if response == QMessageBox.Yes:
-                    export_folder = os.path.join(segmentation_path, 'stl')
+                    export_folder = os.path.join(transformation_path)
                     if not os.path.exists(export_folder):
                         os.makedirs(export_folder)
 
@@ -307,7 +308,7 @@ if not file_saved:
                     clear_stl_folde(export_folder)
 
                     # Save transformation matrix
-                    transform_matrix_path = os.path.join(segmentation_path, 'stl', 'transformation_matrix.txt')
+                    transform_matrix_path = os.path.join(transformation_path, 'transformation_matrix.txt')
                     save_transformation_matrix(transform_node, transform_matrix_path)
 
                     # Apply the transformation to the volume
@@ -317,7 +318,7 @@ if not file_saved:
                     slicer.vtkSlicerTransformLogic().hardenTransform(volume_node)
 
                     # Save the transformed volume in the STL folder
-                    transformed_anatomy_path = os.path.join(segmentation_path, 'stl', 'transformed_anatomy.nrrd')
+                    transformed_anatomy_path = os.path.join(transformation_path, 'transformed_anatomy.nrrd')
                     slicer.util.saveNode(volume_node, transformed_anatomy_path)
 
                     # Export the segmentation to STL
