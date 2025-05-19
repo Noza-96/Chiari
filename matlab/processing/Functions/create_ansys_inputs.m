@@ -7,6 +7,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
     modes = 20; % Fourier modes
     t = linspace(0, 1, ts_cycle);  % Time vector
 
+    load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
+
     for ii = 1:dat_PC.Ndat
 
         % Extract and scale pcMRI data
@@ -108,19 +110,20 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
     end
 
     % Output structure
-     pcmri.x = x;
+     pcmri.x = x; %[m]
      pcmri.y = y;
      pcmri.z = z;
      pcmri.SV = SV;
-     pcmri.u_normal = u;
+     pcmri.u_normal = u; %[cm/s]
      pcmri.normal_v = nv;
-     pcmri.q = q;
+     pcmri.q = q; %[ml/s]
      pcmri.locations = cas.locations;
-     pcmri.locz = dat_PC.locz;
+     pcmri.locz = dat_PC.locz; %[cm]
      pcmri.Ndat = dat_PC.Ndat;
      pcmri.Nt = ts_cycle;
      pcmri.case = 'PC-MRI';
      pcmri.T = dat_PC.T;
+     pcmri.FM = abs(anatomy.FM)/10; %[cm]
 
     save(fullfile(cas.dirmat, "pcmri_vel"), 'pcmri');
 end

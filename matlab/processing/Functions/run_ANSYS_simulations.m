@@ -34,7 +34,7 @@ end
 
 % Helper function to check if the case file exists
 function exists = checkCaseFile(cas, case_name)
-    file_path = fullfile(cas.diransys_in, case_name + "_0.cas.gz");
+    file_path = fullfile(cas.diransys_in, "case-files", case_name + ".cas.gz");
     exists = isfile(file_path);
     if ~exists
         fprintf(2, 'Error: Case file %s not found.\n', case_name);

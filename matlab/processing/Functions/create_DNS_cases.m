@@ -1,4 +1,4 @@
-function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, delta_h_FM, iterations_ts, ts_cycle)
+function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle)
     DNS_cases = cell(length(case_name),length(mesh_size));
     for i = 1:length(case_name)     
         for j = 1:length(mesh_size)
@@ -18,11 +18,14 @@ function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, delta_
             DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
             DNS.slices.locations = [cas.locations(1:end-1), "bottom", "top"]';
             DNS.cycles = cycles;
-            DNS.delta_h_FM = delta_h_FM;
             DNS.iterations_ts = iterations_ts;
             DNS.ts_cycle = ts_cycle;
             DNS.subject = cas.subj;
-            DNS_cases{i,j} = DNS.case;       
+            DNS_cases{i,j} = DNS.case;
+
+            if DNS.sim == 2
+                DNS.continuity = "tonsils";
+            end
             save(fullfile(cas.dirmat,"DNS_"+DNS.case+".mat"),'DNS')
             clear DNS
         end     
