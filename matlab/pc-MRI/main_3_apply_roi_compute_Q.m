@@ -1,18 +1,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all; 
 
-[aux, cas, dat_PC, single_reading] = run_if_empty('s101_b', 'SIEMENS');  % if skipping previous steps
+[aux, cas, dat_PC, single_reading] = run_if_empty('s101_aa', 'SIEMENS');  % if skipping previous steps
 
-disp(["Applying ROIs and computing Q ..." + newline])
+disp("Applying ROIs and computing Q ..." + newline)
 
 
-correct_aliasing = true;
-unwrap_periodic = true;
+correct_aliasing = true; % wrap in time - aliasing correction
+unwrap_periodic = true; % allow for periodic wraping
 smooth_spatial_outliers = true;  % Flag to apply spatial outlier smoothing
-gauss_filter = true;
+gauss_filter = true; % apply gauss filter
 
 dat_PC = apply_ROI_compute_Q(dat_PC, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter);
-
 
 disp(["Repeating and interpolating Q ..." + newline])
 
@@ -26,7 +25,7 @@ disp(["Fourier decomposition ..." + newline])
 
 dat_PC = decompose_fourier(cas, dat_PC);
 
-disp(["Saving everything in a .mat file ..." + newline])
+disp("Saving everything in a .mat file ..." + newline)
 
 if isempty(single_reading) 
     sstt_name = "";
@@ -44,7 +43,7 @@ movieVector = create_animation(dat_PC, cas, ts_cycle);
 
 save_animation(movieVector, fullfile(cas.dirvid, sstt_name+"flow_measurements_"+cas.subj+".mp4"));
 
-disp([ "Done!" + newline])
+disp( "Done!" + newline)
 
 function [aux, cas, dat_PC, single_reading] = run_if_empty(subject, model)
         cas.subj = subject;

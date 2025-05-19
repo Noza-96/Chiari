@@ -12,7 +12,7 @@ load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
     locations = cellfun(@(x) strrep(x, '0', ''), cas.locations, 'UniformOutput', false);
     % z-position compared to C3C4
     locz_vals = cell2mat(dat_PC.locz);
-    Dz_loc = round(abs(locz_vals(end) - locz_vals)*10);
+    Dz_loc = -(anatomy.FM-(-locz_vals*10));
     % labels = cellfun(@(loc, dz) sprintf('%s (%d mm)', loc, dz), locations, num2cell(Dz_loc), 'UniformOutput', false)
 
     % Preallocate movie vector
@@ -133,21 +133,22 @@ pcmri.q = q;
             hold on
             plot(Vs, Dz_loc, 'o', 'LineWidth', 1.5, 'MarkerFaceColor', 'w');
 
-            yticks(-20:5:100);
+            yticks(-200:5:100);
 
             for i = 1:length(anatomy.Dz) - 2
-                yline(anatomy.Dz(i), '--', anatomy.location{i}, ...
+                yline(-anatomy.Dz(i), '--', anatomy.location{i}, ...
                     'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs);
             end             
+            % ylim([floor(min(Dz_loc(:))/10)*10, ceil(max(Dz_loc(:))/10)*10])
 
-            ylim([0, ceil(max(Dz_loc(:))/10)*10])
+            ylim([-60, 10])
         
             % Customize the appearance of the plot
             set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
             xlabel("$V_s \,{\rm [ml]}$", 'Interpreter', 'latex', 'FontSize', fs);
             ylabel("$z \,{\rm [mm]}$", 'Interpreter', 'latex', 'FontSize', fs);
             % xlim([floor(min(Vs(:)) * 10) / 10, ceil(max(Vs(:)) * 10) / 10]);'\
-            xlim([0.3,0.6]);
+            xlim([0,0.7]);
             ax = gca; % Get current axes
             % ax.XAxis.TickLabelRotation = 90; % Rotate y-axis tick labels to vertical
             set(gcf, 'Color', 'w');  % Set background color to white for figures

@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all; 
 
-[aux, cas, dat_PC, single_reading] = run_if_empty('s101_aa', 'SIEMENS');  % if skipping previous steps
+[aux, cas, dat_PC, single_reading] = run_if_empty(['s101_aa'], 'SIEMENS');  % if skipping previous steps
 
 reference_location = 'C3C4'; 
 % (set to 'zero' to set location to 0.0)
@@ -14,26 +14,19 @@ makemovies = false;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-disp([newline + "Adjusting vertical location ..." + newline])
+disp("Adjusting vertical location ..." + newline)
 
 dat_PC = adjust_vertical_location_PC(cas, dat_PC, reference_location);
 
-disp([newline + "Cropping data ..." + newline])
+disp("Cropping data ..." + newline)
 
 dat_PC = crop_data(cas, dat_PC, crop_size, single_reading);
 
-disp([newline + "Making movies (if requested) ..." + newline])
+disp("Setting up ROIs ..." + newline)
 
-if makemovies
-    make_movies(cas, dat_PC, 'U_tot');
-end
-
-disp([newline + "Setting up ROIs ..." + newline])
-
-%dat_PC = define_ROI_freehand(cas, dat_PC);
 dat_PC = define_ROI_video(cas, dat_PC);
 
-disp([newline + "Saving everything in a .mat file ..." + newline])
+disp("Saving everything in a .mat file ..." + newline)
 
 if isempty(single_reading) 
     sstt_name = "";
@@ -45,7 +38,7 @@ else
 end
 
 save(fullfile(cas.dirmat, "02-"+sstt_name+"crop_set_roi.mat"), 'aux', 'cas', 'dat_PC');
-disp([newline + "Done!" + newline])
+disp("Done!" + newline)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all;
 
-cas.subj = 's101_aa';
+cas.subj = 's101_b';
 
 cas.model = 'SIEMENS'; % GE (Utah) or SIEMENS (Granada)
 

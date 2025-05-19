@@ -36,8 +36,6 @@ function dat = apply_ROI_compute_Q(dat, correct_aliasing, unwrap_periodic, smoot
         if correct_aliasing
             UU = U_SAS{idat};  
             wrapped_phase = (pi / venc{idat}) * UU;
-            % max(wrapped_phase(:))
-            % min(wrapped_phase(:))
 
             % temporal unwrap to reduce aliasing, periodic
             unwrapped_phase = unwrap_time_periodic(wrapped_phase, unwrap_periodic);
@@ -99,11 +97,6 @@ function dat = apply_ROI_compute_Q(dat, correct_aliasing, unwrap_periodic, smoot
     dat.mean_U_SAS = mean_U_SAS;
     dat.mean_U_COR = mean_U_COR;
     dat.mean_U_SPC = mean_U_SPC;
-
-    % if smooth_spatial_outliers
-    %     dat.outlier_masks = outlier_masks;
-    % end
-
 end
 
 function [U_smooth, outlier_mask_all] = smooth_spatial_outliers_3D(U, threshold)

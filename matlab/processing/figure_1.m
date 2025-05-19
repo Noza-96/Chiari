@@ -6,6 +6,10 @@ red   = [0.8500, 0.3250, 0.0980];  % warm red-orange
 blue  = [0.0000, 0.4470, 0.7410];  % deep blue
 green = [0.4660, 0.6740, 0.1880];  % vibrant green
 
+red   = [0.8, 0.2, 0.2];
+green = [0.2, 0.6, 0.2];
+blue  = [0.2, 0.4, 0.8];
+
 color_m = {red, blue, green};
 
 fs = 16;
@@ -33,23 +37,29 @@ for s=1:length(subjects)
         locations = cellfun(@(x) strrep(x, '0', ''), cas.locations, 'UniformOutput', false);
         % z-position compared to C3C4
         locz_vals = cell2mat(pcmri.locz);
-        Dz_loc = round(abs(locz_vals(end) - locz_vals)*10);
+        Dz_loc = -(anatomy.FM-(-locz_vals*10));
 
     
     
     % Loop through each flow data set
-    for k = 1:Ndata   
-        if k == 1 && (subject == "s101_a" || subject == "s101_aa")
-            continue
+    for loc = 1:Ndata   
+        if subject == "s101_a" || subject == "s101_aa"
+            k = loc-1;
+            if loc == 1
+                continue
+            end
+        else 
+            k = loc;
         end
         Q = pcmri.q{k};
         t = linspace(0, 1, length(Q));  % Create time vector
-        nexttile(1+(k-1)*rows, [1, 2]);
-        plot(t*pcmri.T{k}, Q, 'Color', color_m{s}, 'LineStyle','-', LineWidth=1.5)
+        % dimensional with *pcmri.T{k}
+        nexttile(1+(loc-1)*rows, [1, 2]);
+        plot(t, Q, 'Color', color_m{s}, 'LineStyle','-', LineWidth=1.5)
         hold on
         % Call the flow rate function
         % flow_rate(Q, 0);
-        set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
+        set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
 
         ylabel("$Q\left[{\rm ml/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
         yline(0,LineWidth=1,LineStyle=":")
@@ -58,10 +68,10 @@ for s=1:length(subjects)
         if k < pcmri.Ndat
             xlabel([])
         else
-            xlabel("$t\, [{\rm s}]$", 'Interpreter', 'latex', 'FontSize', fs);
+            xlabel("$t/T$", 'Interpreter', 'latex', 'FontSize', fs);
         end
 
-        ylim([-2, 2]);
+        ylim([-2.5, 2.5]);
 
         max_vel = max(pcmri.u_normal{k}, [], 1).*(pcmri.q{k}>0) + ...
                   min(pcmri.u_normal{k}, [], 1).*(pcmri.q{k}<0);
@@ -72,12 +82,12 @@ for s=1:length(subjects)
 
 
         t = linspace(0, 1, pcmri.Nt);  % Create time vector
-        nexttile(3+(k-1)*rows, [1, 2]);
-        plot(t*pcmri.T{k}, max_vel, 'Color', color_m{s}, 'LineStyle','-', LineWidth=1.5)
+        nexttile(3+(loc-1)*rows, [1, 2]);
+        plot(t, max_vel, 'Color', color_m{s}, 'LineStyle','-', LineWidth=1.5)
         hold on
         % Call the flow rate function
         % flow_rate(Q, 0);
-        set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
+        set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
         yline(0,LineWidth=1,LineStyle=":")
 
         ylabel("$u_{\rm max}\left[{\rm cm/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
@@ -86,7 +96,7 @@ for s=1:length(subjects)
         if k < pcmri.Ndat
             xlabel([])
         else
-            xlabel("$t\, [{\rm s}]$", 'Interpreter', 'latex', 'FontSize', fs);
+            xlabel("$t/T$", 'Interpreter', 'latex', 'FontSize', fs);
         end
         
         Y_l(k) = max(ceil(max(abs(max_vel(:))))+1,Y_l(k));
@@ -97,26 +107,21 @@ for s=1:length(subjects)
 
     end
     
-    Vs = [pcmri.SV{:}]; 
-    index = 1:length(Vs);
-    if subject == "s101_a" || subject == "s101_aa"
-        index = 2:length(Vs);
-    end
-    
-    % Plot volumes in the last tile
-    nexttile(rows,[Ndata, 1]);
-    plot(Vs(index), Dz_loc(index), '-', 'LineWidth', 1.5, 'Color', color_m{s});
-    hold on
-    plot(Vs(index), Dz_loc(index), 'o', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'Color', color_m{s});
-    
-    yticks(-20:5:100);
+    Vs{s} = [pcmri.SV{:}]; 
+    Dz{s} = Dz_loc;
+ 
 
-    for i = 1:length(anatomy.Dz) - 2
-    yline(anatomy.Dz(i), '--', anatomy.location{i}, ...
-        'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs);
-    end             
+    end
+end
+
+nexttile(rows,[Ndata, 1]);
+
+for s=1:length(subjects)
+    plot(Vs{s}, Dz{s}, '-', 'LineWidth', 1.5, 'Color', color_m{s});
+    hold on    
+    yticks(-100:5:100);          
     
-    ylim([0, ceil(max(Dz_loc(:))/10)*10])
+    ylim([-60, 10])
     
     % Customize the appearance of the plot
     set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
@@ -126,11 +131,22 @@ for s=1:length(subjects)
     % ax.XAxis.TickLabelRotation = 90; % Rotate y-axis tick labels to vertical
     set(gcf, 'Color', 'w');  % Set background color to white for figures
     grid off; 
-    xlim([0.3, 0.6]);
+    xlim([0, 0.8]);
 
     set(gcf, 'Color', 'w')
-    end
 end
+for i = 1:length(anatomy.Dz) - 2
+yline(-anatomy.Dz(i), '--', anatomy.location{i}, ...
+    'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs-2);
+end   
+
+marker = {'o','o','o'};
+for s=1:length(subjects)
+    plot(Vs{s}, Dz{s}, marker{s}, 'MarkerSize',7,'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'Color', color_m{s}, 'MarkerEdgeColor',color_m{s});
+end
+
+
+
 
 print(gcf, fullfile(pwd,'Figures', 'fig_1'), '-depsc','-vector');
 

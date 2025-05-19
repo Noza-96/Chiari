@@ -3,7 +3,7 @@ function all_simulations = GUI_create_mesh(cas, dat_PC, DNS_cases)
 fileID = fopen(fullfile(cas.diransys_in, "journals", "create_mesh.jou"), 'w');
 all_simulations = true; % Initialize flag
 
-local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local sizing
+local_sizing = {"cord", "dura", "tonsils"}; % to which boundaries apply local sizing %nerve_roots
 
     for ii = 1:length(DNS_cases)
     

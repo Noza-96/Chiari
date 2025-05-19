@@ -59,13 +59,13 @@ function dat = decompose_fourier(cas, dat)
         amidat{idat} = am;
         %Qmidat{idat} = Qm;
 
-        figure(401)
-        subplot(Ndat, 1, idat)
-        hold on
-        plot(ttt, QQQ, 'k-', 'LineWidth', 2)
-        plot(tF,  QF, 'r--', 'LineWidth', 2)
-        xlim([0, TT])
-        drawnow
+        % figure(401)
+        % subplot(Ndat, 1, idat)
+        % hold on
+        % plot(ttt, QQQ, 'k-', 'LineWidth', 2)
+        % plot(tF,  QF, 'r--', 'LineWidth', 2)
+        % xlim([0, TT])
+        % drawnow
 
     end
     

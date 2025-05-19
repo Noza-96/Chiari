@@ -1,4 +1,4 @@
-function dat = read_dicoms_PC(cas, resettimevector)
+function dat  = read_dicoms_PC(cas, resettimevector)
 
     Ndat = length(cas.folders_PC);
 
@@ -129,37 +129,51 @@ function dat = read_dicoms_PC(cas, resettimevector)
         for jj = 1:numim
             im{idat}{jj}    = im_unsorted{idat}{sortind(jj)};
             immag{idat}{jj} = immag_unsorted{idat}{sortind(jj)};
-            imcom{idat}{jj} = imcom_unsorted{idat}{sortind(jj)};
-
-            % Extract metadata for coordinate calculation
-            pixel_spacing = info{idat}{jj}.PixelSpacing; % [spacing_x; spacing_y]
-            image_position = info{idat}{jj}.ImagePositionPatient; % [x; y; z]
-            image_orientation = info{idat}{jj}.ImageOrientationPatient; % [row_dir_x; row_dir_y; row_dir_z; col_dir_x; col_dir_y; col_dir_z]
-            
-            % Directions
-            row_direction = image_orientation(1:3);
-            col_direction = image_orientation(4:6);
-            
-            % Image dimensions
-            [rows, cols] = size(dicomread(info{idat}{jj}));
-            
-            % Preallocate array for coordinates
-            pixel_coordinates = zeros(rows, cols, 3); % For (x, y, z) of each pixel
-            
-            % Calculate 3D coordinates for each pixel
-            for i = 1:rows
-                for j = 1:cols
-                pixel_coordinates(i, j, :) = image_position ...
-                                           + (j-1) * row_direction * pixel_spacing(1) ...
-                                           + (i-1) * col_direction * pixel_spacing(2);
-
-                end
-            end
-            
-            % Store in cell for this case
-            pixel_coord{idat} = pixel_coordinates;
+            imcom{idat}{jj} = imcom_unsorted{idat}{sortind(jj)};    
         end
 
+        % Extract metadata for coordinate calculation
+        pixel_spacing = info{idat}{1}.PixelSpacing; % [spacing_x; spacing_y]
+        image_position = info{idat}{1}.ImagePositionPatient; % [x; y; z]
+        image_orientation = info{idat}{1}.ImageOrientationPatient; % [row_dir_x; row_dir_y; row_dir_z; col_dir_x; col_dir_y; col_dir_z]
+        
+        % Directions
+        row_direction = image_orientation(1:3);
+        col_direction = image_orientation(4:6); 
+
+        % Image dimensions
+        [rows, cols] = size(dicomread(info{idat}{1}));
+        
+        % Preallocate array for coordinates
+        pixel_coordinates = zeros(rows, cols, 3); % For (x, y, z) of each pixel
+        
+        % Calculate 3D coordinates for each pixel
+        for i = 1:rows
+            for j = 1:cols
+            pixel_coordinates(i, j, :) = image_position ...
+                                       + (j-1) * row_direction * pixel_spacing(1) ...
+                                       + (i-1) * col_direction * pixel_spacing(2);
+
+            end
+        end
+        
+        filename = cas.locations{idat} + "_transformation.txt";
+        transformation_path = fullfile(cas.dirseg, 'transformation', filename);
+
+        if exist(transformation_path)
+            % Read the matrix (assumes 4 rows, 4 columns, space-separated)
+            transformation_matrix = dlmread(transformation_path);
+            
+            % Display to verify
+            fprintf('Transformation %s applied! \n', filename);
+            
+            disp(transformation_matrix);
+            
+            pixel_coordinates = applyTransformation(pixel_coordinates, transformation_matrix);
+        end
+
+        % Store in cell for this case
+        pixel_coord{idat} = pixel_coordinates;
 
 
         for jj = 1:numim
@@ -220,22 +234,6 @@ function dat = read_dicoms_PC(cas, resettimevector)
     disp(' '); disp(' '); disp(' ');
 
 
-    % % Create figure to visualize locations pc-mri measurements 
-    % fig = figure;
-    % segm_path = ""+cas.dirseg+"/stl/segmentation.stl";
-    % if exist(segm_path, 'file') == 2
-    %     disp("Segmentation exists!")
-    %     gm = importGeometry(segm_path);
-    %     scale(gm,[1,1,1])
-    %     pdegplot(gm)
-    % else
-    %     disp("There is no segmentation...")
-    % end
-    % for idat = 1:Ndat
-    %     DrawImageSlice3D(fname_showorient{idat}, fig, 0.75);
-    % end
-    % saveas(fig, [cas.dirfig, '/pc-mri_locations.fig'])
-
     dat.pixel_coord  = pixel_coord;
     dat.Ndat         = Ndat;
     dat.locz         = locz;
@@ -251,5 +249,35 @@ function dat = read_dicoms_PC(cas, resettimevector)
     dat.fcal_H_cm_px = fcal_H_cm_px;
     dat.fcal_V_cm_px = fcal_V_cm_px;
 
+end
+
+function transformed_pixel_coordinates = applyTransformation(pixel_coordinates, transformation_matrix)
+% Apply a 4x4 transformation matrix to a [rows x cols x 3] pixel coordinate grid
+%
+% Inputs:
+%   pixel_coordinates     - [rows x cols x 3] array of original (x,y,z) positions
+%   transformation_matrix - [4 x 4] transformation matrix from 3D slicer
+%
+% Output:
+%   transformed_pixel_coordinates - [rows x cols x 3] array of transformed positions
+
+    % Get dimensions
+    [rows, cols, ~] = size(pixel_coordinates);
+    N = rows * cols;
+
+    % Flatten pixel coordinates into [N x 3]
+    coords = reshape(pixel_coordinates, [N, 3]);
+
+    % Convert to homogeneous coordinates [N x 4]
+    coords_hom = [coords, ones(N, 1)];
+
+    % Apply transformation matrix [N x 4]
+    transformed_coords_hom = (transformation_matrix * coords_hom')';  % [N x 4]
+
+    % Extract (x, y, z)
+    transformed_coords = transformed_coords_hom(:, 1:3);
+
+    % Reshape back to [rows x cols x 3]
+    transformed_pixel_coordinates = reshape(transformed_coords, [rows, cols, 3]);
 end
 

@@ -78,10 +78,10 @@ def get_patient_id():
 # Function to get the local path to the Chiari folder based on the hostname
 def get_local_chiari_path():
     hostname = platform.node()
-    if hostname == 'Guillermos-MacBook-Pro.local' or hostname == 'Guillermos-MBP':
+    if hostname == 'Guillermos-MacBook-Pro.local' or hostname == 'Guillermos-MBP' or hostname == 'guillermos-macbook-pro.local.dynamic.ucsd.edu': 
         chiari_path = '/Users/noza/Documents/chiari'
     elif hostname == 'Lenovo':
-        chiari_path = r'C:\Users\guill\Documents\chiari'
+        chiari_path = r'C:\Users\guill\Documents\chiari' 
 
     return chiari_path
 

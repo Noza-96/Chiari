@@ -17,13 +17,6 @@ function dat = compute_SVQ_zc(dat)
         Q_SAS_repip_zc{idat} = Q_SAS_repip{idat} - zc_SAS{idat};
         
         SVQ_SAS_zc{idat} = 0.5*trapz(t_ip{idat}, abs(Q_SAS_ip_zc{idat}));
-        
-        %figure(99)
-        %clf
-        %hold on
-        %plot(t_ip{idat}, Q_SAS_ip{idat}, 'k-')
-        %plot(t_ip{idat}, Q_SAS_ip_zc{idat}, 'r-')
-        %pause
 
     end
     
