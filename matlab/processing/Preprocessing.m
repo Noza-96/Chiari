@@ -3,11 +3,6 @@ clear; close all; clc;
 addpath('Functions/');
 addpath('Functions/Others/')
 
-% TODO: Create planes perpendicular from z-direction from 5 mm to 50
-% mm below the FM, in intervals of 5. Evaluate pressure.
-
-%TODO: Add proximity
-
 % Choose subject
 subject = "s101_b";
 
@@ -30,7 +25,7 @@ check_valid_case(case_name)
 DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle);
 
 % journal to be used for creating all meshes and corresponding .cas files
-cases_ready = GUI_create_mesh(cas, dat_PC, DNS_cases);
+cases_ready = GUI_create_mesh(cas, mesh_size);
 
 % visualize output ANSYS console
 visualize_console = 1;

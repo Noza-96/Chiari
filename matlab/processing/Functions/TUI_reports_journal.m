@@ -27,7 +27,7 @@ function TUI_reports_journal(cas, DNS, fileID)
             fprintf(fileID,"/solve/report-definitions/add q_" + location + "  surface-volumeflowrate surface-names " + location + " () q \n" );
         end
         % Create expression
-        expression =  "Average(StaticPressure,['foramen_magnum'], Weight ='Area') - Average(StaticPressure,['foramen_magnum-"+num2str(DNS.delta_h_FM)+"'], Weight ='Area')";
+        expression =  "Average(StaticPressure,['FM-5'], Weight ='Area') - Average(StaticPressure,['FM-30'], Weight ='Area')";
         TUI_sstt = sprintf('/solve/report-definitions/add dp single-val-expression define "%s" q \n', expression);
         fprintf(fileID,TUI_sstt);
 
@@ -35,7 +35,7 @@ function TUI_reports_journal(cas, DNS, fileID)
     variables = ['flow-time', 'dp',"q_"+inlet_locations(1), "q_"+inlet_locations(2), "q_"+inlet_locations(3), 'u_max'];
     report_file (fileID, variables, DNS.case, 1);
 
-    %% Save verlocity and pressure at specific locations every time-step
+    %% Save velocity and pressure at specific locations every time-step
     report_name = DNS.case + '_report';
 
     folder = DNS.ansys_path+"/"+cas.subj+"/outputs/"+DNS.case;
@@ -52,10 +52,12 @@ function TUI_reports_journal(cas, DNS, fileID)
     Cell_centered = 'no'; % Location/Cell-Centered?
     export_every = 'time-step'; % Export data every: ("time-step" "flow-time")
     
+    FM_locations = "FM-" + string(5:5:50);
+    all_locations = [DNS.slices.locations; FM_locations'];
+
     % Join fields and locations into a single string
     fields_str = strjoin(DNS.fields, ' '); % Concatenate fields with space delimiter
-    locations_str = strjoin(DNS.slices.locations, ' '); % Concatenate locations with space delimiter
-    
+    locations_str = strjoin(all_locations, ' '); % Concatenate locations with space delimiter
     % Build the string using sprintf
     TUI_sstt = sprintf('/file/transient-export/ascii "%s" %s () %s q %s %s %s "%s" %d time-step \n', ...
     directory, locations_str, fields_str, Cell_centered, comma, report_name, export_every, frequency);

@@ -14,19 +14,19 @@ function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
     N = dat_PC.Ndat;
     
     % Create slices of PC measurements
-    for loc = 1:(N-1) %skip FM and last location
+    for loc = 1:N %TODO: skip top and bottom locations
         XYZ = three_point_plane(dat_PC, loc);
         create_plane (fileID,XYZ,cas.locations{loc})
-        if loc == 1 
-            % Dz foramen with respect to top pcmri location
-            Dz_foramen = (dat_PC.locz{end} - dat_PC.locz{1})/100 - anatomy.Dz(1)/1000; % [m]
-             % create plane at the location of the foramen_magnum
-            XYZ(:,3) = XYZ(:,3) - Dz_foramen;
-            create_plane (fileID,XYZ,"foramen_magnum")
-             % create plane at the location of the foramen_magnum - 25 mm
-            XYZ(:,3) = XYZ(:,3) - DNS.delta_h_FM/1000;
-            create_plane (fileID,XYZ,"foramen_magnum-"+num2str(DNS.delta_h_FM))
-        end
+    end
+
+    % create planes perpendicular to z-dir at 5 mm separation FM  till 50 mm below    
+    for Dz = 5:5:50
+        % Dz foramen with respect to top pcmri location
+        Dz_foramen = (anatomy.FM-Dz)/1000; % [m]
+
+         % create plane at the location of the foramen_magnum
+        XYZ(:,3) = Dz_foramen;
+        create_plane (fileID,XYZ,"FM-"+Dz)
     end
 
     % Create surface to export later
@@ -46,7 +46,7 @@ function create_plane (fileID, XYZ, sstt)
     fprintf(fileID,"/surface/plane-surface "+sstt+" three-points ");
     % Loop through the points (1 to 3) and print their XYZ coordinates
     for point = 1:3
-        % Print each coordinate, multiplied by 1e3 (in one line)
+        % Print each coordinate  
         fprintf(fileID, '%f %f %f ', XYZ(point, 1), XYZ(point, 2), XYZ(point, 3)); % [m]
     end
     fprintf(fileID,"no\n");
@@ -56,7 +56,7 @@ function XYZ = three_point_plane(dat_PC, index)
 
     xyz = dat_PC.pixel_coord{index}*1e-3; %m
     
-    %xyz coordinates
+    % xyz coordinates
     x = reshape(xyz(:,:,1),[],1);
     y = reshape(xyz(:,:,2),[],1);
     z = reshape(xyz(:,:,3),[],1);

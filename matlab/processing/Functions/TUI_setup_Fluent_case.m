@@ -8,10 +8,10 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
 
     fprintf(fileID,';setup case \n' );
 
-    continuity_inlet = 'tonsils';
+    case_name  = DNS.geom + "_dx" + DNS.mesh_size;
 
     % read case
-    case_path = DNS.ansys_path +"/" + DNS.subject +"/inputs/case-files/"+ DNS.case + "_0.cas.gz"; 
+    case_path = DNS.ansys_path +"/" + DNS.subject +"/inputs/case-files/"+ case_name + ".cas.gz"; 
 
     fprintf(fileID,"/file read-case "+case_path+"\n" );
 
@@ -31,10 +31,10 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     % Set pressure-velocity coupled scheme
     fprintf(fileID,'/solve/set p-v-coupling 24 q  \n');
 
-    % Assign a penetration velocity in continuity_inlet to satisfy continuity
+    % Assign a penetration velocity in DNS.continuity to satisfy continuity
     if DNS.sim == 2
-        named_expression (fileID, "v_" + continuity_inlet, "-(MassFlow(['top']) + MassFlow(['bottom']))/(rho*Area(['" + continuity_inlet + "']))")
-        fprintf(fileID,"/define/boundary-conditions/velocity-inlet " + continuity_inlet + " no no yes yes no ""v_" + continuity_inlet + """ no 0  q \n");
+        named_expression (fileID, "v_" + DNS.continuity, "-(MassFlow(['top']) + MassFlow(['bottom']))/(rho*Area(['" + DNS.continuity + "']))")
+        fprintf(fileID,"/define/boundary-conditions/velocity-inlet " + DNS.continuity + " no no yes yes no ""v_" + DNS.continuity + """ no 0  q \n");
     end
 
     % Create velocity inlet

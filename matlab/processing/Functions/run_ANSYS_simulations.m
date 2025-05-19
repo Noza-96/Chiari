@@ -48,7 +48,8 @@ end
 
 % Helper function to run the Fluent simulation through terminal
 function runFluentSimulation(DNS, case_name, n_cores, visualize_console)
-    fluent_cmd = "fluent 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
+    fluent_command = get_fluent_command();
+    fluent_cmd = fluent_command + " 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
     if visualize_console == 0
         fluent_cmd = fluent_cmd + " > nul";
     end
@@ -65,3 +66,5 @@ function finalizeSimulation(DNS, case_name, cas, elapsed_time)
     DNS.time = elapsed_time;
     save(fullfile(cas.dirmat, "DNS_" + DNS.case + ".mat"), 'DNS');
 end
+
+
