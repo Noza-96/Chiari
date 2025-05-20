@@ -10,29 +10,29 @@ function TUI_reports_journal(cas, DNS, fileID)
     fprintf(fileID,';reports \n' );
 
     % create dummy files
-        fprintf(fileID,'/solve/report-definitions/add pilot volume-max field velocity-magnitude zone-names fluid () q \n' );
-        report_file (fileID, {'flow-time'}, 'pilot', 1)
-        fprintf(fileID,'/solve/report-plot/add pilot q \n' );
+    fprintf(fileID,'/solve/report-definitions/add pilot volume-max field velocity-magnitude zone-names fluid () q \n' );
+    report_file (fileID, {'flow-time'}, 'pilot', 1)
+    fprintf(fileID,'/solve/report-plot/add pilot q \n' );
 
     % delete previous reports to avoid conflicts
-        fprintf(fileID,"/solve/report-plots delete-all yes \n");
-        fprintf(fileID,"/solve/report-files delete-all yes \n");
-        fprintf(fileID,"/solve/report-definitions delete-all yes \n");
+    fprintf(fileID,"/solve/report-plots delete-all yes \n");
+    fprintf(fileID,"/solve/report-files delete-all yes \n");
+    fprintf(fileID,"/solve/report-definitions delete-all yes \n");
 
     % report definitions         
-        % u_max
-        fprintf(fileID,'/solve/report-definitions/add u_max volume-max field velocity-magnitude zone-names fluid () q \n' );
-        % flow rate inlet locations
-        for location = inlet_locations
-            fprintf(fileID,"/solve/report-definitions/add q_" + location + "  surface-volumeflowrate surface-names " + location + " () q \n" );
-        end
-        % Create expression longitudinal impedance
-        % expression =  "Average(StaticPressure,['FM-5'], Weight ='Area') - Average(StaticPressure,['FM-30'], Weight ='Area')";
-        % TUI_sstt = sprintf('/solve/report-definitions/add dp single-val-expression define "%s" q \n', expression);
-        % fprintf(fileID,TUI_sstt);
+    % u_max
+    fprintf(fileID,'/solve/report-definitions/add u_max volume-max field velocity-magnitude zone-names fluid () q \n' );
+    % flow rate inlet locations
+    for location = inlet_locations
+        fprintf(fileID,"/solve/report-definitions/add q_" + location + "  surface-volumeflowrate surface-names " + location + " () q \n" );
+    end
+    
+    for Dz = 5:5:50
+        fprintf(fileID,"/solve/report-definitions/add p_FM-" + Dz + "  surface-areaavg field pressure surface-names FM-" + Dz + " () q \n" );
+    end
 
     % report files
-    variables = ['flow-time', 'dp',"q_"+inlet_locations(1), "q_"+inlet_locations(2), "q_"+inlet_locations(3), 'u_max'];
+    variables = ['flow-time', 'u_max', "q_" + inlet_locations(1:end), "p_FM-" + [5:5:50]];
     report_file (fileID, variables, DNS.case, 1);
 
     %% Save velocity and pressure at specific locations every time-step
@@ -52,8 +52,7 @@ function TUI_reports_journal(cas, DNS, fileID)
     Cell_centered = 'no'; % Location/Cell-Centered?
     export_every = 'time-step'; % Export data every: ("time-step" "flow-time")
     
-    FM_locations = "FM-" + string(5:5:50);
-    all_locations = ["top"; DNS.slices.locations(2:N-1); "bottom"; FM_locations'];
+    all_locations = ["top"; DNS.slices.locations(2:N-1); "bottom"];
 
     % Join fields and locations into a single string
     fields_str = strjoin(DNS.fields, ' '); % Concatenate fields with space delimiter
