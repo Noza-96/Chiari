@@ -52,7 +52,7 @@ function TUI_reports_journal(cas, DNS, fileID)
     Cell_centered = 'no'; % Location/Cell-Centered?
     export_every = 'time-step'; % Export data every: ("time-step" "flow-time")
     
-    all_locations = ["top"; DNS.slices.locations(2:N-1); "bottom"];
+    all_locations = ["top"; DNS.slices.locations(2:end-1); "bottom"];
 
     % Join fields and locations into a single string
     fields_str = strjoin(DNS.fields, ' '); % Concatenate fields with space delimiter
