@@ -1,13 +1,28 @@
 function all_simulations = GUI_create_mesh(cas, mesh_size)
 
-    fileID = fopen(fullfile(cas.diransys_in, "journals", "create_mesh.jou"), 'w');
+    full_ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));
+    
+    GUI_journal_path = fullfile(full_ansys_path, cas.subj, "inputs", "journals", "create_mesh.jou");
+    TUI_journal_path = fullfile(full_ansys_path, cas.subj, "inputs", "journals", "TUI_create_mesh.jou");
+
+    % Create TUI journal to call GUI journal 
+
+    fileID = fopen(TUI_journal_path, 'w');
+
+    fprintf(fileID,"/file read-journal "+GUI_journal_path+"\n" );
+
+    fclose(fileID);
+
+
+    fileID = fopen(GUI_journal_path, 'w');
     all_simulations = true; % Initialize flag
     geometry_exist = true;
     count_sim = 1; 
     
     n_cores = 10;
     
-    geom = ["c", "cn"];
+    % geom = ["c", "cn"];
+    geom = ["c"];
     
     continuity_condition = "tonsils";
     
@@ -33,7 +48,6 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
                 end
             
                 sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
-                full_ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));
             
                 geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom(k)+ "_geometry.scdoc");
     
@@ -130,7 +144,7 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
         visualize_console = 1;
         fluent_command = get_fluent_command(); 
         fprintf('opening Fluent meshing to create simulation using GUI journal\n');
-        fluent_cmd = fluent_command + " 3ddp -t" + n_cores + "-i """ + fullfile(full_ansys_path, cas.subj, "inputs", "journals", "create_mesh.jou") + """";
+        fluent_cmd = fluent_command + " 3ddp -t" + n_cores + "-i """ + TUI_journal_path + """";
         if visualize_console == 0
             fluent_cmd = fluent_cmd + " > nul";
         end
