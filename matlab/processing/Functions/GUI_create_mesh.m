@@ -9,7 +9,9 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
 
     fileID = fopen(TUI_journal_path, 'w');
 
-    fprintf(fileID,"/file read-journal "+GUI_journal_path+"\n" );
+    fprintf(fileID,'/file/set-tui-version "24.1"\n' );
+    
+    fprintf(fileID,"/file read-journal "+strrep(strrep(GUI_journal_path, '\', '\\'), '/', '\\')+"\n" );
 
     fclose(fileID);
 
@@ -144,7 +146,7 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
         visualize_console = 1;
         fluent_command = get_fluent_command(); 
         fprintf('opening Fluent meshing to create simulation using GUI journal\n');
-        fluent_cmd = fluent_command + " 3ddp -t" + n_cores + "-i """ + TUI_journal_path + """";
+        fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + "-i """ + TUI_journal_path + """";
         if visualize_console == 0
             fluent_cmd = fluent_cmd + " > nul";
         end
