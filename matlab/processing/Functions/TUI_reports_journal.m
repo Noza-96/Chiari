@@ -26,10 +26,10 @@ function TUI_reports_journal(cas, DNS, fileID)
         for location = inlet_locations
             fprintf(fileID,"/solve/report-definitions/add q_" + location + "  surface-volumeflowrate surface-names " + location + " () q \n" );
         end
-        % Create expression
-        expression =  "Average(StaticPressure,['FM-5'], Weight ='Area') - Average(StaticPressure,['FM-30'], Weight ='Area')";
-        TUI_sstt = sprintf('/solve/report-definitions/add dp single-val-expression define "%s" q \n', expression);
-        fprintf(fileID,TUI_sstt);
+        % Create expression longitudinal impedance
+        % expression =  "Average(StaticPressure,['FM-5'], Weight ='Area') - Average(StaticPressure,['FM-30'], Weight ='Area')";
+        % TUI_sstt = sprintf('/solve/report-definitions/add dp single-val-expression define "%s" q \n', expression);
+        % fprintf(fileID,TUI_sstt);
 
     % report files
     variables = ['flow-time', 'dp',"q_"+inlet_locations(1), "q_"+inlet_locations(2), "q_"+inlet_locations(3), 'u_max'];
@@ -53,7 +53,7 @@ function TUI_reports_journal(cas, DNS, fileID)
     export_every = 'time-step'; % Export data every: ("time-step" "flow-time")
     
     FM_locations = "FM-" + string(5:5:50);
-    all_locations = [DNS.slices.locations; FM_locations'];
+    all_locations = ["top"; DNS.slices.locations(2:N-1); "bottom"; FM_locations'];
 
     % Join fields and locations into a single string
     fields_str = strjoin(DNS.fields, ' '); % Concatenate fields with space delimiter

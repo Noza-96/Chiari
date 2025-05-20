@@ -70,8 +70,11 @@ function [cas, dat_PC] = check_subject_initialization(subject, ts_cycle, repeat_
     file_to_compare = fullfile(cas.diransys_in, "flow-rates", "Q_bottom.txt"); 
 
     % Create ansys inputs if needed or if forced by repeat_initialization
+    d1 = dir(mri_data_path);
+    d2 = dir(file_to_compare);
+
     if repeat_initialization || exist(file_to_compare, 'file') == 0 || ...
-            datetime(dir(mri_data_path).date) > datetime(dir(file_to_compare).date)
+        datetime(d1.datenum, 'ConvertFrom', 'datenum') > datetime(d2.datenum, 'ConvertFrom', 'datenum')
         disp('ansys inputs need to be created\updated, creating files...')
         create_ansys_inputs(dat_PC, cas, ts_cycle);
     else 

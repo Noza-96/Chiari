@@ -14,7 +14,7 @@ function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
     N = dat_PC.Ndat;
     
     % Create slices of PC measurements
-    for loc = 1:N %TODO: skip top and bottom locations
+    for loc = 2:N-1 %TODO: skip top and bottom locations
         XYZ = three_point_plane(dat_PC, loc);
         create_plane (fileID,XYZ,cas.locations{loc})
     end
