@@ -128,7 +128,8 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
             end  
         end
     end
-
+    fprintf(fileID,"exit \n"); 
+    fprintf(fileID,"o \n"); 
     fclose(fileID);
 
     % run ansys meshing to run simulations

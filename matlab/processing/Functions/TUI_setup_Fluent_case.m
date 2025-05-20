@@ -1,12 +1,19 @@
 %Create-planes journal
-function TUI_setup_Fluent_case(DNS, cas, fileID)
-
+function TUI_setup_Fluent_case(DNS, cas, boundary_inlet, fileID)
+    
     if nargin < 3
         fileID = fopen(fullfile(DNS.TUI_path,"setup_case_TUI.jou"), 'w');
     end
     fprintf(fileID,'/file/set-tui-version "24.1"\n' );
 
     fprintf(fileID,';setup case \n' );
+
+    % boundary outlet is the oposite (top/bottom) of boundary inlet
+    if boundary_inlet == "bottom"
+        boundary_outlet = "top";
+    else
+        boundary_outlet = "bottom";
+    end
 
     case_name  = DNS.geom + "_dx" + DNS.mesh_size;
 
@@ -24,6 +31,17 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
 
     % change material to CSF
     fprintf(fileID,'/define/materials/change-create air csf yes expression "rho" no no yes expression "mu" no no no yes q \n');
+
+    % TODO: Update boundary conditions for DNS
+    if ismember(DNS.sim, [0, 1]) 
+        %bottom: zero pressure, tonsils: wall
+        set_bc(fileID, boundary_inlet, "velocity-inlet")
+        set_bc(fileID, boundary_outlet, "pressure-outlet")
+        set_bc(fileID, "tonsils", "wall")
+        set_bc(fileID, "cord", "wall")
+    end
+    
+    
     
     % second-order transient simulation
     fprintf(fileID,'/define/models/unsteady-2nd-order? yes q \n');
@@ -39,7 +57,6 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
 
     % Create velocity inlet
     if DNS.sim == 0
-        boundary_inlet = "bottom"; 
         fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_" + boundary_inlet + ".txt"), 'r');  % Open the file for reading
         sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
         fclose(fid);
@@ -61,4 +78,8 @@ function named_expression (fileID,name, expression)
          name, expression);
 
     fprintf(fileID,TUI_sstt);
+end
+
+function set_bc(fileID, boundary_name, condition)
+    fprintf(fileID,"/define/boundary-conditions/modify-zones/zone-type " + boundary_name + " " + condition + " q \n");
 end

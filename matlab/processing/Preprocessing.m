@@ -16,7 +16,9 @@ mesh_size = [0.0002];    % Array with the different mesh sizes to be simulated
 ts_cycle = 100;     % number of time steps per cycle
 iterations_ts = 20; % iterations per time step
 cycles = 3;         % cyles to be computed
-n_cores = 10;       % number of processors simulation
+n_cores = 12;       % number of processors simulation
+
+boundary_inlet = "top"; % in the case of pressure outlet (case 0/1)
 
 check_valid_case(case_name) 
 
@@ -24,7 +26,7 @@ check_valid_case(case_name)
 
 DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle);
 
-% journal to be used for creating all meshes and corresponding .cas files
+% run fluent-meshing to create meshes and corresponding .cas files
 cases_ready = GUI_create_mesh(cas, mesh_size);
 
 % visualize output ANSYS console
@@ -34,7 +36,7 @@ if cases_ready == true
     answer = questdlg('Run ANSYS simulation?', 'Confirmation', 'Yes', 'No', 'No');
     if strcmp(answer, 'Yes')
         disp('Running ANSYS simulation...');   
-        run_ANSYS_simulations (cas, dat_PC, DNS_cases, n_cores, visualize_console)
+        run_ANSYS_simulations (cas, dat_PC, DNS_cases, n_cores, boundary_inlet, visualize_console)
     else
     end
 end

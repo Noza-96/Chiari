@@ -1,4 +1,4 @@
-function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_console)
+function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, boundary_inlet, visualize_console)
 
     % Run simulations for each DNS case
     for k = 1:length(DNS_cases)
@@ -12,7 +12,7 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_consol
         fileID = fopen(fullfile(cas.diransys_in, "journals", DNS.case + ".jou"), 'w');
         
         % Setup simulation
-        TUI_setup_Fluent_case(DNS, cas, fileID);
+        TUI_setup_Fluent_case(DNS, cas, boundary_inlet, fileID);
         
         % Create PCMRI surfaces and other necessary setups
         TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID);
@@ -21,8 +21,7 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_consol
         TUI_reports_journal(cas, DNS, fileID);
         
         % run the simulation
-        TUI_run_simulation(dat_PC, cas, DNS, fileID);
-
+        TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID);
 
         runFluentSimulation(DNS, DNS_cases{k}, n_cores, visualize_console);
 
@@ -49,7 +48,7 @@ end
 % Helper function to run the Fluent simulation through terminal
 function runFluentSimulation(DNS, case_name, n_cores, visualize_console)
     fluent_command = get_fluent_command();
-    fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
+    fluent_cmd = fluent_command + " 3ddp -t" + n_cores + " -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
     if visualize_console == 0
         fluent_cmd = fluent_cmd + " > nul";
     end
