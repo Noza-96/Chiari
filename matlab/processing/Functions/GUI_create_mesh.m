@@ -96,6 +96,10 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Improve Surface Mesh'].Arguments.set_state({r'FaceQualityLimit': 0.7,r'MeshObject': r'',r'SMImprovePreferences': {r'AdvancedImprove': r'no',r'AllowDefeaturing': r'no',r'SIQualityCollapseLimit': 0.85,r'SIQualityIterations': 5,r'SIQualityMaxAngle': 160,r'SIRemoveStep': r'no',r'SIStepQualityLimit': 0,r'SIStepWidth': 0,r'ShowSMImprovePreferences': False,},r'SQMinSize': 0.001,})"")\n" );
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Improve Surface Mesh'].Execute()"")\n" );
                 
+                %---------- PAUSE JOURNAL   
+
+                fprintf(fileID,"(%%py-exec ""input('Journal paused - check quality surface mesh and press Enter to continue...')"")\n" );
+
                 % Describe fluid regions
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].UpdateChildTasks(SetupTypeChanged=False)"")\n" );
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].Arguments.set_state({r'NonConformal': r'No',r'SetupType': r'The geometry consists of only fluid regions with no voids',})"")\n" );
@@ -126,6 +130,10 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Improve Volume Mesh'].Arguments.set_state({r'CellQualityLimit': 0.3,r'QualityMethod': r'Orthogonal',r'VMImprovePreferences': {r'ShowVMImprovePreferences': False,r'VIQualityIterations': 5,r'VIQualityMinAngle': 0,r'VIgnoreFeature': r'yes',},})"")\n" );
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Improve Volume Mesh'].Execute()"")\n" );
                 
+                %---------- PAUSE JOURNAL   
+
+                fprintf(fileID,"(%%py-exec ""input('Journal paused - check quality volume mesh and press Enter to continue...')"")\n" );
+
                 filename_2 = fullfile(full_ansys_path, cas.subj, "inputs", "case-files", case_name);
                 % export case file 
                 fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*WriteSubMenu*Case..."") \n" );     
@@ -160,4 +168,3 @@ end
 function filepath = correct_path(filepath)
     filepath = strrep(filepath, '\', '/');
 end
-
