@@ -23,6 +23,10 @@ function TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID)
     end
   
     for k=1:DNS.cycles
+        if k == DNS.cycles
+            % last cycle report
+            TUI_last_cycle_report_journal(DNS, fileID)
+        end
         for n = 1:DNS.ts_cycle   
             for boundary = prof_bound
                 % load profile data

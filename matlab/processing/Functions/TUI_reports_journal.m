@@ -1,8 +1,12 @@
-function TUI_reports_journal(cas, DNS, fileID)
+function TUI_reports_journal(DNS, fileID)
 
     if nargin < 3
         fileID = fopen(DNS.TUI_path+"/reports_journal_TUI.jou", 'w');
         fprintf(fileID,'/file/set-tui-version "24.1"\n' );
+    end
+
+    if ~exist(DNS.path_out_report, 'dir')
+        mkdir(folder);
     end
 
     inlet_locations = ["bottom", "top", "tonsils"];
@@ -34,32 +38,6 @@ function TUI_reports_journal(cas, DNS, fileID)
     % report files
     variables = ['flow-time', 'u_max', "q_" + inlet_locations(1:end), "p_FM-" + [5:5:50]];
     report_file (fileID, variables, DNS.case, 1);
-
-    %% Save velocity and pressure at specific locations every time-step
-    report_name = DNS.case + '_report';
-
-    folder = DNS.ansys_path+"/"+cas.subj+"/outputs/"+DNS.case;
-    directory = folder + "/" + report_name;
-
-    if ~exist(folder, 'dir')
-        mkdir(folder);
-    end
-
-    fprintf(fileID,'/file/set-tui-version "24.1"\n' );
-
-    frequency = 1;
-    comma = 'no'; % Delimiter/Comma?
-    Cell_centered = 'no'; % Location/Cell-Centered?
-    export_every = 'time-step'; % Export data every: ("time-step" "flow-time")
-
-    % Join fields and locations into a single string
-    fields_str = strjoin(DNS.fields, ' '); % Concatenate fields with space delimiter
-    locations_str = strjoin(DNS.slices.locations, ' '); % Concatenate locations with space delimiter
-    % Build the string using sprintf
-    TUI_sstt = sprintf('/file/transient-export/ascii "%s" %s () %s q %s %s %s "%s" %d time-step \n', ...
-    directory, locations_str, fields_str, Cell_centered, comma, report_name, export_every, frequency);
-
-    fprintf(fileID,TUI_sstt);
 
     if nargin < 3
         fclose(fileID);

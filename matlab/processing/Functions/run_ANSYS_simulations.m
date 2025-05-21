@@ -25,10 +25,10 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, boundary_inlet, 
         % Create PCMRI surfaces and other necessary setups
         TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID);
         
-        % Add reports 
-        TUI_reports_journal(cas, DNS, fileID);
+        % Add reports every time step
+        TUI_reports_journal(DNS, fileID);
         
-        % run the simulation
+        % run the simulation - add reports last cycle
         TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID);
 
         runFluentSimulation(DNS, DNS_cases{k}, n_cores, visualize_console);
