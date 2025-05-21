@@ -69,7 +69,7 @@ end
 
 function report_file (fileID, variables, report_case, freq)
 
-    TUI_sstt = sprintf('/solve/report-files/add %s_variables frequency %d name "%s_variables" report-defs %s () print? yes file-name "%s_variables" q \n', ...
+    TUI_sstt = sprintf('/solve/report-files/add %s_report frequency %d name "%s_report" report-defs %s () print? yes file-name "%s_report" q \n', ...
          report_case, freq, report_case, strjoin(variables, ' '), report_case);
 
     fprintf(fileID,TUI_sstt);

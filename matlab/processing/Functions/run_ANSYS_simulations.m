@@ -7,6 +7,14 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, boundary_inlet, 
         % Load the DNS data
         DNS = loadDNSData(cas, DNS_cases{k});
 
+        output_check = fullfile(DNS.path_out_report, DNS_cases{k} + "_report.out");
+
+        if isfile(output_check)
+            fprintf('Simulation %s already done, skipping to next case...\n', DNS_cases{k});
+            continue;
+        end
+                       
+
         % Create and run the ANSYS journal
         
         fileID = fopen(fullfile(cas.diransys_in, "journals", DNS.case + ".jou"), 'w');
@@ -58,7 +66,7 @@ end
 % Helper function to finalize simulation and save results
 function finalizeSimulation(DNS, case_name, cas, elapsed_time)
     delete('fluent*'); % Delete temporary files
-    movefile(case_name + "_variables.out", fullfile(cas.diransys_out, case_name, case_name + "_report.out"));
+    movefile(case_name + "_report.out", fullfile(DNS.path_out_report, case_name + "_report.out"));
     fprintf("%s completed in %.2f seconds.\n", case_name, elapsed_time);
 
     % Save the simulation time
