@@ -41,7 +41,8 @@ function TUI_setup_Fluent_case(DNS, cas, boundary_inlet, fileID)
         set_bc(fileID, "cord", "wall")
     end
     
-    
+    % disable print-residuals
+    fprintf(fileID,'/solve/monitors/residual/print? yesq \n');
     
     % second-order transient simulation
     fprintf(fileID,'/define/models/unsteady-2nd-order? yes q \n');

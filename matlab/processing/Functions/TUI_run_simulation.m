@@ -28,6 +28,9 @@ function TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID)
             TUI_last_cycle_report_journal(DNS, fileID)
         end
         for n = 1:DNS.ts_cycle   
+
+            fprintf(fileID,";iteration " +n+"/"+DNS.ts_cycle+" cycle "+k+"/"+DNS.cycles+"\n" );
+
             for boundary = prof_bound
                 % load profile data
                 fprintf(fileID,"/file/read-profile """+profile_dir+""+boundary{1}+"_prof_"+n+".csv"" \n");

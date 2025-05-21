@@ -4,7 +4,7 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_b";
+subject = "s101_b"; 
 
 % c: geometry bounded with 2 pcMRI planes. 
 % c0/c1 for zero pressure top and bottom flow rate/velocity
@@ -20,7 +20,7 @@ n_cores = 12;       % number of processors simulation
 
 boundary_inlet = "top"; % in the case of pressure outlet (case 0/1)
 
-check_valid_case(case_name) 
+check_valid_case(case_name, subject) 
 
 [cas, dat_PC] = check_subject_initialization(subject, ts_cycle);
 
@@ -44,7 +44,8 @@ end
 
 %% Auxiliary functions 
 
-function check_valid_case(case_names)
+function check_valid_case(case_names, subject)
+    fprintf('subject: %s\n\n', subject);
     valid_cases = ["c0","c1","c2","cn0","cn1","cn2"];
 
     % Loop through each case to see if its valid

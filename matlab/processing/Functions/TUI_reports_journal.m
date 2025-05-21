@@ -1,12 +1,12 @@
 function TUI_reports_journal(DNS, fileID)
 
-    if nargin < 3
+    if nargin < 2
         fileID = fopen(DNS.TUI_path+"/reports_journal_TUI.jou", 'w');
         fprintf(fileID,'/file/set-tui-version "24.1"\n' );
     end
 
     if ~exist(DNS.path_out_report, 'dir')
-        mkdir(folder);
+        mkdir(DNS.path_out_report);
     end
 
     inlet_locations = ["bottom", "top", "tonsils"];
@@ -39,7 +39,7 @@ function TUI_reports_journal(DNS, fileID)
     variables = ['flow-time', 'u_max', "q_" + inlet_locations(1:end), "p_FM-" + [5:5:50]];
     report_file (fileID, variables, DNS.case, 1);
 
-    if nargin < 3
+    if nargin < 2
         fclose(fileID);
     end
     

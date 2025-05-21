@@ -10,10 +10,11 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, boundary_inlet, 
         output_check = fullfile(DNS.path_out_report, DNS_cases{k} + "_report.out");
 
         if isfile(output_check)
-            fprintf('Simulation %s already done, skipping to next case...\n', DNS_cases{k});
+            fprintf('%s simulation already done! skipping to next case...\n', DNS_cases{k});
             continue;
-        end
-                       
+        else
+            fprintf('\n%s ...\n', DNS_cases{k});
+        end  
 
         % Create and run the ANSYS journal
         

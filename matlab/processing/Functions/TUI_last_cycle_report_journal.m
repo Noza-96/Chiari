@@ -2,8 +2,11 @@ function TUI_last_cycle_report_journal(DNS, fileID)
 % Last cycle - Save DNS.fields at pcmri locations every time-step
 
     fprintf(fileID,';last cycle reports \n' );
-
+    
     report_name = DNS.case + '_report';
+    folder = DNS.ansys_path+"/"+DNS.subject+"/outputs/"+DNS.case;
+    directory = folder + "/" + report_name;
+
 
     frequency = 1;
     comma = 'no'; % Delimiter/Comma?
