@@ -16,7 +16,7 @@ function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterat
             DNS.path_out_report = fullfile(cas.diransys_out, DNS.case);          
             % reports at each time step 
             DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
-            DNS.slices.locations = [cas.locations(1:end-1), "bottom", "top"]';
+            DNS.slices.locations = ["top", cas.locations(2:end-1), "bottom"]';
             DNS.cycles = cycles;
             DNS.iterations_ts = iterations_ts;
             DNS.ts_cycle = ts_cycle;

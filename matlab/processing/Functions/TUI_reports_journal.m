@@ -51,12 +51,10 @@ function TUI_reports_journal(cas, DNS, fileID)
     comma = 'no'; % Delimiter/Comma?
     Cell_centered = 'no'; % Location/Cell-Centered?
     export_every = 'time-step'; % Export data every: ("time-step" "flow-time")
-    
-    all_locations = ["top"; DNS.slices.locations(2:end-1); "bottom"];
 
     % Join fields and locations into a single string
     fields_str = strjoin(DNS.fields, ' '); % Concatenate fields with space delimiter
-    locations_str = strjoin(all_locations, ' '); % Concatenate locations with space delimiter
+    locations_str = strjoin(DNS.slices.locations, ' '); % Concatenate locations with space delimiter
     % Build the string using sprintf
     TUI_sstt = sprintf('/file/transient-export/ascii "%s" %s () %s q %s %s %s "%s" %d time-step \n', ...
     directory, locations_str, fields_str, Cell_centered, comma, report_name, export_every, frequency);
@@ -71,8 +69,8 @@ end
 
 function report_file (fileID, variables, report_case, freq)
 
-    TUI_sstt = sprintf('/solve/report-files/add %s_variables frequency %d name "%s_variables" report-defs %s () print? yes q \n', ...
-         report_case, freq, report_case, strjoin(variables, ' '));
+    TUI_sstt = sprintf('/solve/report-files/add %s_variables frequency %d name "%s_variables" report-defs %s () print? yes file-name "%s_variables" q \n', ...
+         report_case, freq, report_case, strjoin(variables, ' '), report_case);
 
     fprintf(fileID,TUI_sstt);
 end
