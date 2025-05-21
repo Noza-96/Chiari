@@ -29,7 +29,6 @@ function TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID)
         end
         for n = 1:DNS.ts_cycle   
 
-            fprintf(fileID,";iteration " +n+"/"+DNS.ts_cycle+" cycle "+k+"/"+DNS.cycles+"\n" );
 
             for boundary = prof_bound
                 % load profile data
@@ -48,13 +47,12 @@ function TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID)
 
                 % export surface mesh
                 fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n", surface_path));
-
-                % run first iteration, with yes to continue
-                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
-            else
-                % next iterationsss
-                fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
             end
+
+            fprintf(fileID,";iteration " +n+"/"+DNS.ts_cycle+" cycle "+k+"/"+DNS.cycles+"\n" );
+            
+            fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
+
         end         
     end
 
