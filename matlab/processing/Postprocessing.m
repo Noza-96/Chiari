@@ -8,23 +8,13 @@ addpath('Functions/Others/')
 subject = "s101_b";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
-case_name = {"b1"}; 
-mesh_size = [0.0005];
+case_name = {"c2"}; 
+mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file
 [cas, dat_PC, case_reports] = read_ansys_reports(subject, case_name, mesh_size);
 
 load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
-
-for case_DNS = case_reports
-    load(fullfile(cas.dirmat, "DNS_"+case_DNS{1}+".mat"), 'DNS');
-    
-    % 2. Create 3D animations with velocity results into spinal canal geometry
-    % animation_3D(cas, dat_PC, DNS)
-
-    % 3. Longitudinal impedance - Pressure drop and Flow rate
-    longitudinal_impedance(cas, DNS)
-end
 
 %% 4. Comparison PC-MRI with Ansys solution -- Animation
 case_name = {"b1"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord

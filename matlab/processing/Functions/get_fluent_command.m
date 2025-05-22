@@ -10,6 +10,7 @@ function fluent_command = get_fluent_command()
     if hostname == "DESKTOP-30N19DV"
         fluent_command = """C:\Program Files\ANSYS Inc\v231\fluent\ntbin\win64\fluent.exe""";
     elseif hostname == "Guillermos-MacBook-Pro.local"
+        fluent_command = 'none';
         disp('Ansys path not available ...');
         return;
     else    

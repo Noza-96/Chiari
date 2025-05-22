@@ -1,9 +1,11 @@
 function [cas, dat_PC, DNS_cases] = read_ansys_reports(subject, case_name, mesh_size)
 
     % load MRI data for subject
-    load(fullfile("../../../computations", "pc-mri", subject, "mat","03-apply_roi_compute_Q.mat"));
+    load(fullfile("../../../computations", "pc-mri", subject, "mat", "03-apply_roi_compute_Q.mat"), 'cas', 'dat_PC');
 
     DNS_cases = case_name+"_dx"+formatDecimal(mesh_size)';
+
+    Dz = 5:5:50;
 
     for DNS_case = DNS_cases
         % Load DNS files
@@ -16,18 +18,17 @@ function [cas, dat_PC, DNS_cases] = read_ansys_reports(subject, case_name, mesh_
         % Define initial cycle number
         N0 = (DNS.cycles - 1) * DNS.ts_cycle;
         Nloc = length(DNS.slices.locations);
-        
         % Preallocate arrays for data storage
         index = cell(1, Nloc); 
         x_DNS = cell(Nloc, 1); 
         y_DNS = cell(Nloc, 1); 
         z_DNS = cell(Nloc, 1); 
         normal_v = cell(1,dat_PC.Ndat);
-        u_DNS = cell(Nloc, 100); 
-        un_DNS = cell(Nloc, 100); 
-        v_DNS = cell(Nloc, 100); 
-        w_DNS = cell(Nloc, 100); 
-        p_DNS = cell(Nloc, 100); 
+        u_DNS = cell(Nloc, DNS.ts_cycle); 
+        un_DNS = cell(Nloc, DNS.ts_cycle ); 
+        v_DNS = cell(Nloc, DNS.ts_cycle ); 
+        w_DNS = cell(Nloc, DNS.ts_cycle ); 
+        p_DNS = cell(Nloc, DNS.ts_cycle ); 
         u_combined = cell(Nloc, 1); 
         un_combined = cell(Nloc, 1); 
         v_combined = cell(Nloc, 1); 
@@ -39,8 +40,6 @@ function [cas, dat_PC, DNS_cases] = read_ansys_reports(subject, case_name, mesh_
         for i = 1:length(dat_PC.pixel_coord)
             slice_z(i) = mean(mean(dat_PC.pixel_coord{i}(:,:,3)));
         end
-    
-        slice_z(end-1) = slice_z(1) - DNS.delta_h_FM;
     
         % Load data for each time step
         for n = 1:DNS.ts_cycle
@@ -61,13 +60,13 @@ function [cas, dat_PC, DNS_cases] = read_ansys_reports(subject, case_name, mesh_
                 X = data{2}; % [m]
                 Y = data{3}; % [m]
                 Z = data{4}; % [m]
-                slice_z(end) = max(Z(:)) * 1e3; % top slice
+                % slice_z(end) = max(Z(:)) * 1e3; % top slice [mm]
                 DNS.slices.locz = slice_z / 1e3; % Convert to m
             end
     
     
             % Velocity components
-            [U, V, W, P] = deal(data{7}, data{6}, data{5}, data{8});
+            [W, V, U, P] = deal(data{5}, data{6}, data{7}, data{8});
             
             % Loop through DNS locations and store data
             for k = 1:length(DNS.slices.locz)
@@ -153,19 +152,30 @@ function [cas, dat_PC, DNS_cases] = read_ansys_reports(subject, case_name, mesh_
         %% load output report
         % Check if the file exists
         if exist(fullfile(DNS.path_out_report, DNS.case + "_report.out"), 'file') == 2 % 'file' ensures it checks for files only
+
+            index_0 = 7; % #entries before dp-Dz
             % Open and read the file
             fileID = fopen(fullfile(DNS.path_out_report, DNS.case + "_report.out"), 'r');
-            data = textscan(fileID, '%d %f %f %f %f %f %f', 'HeaderLines', 4);
+            %time-step, %t, %u_max, %q (bottom, top, tonsils), %dp (5, 10, 50)
+            formatSpec = ['%d', repmat(' %f', 1, index_0 - 1 + length(Dz))];  % 1 integer + N floats
+            data = textscan(fileID, formatSpec, 'HeaderLines', 4);
             fclose(fileID);
         
             % Assign the columns to variables
             DNS.out.ts = data{1};        % First column - Time Step
             DNS.out.t = data{2};         % Second column - flow-time
-            DNS.out.dp = data{3};        % Third column - dp
+            DNS.out.u_max = data{3};     % Third column - dp
+
             DNS.out.q_bottom = data{4};  % Fourth column - q_bottom
             DNS.out.q_top = data{5};  
-            DNS.out.q_cord = data{6}; 
-            DNS.out.u_max = data{7};  
+            DNS.out.q_cont = data{6};
+            
+            
+            for ii = 1:length(Dz)
+                DNS.out.dp.val{ii} = data{index_0}; 
+                DNS.out.dp.loc{ii} = "fm-"+Dz(ii);
+                index_0 = index_0 + 1;
+            end
             
             % Save updated DNS structure
             save(fullfile(cas.dirmat, "DNS_" + DNS_case{1} + ".mat"), 'DNS');

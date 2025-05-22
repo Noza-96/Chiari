@@ -49,8 +49,8 @@ function TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID)
                 fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n", surface_path));
             end
 
-            fprintf(fileID,";iteration " +n+"/"+DNS.ts_cycle+" cycle "+k+"/"+DNS.cycles+"\n" );
-            
+            fprintf(fileID,";" + DNS.case + ": iteration " +n+"/"+DNS.ts_cycle+" cycle "+k+"/"+DNS.cycles+"\n" );
+
             fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
 
         end         

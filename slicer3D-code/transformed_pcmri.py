@@ -1,6 +1,7 @@
 from qt import QInputDialog, QMessageBox
 import platform
 import os
+import SegmentEditorEffects
 import slicer
 import vtk
 
@@ -9,6 +10,45 @@ vtk.vtkObject.GlobalWarningDisplayOff()
 
 # Clear the MRML scene to delete all loaded data
 slicer.mrmlScene.Clear(0)
+
+
+def segmentation_2D_slices(segmentation_node, volume_node, segmentation_2D_path):
+
+    # Clone input volume for output
+    volumes_logic = slicer.modules.volumes.logic()
+    output_volume = volumes_logic.CloneVolume(slicer.mrmlScene, volume_node, volume_node.GetName() + "_segmentation")
+
+    # Get segment ID
+    segment_id = segmentation_node.GetSegmentation().GetNthSegmentID(0)
+
+    # Fill INSIDE the segment with 0
+    SegmentEditorEffects.SegmentEditorMaskVolumeEffect.maskVolumeWithSegment(
+        segmentation_node,
+        segment_id,
+        "FILL_INSIDE",
+        [1],
+        output_volume,
+        output_volume,
+        [0]*6
+    )
+
+    # Fill OUTSIDE the segment with 0
+    SegmentEditorEffects.SegmentEditorMaskVolumeEffect.maskVolumeWithSegment(
+        segmentation_node,
+        segment_id,
+        "FILL_OUTSIDE",
+        [0],
+        output_volume,
+        output_volume,
+        [0]*6
+    )
+
+    # Save final NRRD
+    slicer.util.saveNode(output_volume, segmentation_2D_path)
+    print(f"✅ Saved masked volume (2D segmentation) to: {segmentation_2D_path}")
+
+    # Remove volume from scene
+    slicer.mrmlScene.RemoveNode(output_volume)
 
 def get_volumes_sorted_by_z():
     volume_nodes_with_z = []
@@ -197,22 +237,30 @@ chiari_path = get_local_chiari_path()
 segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
 pcMRI_path = os.path.join(segmentation_path, "pcMRI")
 transformation_path = os.path.join(segmentation_path, 'transformation')
+stl_path = os.path.join(segmentation_path, 'stl')
+
 
 # load transformed anatomy or anatomy
 
 if os.path.exists(os.path.join(transformation_path, 'transformed_anatomy.nrrd')):
     volume_node = slicer.util.loadVolume(os.path.join(transformation_path, 'transformed_anatomy.nrrd'))
-    segmentation_node = slicer.util.loadSegmentation(os.path.join(transformation_path, 'segmentation.stl'))
     print("loaded transformed anatomy ...")
 else:
     volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, "anatomy.nrrd"))
-    segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, 'raw_segmentation.seg.nrrd'))
     print("loaded raw anatomy ...")
 
 # Load the segmentation file and visualize it in 3D
 volume_node.SetName("anatomy")
-segmentation_node.SetName("segmentation")
+
+# Convert stl as model and transform it to segmentation node
+model_node = slicer.util.loadModel(os.path.join(stl_path, 'segmentation.stl'))
+model_node.SetName("segmentation")
+segmentation_node = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLSegmentationNode', 'segmentation')
+slicer.modules.segmentations.logic().ImportModelToSegmentationNode(model_node, segmentation_node)
 display_segmentation_3D(segmentation_node)
+slicer.mrmlScene.RemoveNode(model_node)
+segmentation_node.CreateDefaultDisplayNodes()
+
 
 # Get all .nrrd files in the directory pcMRI and load them as Sequence
 files = os.listdir(pcMRI_path)
@@ -240,6 +288,7 @@ assign_to_slices(sorted_volumes, slice_views)
 # Adjust the slice views
 adjust_slice_views(slice_views)
 
+
 # rename sliced volumes
 for label, node in zip(id_slices, sorted_volumes):
     node.SetName(label)
@@ -249,6 +298,7 @@ for k in range(len(sorted_volumes)):
     pcmri_node = sorted_volumes[k]
     set_manual = True
     pcmri_transformation = os.path.join(transformation_path, pcmri_node.GetName() + "_transformation.txt")
+    segmentation_2D_path = os.path.join(segmentation_path, '2D-segmentation', pcmri_node.GetName() + "_segmentation.nrrd")
     # Apply a linear transformation to the pc-mri slices
     if os.path.exists(pcmri_transformation):
         response = QMessageBox.question(None, 'Load Existing Transformation', pcmri_node.GetName() + ': apply existing transformation?', QMessageBox.No | QMessageBox.Yes, QMessageBox.Yes )
@@ -314,5 +364,11 @@ for k in range(len(sorted_volumes)):
                         # Output the results
                         print("transformation_matrix.txt, segmentation.stl and transformed_anatomy.nrrd saved in stl folder")
                     break
+    if not os.path.exists(segmentation_2D_path):
+
+        segmentation_2D_slices(segmentation_node, pcmri_node, segmentation_2D_path)
+        # slicer.mrmlScene.RemoveNode(segmentation_node)
+        
+        
 
     
