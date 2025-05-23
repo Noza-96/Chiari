@@ -1,70 +1,55 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear; close all; 
+clear; close all;
 
-[pcmri, cas, dat_PC] = run_if_empty('s101_b');  % if skipping previous steps
+[pcmri, cas, dat_PC] = run_if_empty('s101_b');  % Load data if not already
 
-% TODO:
-% 1. For each slice, create nrrd ROI to obtain 2D segmentations anatomy
-% 2. For each ts, apply registration velocity, obtaining nrrd
-% 3. Interpret nrrd in matlab to obtain new ROI ans velocity.
+% === Create output directories ===
+segmentation_dir         = fullfile(cas.dirdat, cas.subj, "registration", "2D-segmentation");
+input_registration_dir   = fullfile(cas.dirdat, cas.subj, "registration", "input-velocity");
+output_registration_dir  = fullfile(cas.dirdat, cas.subj, "registration", "output-velocity");
 
+cellfun(@(d) ~exist(d, 'dir') && mkdir(d), ...
+    {segmentation_dir, input_registration_dir, output_registration_dir});
 
-dat.xyz = dat_PC.pixel_coord;
-dat.ROI = dat_PC.ROI_SAS;
-dat.U = dat_PC.U_SAS;
-dat.ID = cas.locations;
+% === Loop over slices and time steps ===
+for i = 1:length(cas.locations)
+    % ROI and coordinate grid
+    roi = dat_PC.ROI_SAS{i};
+    xyz = dat_PC.pixel_coord{i};
 
-for i = 1:length(dat.ID)
-    % Extract fields
-    roi = dat.ROI{i};                     % 2D [rows x cols]
-    xyz = dat.xyz{i};                    % 3D [rows x cols x 3]
-
-    % === Compute transform once ===
-    origin = squeeze(xyz(1,1,:));                  
-    dy = squeeze(xyz(1,2,:) - xyz(1,1,:));         
-    dx = squeeze(xyz(2,1,:) - xyz(1,1,:));         
-    dz = cross(dx, dy);                            
-
-    R = [dx, dy, dz];                              
+    % Compute IJK-to-LPS transform
+    origin = squeeze(xyz(1,1,:));
+    dy = squeeze(xyz(1,2,:) - xyz(1,1,:));
+    dx = squeeze(xyz(2,1,:) - xyz(1,1,:));
+    dz = cross(dx, dy);
+    R = [dx, dy, dz];
     T = origin - dx - dy;
     transform = [R, T; 0 0 0 1];
 
-    % === Save ROI ===
+    % Save ROI
     img.pixelData = double(roi);
     img.ijkToLpsTransform = transform;
     img.metaData.encoding = 'gzip';
     img.metaData.space = 'left-posterior-superior';
-    nrrd_filename = fullfile(cas.dirdat, cas.subj, "registration", "2D-segmentation", dat.ID{i}+"_roi.nrrd");
-    % Create directory if it doesn't exist
-    [nrrd_dir, ~, ~] = fileparts(nrrd_filename);
-    if ~exist(nrrd_dir, 'dir')
-        mkdir(nrrd_dir);
-    end
-    nrrdwrite(nrrd_filename, img);    
+    roi_filename = fullfile(segmentation_dir, cas.locations{i} + "_roi.nrrd");
+    nrrdwrite(roi_filename, img);
 
+    % Save velocity frames
     for n = 1:dat_PC.Nt{i}
-        u = dat_PC.U_SAS{i}(:, :, n); 
-
-        % === Save U ===
+        u = dat_PC.U_SAS{i}(:, :, n);
         img.pixelData = double(u);
-        img.ijkToLpsTransform = transform;
-        img.metaData.encoding = 'gzip';
-        img.metaData.space = 'left-posterior-superior';
-        nrrd_filename = fullfile(cas.dirdat, cas.subj, "registration", "input-velocity", dat.ID{i}+"_u_"+n+".nrrd");
-        nrrdwrite(sprintf('%s_u.nrrd', dat.ID{i}), img);
-            [nrrd_dir, ~, ~] = fileparts(nrrd_filename);
-        if ~exist(nrrd_dir, 'dir')
-            mkdir(nrrd_dir);
-        end
-        nrrdwrite(nrrd_filename, img);    
+        u_filename = fullfile(input_registration_dir, cas.locations{i} + "_u_" + n + ".nrrd");
+        nrrdwrite(u_filename, img);
     end
-
 end
+
+disp('.nrrd files created with ROI and velocity information ...')
+
 
 python_script = full_path(fullfile(pwd, '..', '..', 'slicer3D-code','transformed_pcmri.py'));
 
 system ("slicer3D  --python-script """ + python_script + """ """ + subject + """ """ + anatomy_dicom + """ """ + dir_chiari + """");
-
+disp('.nrrd files created with 2D segmentations on PCMRI planes using 3D Slicer ...')
 
 function [pcmri, cas, dat_PC] = run_if_empty(subject)
 
