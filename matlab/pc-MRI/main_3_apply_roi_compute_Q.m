@@ -38,11 +38,6 @@ end
 
 save(fullfile(cas.dirmat, "03-"+sstt_name+"apply_roi_compute_Q.mat"), 'aux', 'cas', 'dat_PC');
 
-ts_cycle = 40; 
-movieVector = create_animation(dat_PC, cas, ts_cycle);
-
-save_animation(movieVector, fullfile(cas.dirvid, sstt_name+"flow_measurements_"+cas.subj+".mp4"));
-
 disp( "Done!" + newline)
 
 function [aux, cas, dat_PC, single_reading] = run_if_empty(subject, model)

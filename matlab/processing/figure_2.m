@@ -27,7 +27,7 @@ subject = subjects{s};
     for j = 1:length(frame_idx)
         frame = frame_idx(j);
         nexttile
-        file_location = fullfile("../../../computations", "pc-mri", subject, "mat","03-apply_roi_compute_Q.mat"); 
+        file_location = fullfile("../../../computations", "pc-mri", subject, "mat","04-registration.mat"); 
         if exist(file_location) == 0
             continue
         end

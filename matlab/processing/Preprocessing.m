@@ -4,13 +4,13 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_b"; 
+subject = "s101_aa"; 
 
 % c: geometry bounded with 2 pcMRI planes. 
 % c0/c1 for zero pressure top and bottom flow rate/velocity
 % c2 for two inlet velocities; continuity: normal velocity tonsils 
 
-case_name = {"c2", "c1", "c0", "cn2"};      % Array with the kind of simulations to do
+case_name = {"c2"};      % Array with the kind of simulations to do
 mesh_size = [0.0002];    % Array with the different mesh sizes to be simulated
 
 ts_cycle = 100;     % number of time steps per cycle
@@ -64,7 +64,7 @@ function [cas, dat_PC] = check_subject_initialization(subject, ts_cycle, repeat_
     end
 
     % load data
-    mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat", "03-apply_roi_compute_Q.mat");
+    mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat");
     load(mri_data_path, 'cas', 'dat_PC');
     
     % auxiliary file used to see if ANSYS data is up to date
