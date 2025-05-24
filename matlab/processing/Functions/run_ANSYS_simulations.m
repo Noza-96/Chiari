@@ -1,4 +1,4 @@
-function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, boundary_inlet, visualize_console)
+function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_console)
 
     % Run simulations for each DNS case
     for k = 1:length(DNS_cases)
@@ -21,7 +21,7 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, boundary_inlet, 
         fileID = fopen(fullfile(cas.diransys_in, "journals", DNS.case + ".jou"), 'w');
         
         % Setup simulation
-        TUI_setup_Fluent_case(DNS, cas, boundary_inlet, fileID);
+        TUI_setup_Fluent_case(DNS, cas, fileID);
         
         % Create PCMRI surfaces and other necessary setups
         TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID);

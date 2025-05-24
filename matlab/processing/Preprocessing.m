@@ -10,7 +10,7 @@ subject = "s101_aa";
 % c0/c1 for zero pressure top and bottom flow rate/velocity
 % c2 for two inlet velocities; continuity: normal velocity tonsils 
 
-case_name = {"c2"};      % Array with the kind of simulations to do
+case_name = {"c0t"};      % Array with the kind of simulations to do
 mesh_size = [0.0002];    % Array with the different mesh sizes to be simulated
 
 ts_cycle = 100;     % number of time steps per cycle
@@ -18,9 +18,7 @@ iterations_ts = 20; % iterations per time step
 cycles = 3;         % cyles to be computed
 n_cores = 12;       % number of processors simulation
 
-boundary_inlet = "top"; % in the case of pressure outlet (case 0/1)
-
-check_valid_case(case_name, subject) 
+% check_valid_case(case_name, subject) 
 
 [cas, dat_PC] = check_subject_initialization(subject, ts_cycle);
 
@@ -36,7 +34,7 @@ if cases_ready == true
     answer = questdlg('Run ANSYS simulation?', 'Confirmation', 'Yes', 'No', 'No');
     if strcmp(answer, 'Yes')
         disp('Running ANSYS simulation...');   
-        run_ANSYS_simulations (cas, dat_PC, DNS_cases, n_cores, boundary_inlet, visualize_console)
+        run_ANSYS_simulations (cas, dat_PC, DNS_cases, n_cores, visualize_console)
     else
     end
 end
@@ -44,19 +42,19 @@ end
 
 %% Auxiliary functions 
 
-function check_valid_case(case_names, subject)
-    fprintf('subject: %s\n\n', subject);
-    valid_cases = ["c0","c1","c2","cn0","cn1","cn2"];
-
-    % Loop through each case to see if its valid
-    for i = 1:length(case_names)
-        this_case = string(case_names{i});
-        if ~ismember(this_case, valid_cases)
-            error("Invalid case name: '%s'. Must be one of: %s", ...
-                  this_case, strjoin(valid_cases, ", "));
-        end
-    end
-end
+% function check_valid_case(case_names, subject)
+%     fprintf('subject: %s\n\n', subject);
+%     valid_cases = ["c0","c1","c2","cn0","cn1","cn2"];
+% 
+%     % Loop through each case to see if its valid
+%     for i = 1:length(case_names)
+%         this_case = string(case_names{i});
+%         if ~ismember(this_case, valid_cases)
+%             error("Invalid case name: '%s'. Must be one of: %s", ...
+%                   this_case, strjoin(valid_cases, ", "));
+%         end
+%     end
+% end
 
 function [cas, dat_PC] = check_subject_initialization(subject, ts_cycle, repeat_initialization)
     if nargin < 3

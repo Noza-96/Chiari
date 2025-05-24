@@ -1,4 +1,4 @@
-function TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID)
+function TUI_run_simulation(dat_PC, cas, DNS, fileID)
 
     if nargin < 4
         fileID = fopen(DNS.TUI_path+"/run_simulation_TUI.jou", 'w');
@@ -17,7 +17,7 @@ function TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID)
     if DNS.sim == 0
         prof_bound = {}; % Do not assign profile but impose flow rate
     elseif DNS.sim == 1
-        prof_bound = {boundary_inlet}; % Only assign profile to b_inlet
+        prof_bound = {DNS.inlet}; % Only assign profile to b_inlet
     elseif DNS.sim == 2
         prof_bound = {"bottom", "top"}; % Two inlets
     end

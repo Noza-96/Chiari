@@ -5,9 +5,9 @@ function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterat
             case_i = case_name {i};
             mesh_j = mesh_size (j);
     
+            [DNS.geom, DNS.sim, DNS.inlet] = get_type_simulation(case_i);
             DNS.mesh_size = mesh_j;
-            DNS.case = case_i+"_dx"+formatDecimal(DNS.mesh_size); 
-            [DNS.geom, DNS.sim] = get_type_simulation(case_i);
+            DNS.case = DNS.geom + string(DNS.sim) + DNS.inlet + "_dx" + formatDecimal(DNS.mesh_size);
             
             % full ansys folder path
             DNS.ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));
@@ -36,9 +36,20 @@ end
 
 %% Auxiliary functions 
 
-function [type_geometry, type_simulation] = get_type_simulation(DNS_case)
+function [type_geometry, type_simulation, boundary_inlet] = get_type_simulation(DNS_case)
+    DNS_case = char(DNS_case);
     type_geometry = regexp(DNS_case, '^[a-zA-Z]+', 'match', 'once');
     type_simulation = str2double(regexp(DNS_case, '\d+', 'match', 'once'));
+    if ismember(type_simulation, [0, 1])
+        boundary_inlet = 'top'; % by default top 
+        if length(DNS_case) == 3 && DNS_case(end)=='b'
+            boundary_inlet = 'bottom';
+        elseif length(DNS_case) == 3 && DNS_case(end)=='t'
+            boundary_inlet = 'top';
+        end
+    else
+        boundary_inlet = '';
+    end
 end
 
 function filepath = correct_path(filepath)
