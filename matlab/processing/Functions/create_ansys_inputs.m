@@ -12,6 +12,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
     for ii = 1:dat_PC.Ndat
 
         % Extract and scale pcMRI data
+        ROI = dat_PC.ROI_SAS{ii};                      % [100 x 100]
         U = -dat_PC.U_SAS{ii} * 1e-2;       % [m/s]
         xyz = dat_PC.pixel_coord{ii} * 1e-3; % [m]
         Q = -dat_PC.Q_SAS{ii};              % Flow rate
@@ -24,6 +25,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
         cols = max(find(~zeroCols, 1) - band, 1):min(find(~zeroCols, 1, 'last') + band, size(U,2));
         U = U(rows, cols, :);
         xyz = xyz(rows, cols, :);
+        ROI = ROI(rows, cols); 
+        ROI = ROI(:);
 
         % Reshape to 2D
         U = reshape(U, [], size(U,3));
@@ -44,7 +47,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
 
         % Store output
         x{ii} = xx; y{ii} = yy; z{ii} = zz;
-        u{ii} = uu;
+        u{ii} = uu; roi{ii} = ROI;
         [q{ii}, ~, ~] = four_approx(Q, modes, 0, ts_cycle);
         SV{ii} = 0.5 * simps(t*dat_PC.T{ii}, abs(q{ii}), 2);
 
@@ -113,6 +116,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
      pcmri.x = x; %[m]
      pcmri.y = y;
      pcmri.z = z;
+     pcmri.roi = roi;
      pcmri.SV = SV;
      pcmri.u_normal = u; %[cm/s]
      pcmri.normal_v = nv;

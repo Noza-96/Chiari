@@ -4,7 +4,7 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_aa"; 
+subject = "s101_b"; 
 
 % c: geometry bounded with 2 pcMRI planes. 
 % c0/c1 for zero pressure top and bottom flow rate/velocity
@@ -20,7 +20,7 @@ n_cores = 12;       % number of processors simulation
 
 % check_valid_case(case_name, subject) 
 
-[cas, dat_PC] = check_subject_initialization(subject, ts_cycle);
+[cas, dat_PC] = check_subject_initialization(subject, ts_cycle, 1);
 
 DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle);
 

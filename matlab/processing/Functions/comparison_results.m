@@ -3,6 +3,7 @@ function comparison_results(cas, case_name, mesh_size)
     DNS_cases = reshape(case_name+"_dx"+formatDecimal(mesh_size)', 1, []);
 
     load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
+    pcmri = apply_roi_pcmri(pcmri);
     Ndat = length(pcmri.locations); % number of slices
     Ncases = length(DNS_cases); 
     
@@ -24,7 +25,7 @@ function comparison_results(cas, case_name, mesh_size)
 
     % Loop through time steps
     for n = 1:numFrames
-        for loc = 1:Ndat
+        for loc = 1:Ndat           
             % Plot PC-MRI data/results
             create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-1), Ncases);
 
@@ -123,6 +124,8 @@ function named_location (gca, sstt, fs)
     annotation('textbox', dim, 'String', sstt, 'FontSize', fs, 'Color', 'black', ...
                'EdgeColor', 'none', 'BackgroundColor', 'none', 'Interpreter', 'latex');
 end
+
+
 
 function plot_flow_rate(q,n)
     prev_ax = gca; % Save the current axis before switching

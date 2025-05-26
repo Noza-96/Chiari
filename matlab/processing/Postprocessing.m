@@ -8,17 +8,15 @@ addpath('Functions/Others/')
 subject = "s101_b";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
-case_name = {"c2"}; 
+case_name = {"c0t", "c2", "c1t", "c1b"}; 
 mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file
-[cas, dat_PC, case_reports] = read_ansys_reports(subject, case_name, mesh_size);
+[cas, pcmri, DNS] = read_ansys_reports(subject, case_name, mesh_size);
 
-load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
-
-%% 4. Comparison PC-MRI with Ansys solution -- Animation
-case_name = {"b1"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
-mesh_size = [0.0005];
+%% Animation comparison PC-MRI with Ansys solution -- Animation
+case_name = {"c2"};
+mesh_size = [0.0002];
 
 comparison_results(cas, case_name, mesh_size)
 
@@ -27,7 +25,7 @@ close all
 locations = cellfun(@(x) strrep(x, '0', ''), cas.locations, 'UniformOutput', false);
 
 case_name = {"c2"}; %c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
-mesh_size = [0.0005];
+mesh_size = [0.0002];
 case_report = case_name+"_dx"+formatDecimal(mesh_size);
 
 figure

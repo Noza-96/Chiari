@@ -2,9 +2,7 @@
 clear; close all
 subjects = {"s101_b", "s101_a", "s101_aa"};
 
-red   = [0.8500, 0.3250, 0.0980];  % warm red-orange
-blue  = [0.0000, 0.4470, 0.7410];  % deep blue
-green = [0.4660, 0.6740, 0.1880];  % vibrant green
+gray_c = [1,1,1]*0.3;
 
 red   = [0.8, 0.2, 0.2];
 green = [0.2, 0.6, 0.2];
@@ -14,12 +12,14 @@ color_m = {red, blue, green};
 
 fs = 16;
 fan = 10;
-rows = 5;
+rows = 3;
 Ndata = 5; 
+
+t_T= [0.4, 0.65, 0.8];
 
 % Set up figure properties
 figure;
-set(gcf, 'Position', [200, 200, 1000, Ndata*100]);
+set(gcf, 'Position', [200, 200, 450, Ndata*100]);
 tiledlayout(Ndata, rows, "TileSpacing", "loose", "Padding", "tight");
 
 Y_l = zeros(1,Ndata);
@@ -60,13 +60,17 @@ for s=1:length(subjects)
         % Call the flow rate function
         % flow_rate(Q, 0);
         set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
-
+    
+        for j = 1:length(t_T)
+             plot([t_T(j), t_T(j)], [-3,3], 'LineStyle', '--', 'Color', gray_c, 'LineWidth', 0.5);
+        end
         ylabel("$Q\left[{\rm ml/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
         yline(0,LineWidth=1,LineStyle=":")
 
         % Set x-tick labels conditionally
         if k < pcmri.Ndat
             xlabel([])
+            xticklabels([])
         else
             xlabel("$t/T$", 'Interpreter', 'latex', 'FontSize', fs);
         end
@@ -78,32 +82,32 @@ for s=1:length(subjects)
 
         [max_vel, index] = max(abs(pcmri.u_normal{k}), [], 1);  % Find max of absolute values
         max_vel = 100*max_vel .* sign(pcmri.u_normal{k}(index + (0:size(pcmri.u_normal{k}, 2)-1) * size(pcmri.u_normal{k}, 1)));  % Preserve sign
-        
+        xticks(0:0.1:1);          
 
 
-        t = linspace(0, 1, pcmri.Nt);  % Create time vector
-        nexttile(3+(loc-1)*rows, [1, 2]);
-        plot(t, max_vel, 'Color', color_m{s}, 'LineStyle','-', LineWidth=1.5)
-        hold on
-        % Call the flow rate function
-        % flow_rate(Q, 0);
-        set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
-        yline(0,LineWidth=1,LineStyle=":")
-
-        ylabel("$u_{\rm max}\left[{\rm cm/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
-
-        % Set x-tick labels conditionally
-        if k < pcmri.Ndat
-            xlabel([])
-        else
-            xlabel("$t/T$", 'Interpreter', 'latex', 'FontSize', fs);
-        end
-        
-        Y_l(k) = max(ceil(max(abs(max_vel(:))))+1,Y_l(k));
-
-        ylim([-Y_l(k), Y_l(k)]);
-
-        yticks([-Y_l(k),0,Y_l(k)])
+        % t = linspace(0, 1, pcmri.Nt);  % Create time vector
+        % nexttile(3+(loc-1)*rows, [1, 2]);
+        % plot(t, max_vel, 'Color', color_m{s}, 'LineStyle','-', LineWidth=1.5)
+        % hold on
+        % % Call the flow rate function
+        % % flow_rate(Q, 0);
+        % set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
+        % yline(0,LineWidth=1,LineStyle=":")
+        % 
+        % ylabel("$u_{\rm max}\left[{\rm cm/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
+        % 
+        % % Set x-tick labels conditionally
+        % if k < pcmri.Ndat
+        %     xlabel([])
+        % else
+        %     xlabel("$t/T$", 'Interpreter', 'latex', 'FontSize', fs);
+        % end
+        % 
+        % Y_l(k) = max(ceil(max(abs(max_vel(:))))+1,Y_l(k));
+        % 
+        % ylim([-Y_l(k), Y_l(k)]);
+        % 
+        % yticks([-Y_l(k),0,Y_l(k)])
 
     end
     
@@ -119,7 +123,7 @@ nexttile(rows,[Ndata, 1]);
 for s=1:length(subjects)
     plot(Vs{s}, Dz{s}, '-', 'LineWidth', 1.5, 'Color', color_m{s});
     hold on    
-    yticks(-100:5:100);          
+    yticks(-55:5:5);          
     
     ylim([-60, 10])
     
@@ -132,12 +136,17 @@ for s=1:length(subjects)
     set(gcf, 'Color', 'w');  % Set background color to white for figures
     grid off; 
     xlim([0, 0.8]);
+    xticks(0:0.4:1); 
+    % xticklabels(0:0.4:0.8);
 
     set(gcf, 'Color', 'w')
 end
+% for i = 1:length(anatomy.Dz) - 2
+% yline(-anatomy.Dz(i), '--', anatomy.location{i}, ...
+    % 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs-2);
+
 for i = 1:length(anatomy.Dz) - 2
-yline(-anatomy.Dz(i), '--', anatomy.location{i}, ...
-    'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs-2);
+             plot([0, 1], [-anatomy.Dz(i),-anatomy.Dz(i)], 'LineStyle', '-', 'Color', gray_c, 'LineWidth', 0.5);
 end   
 
 marker = {'o','o','o'};

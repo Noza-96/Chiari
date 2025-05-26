@@ -30,7 +30,7 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_consol
         TUI_reports_journal(DNS, fileID);
         
         % run the simulation - add reports last cycle
-        TUI_run_simulation(dat_PC, cas, DNS, boundary_inlet, fileID);
+        TUI_run_simulation(dat_PC, cas, DNS, fileID);
 
         runFluentSimulation(DNS, DNS_cases{k}, n_cores, visualize_console);
 
