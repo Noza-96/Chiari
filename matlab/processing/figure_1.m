@@ -72,7 +72,7 @@ for s=1:length(subjects)
             xlabel([])
             xticklabels([])
         else
-            xlabel("$t/T$", 'Interpreter', 'latex', 'FontSize', fs);
+            xlabel("Cardiac cycle $(t/T)$", 'Interpreter', 'latex', 'FontSize', fs);
         end
 
         ylim([-2.5, 2.5]);
@@ -83,31 +83,6 @@ for s=1:length(subjects)
         [max_vel, index] = max(abs(pcmri.u_normal{k}), [], 1);  % Find max of absolute values
         max_vel = 100*max_vel .* sign(pcmri.u_normal{k}(index + (0:size(pcmri.u_normal{k}, 2)-1) * size(pcmri.u_normal{k}, 1)));  % Preserve sign
         xticks(0:0.1:1);          
-
-
-        % t = linspace(0, 1, pcmri.Nt);  % Create time vector
-        % nexttile(3+(loc-1)*rows, [1, 2]);
-        % plot(t, max_vel, 'Color', color_m{s}, 'LineStyle','-', LineWidth=1.5)
-        % hold on
-        % % Call the flow rate function
-        % % flow_rate(Q, 0);
-        % set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
-        % yline(0,LineWidth=1,LineStyle=":")
-        % 
-        % ylabel("$u_{\rm max}\left[{\rm cm/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
-        % 
-        % % Set x-tick labels conditionally
-        % if k < pcmri.Ndat
-        %     xlabel([])
-        % else
-        %     xlabel("$t/T$", 'Interpreter', 'latex', 'FontSize', fs);
-        % end
-        % 
-        % Y_l(k) = max(ceil(max(abs(max_vel(:))))+1,Y_l(k));
-        % 
-        % ylim([-Y_l(k), Y_l(k)]);
-        % 
-        % yticks([-Y_l(k),0,Y_l(k)])
 
     end
     
@@ -141,9 +116,6 @@ for s=1:length(subjects)
 
     set(gcf, 'Color', 'w')
 end
-% for i = 1:length(anatomy.Dz) - 2
-% yline(-anatomy.Dz(i), '--', anatomy.location{i}, ...
-    % 'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs-2);
 
 for i = 1:length(anatomy.Dz) - 2
              plot([0, 1], [-anatomy.Dz(i),-anatomy.Dz(i)], 'LineStyle', '-', 'Color', gray_c, 'LineWidth', 0.5);

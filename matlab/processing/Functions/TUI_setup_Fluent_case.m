@@ -58,7 +58,8 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
 
     % Create velocity inlet
     if DNS.sim == 0
-        fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_" + DNS.inlet + ".txt"), 'r');  % Open the file for reading
+        % independently of boundary inlet, uses flow rate at the bottom
+        fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_bottom.txt"), 'r');  % Open the file for reading
         sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
         fclose(fid);
 

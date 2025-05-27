@@ -1,36 +1,45 @@
 function comparison_results(cas, case_name, mesh_size)
 
-    DNS_cases = reshape(case_name+"_dx"+formatDecimal(mesh_size)', 1, []);
-
-    load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
-    pcmri = apply_roi_pcmri(pcmri);
-    Ndat = length(pcmri.locations); % number of slices
-    Ncases = length(DNS_cases); 
-    
+    Ncases = length(case_name); 
+    DNS_cases = cell (1,Ncases);
     st_DNS = cell (1,Ncases);
     
-    for kk = 1:Ncases
-        load(fullfile(cas.dirmat, "DNS_" + DNS_cases{kk} + ".mat"), 'DNS');
-        st_DNS{kk} = DNS;
-        clear DNS
+    for ii = 1:Ncases
+        [t_geom, t_sim, b_inlet] = get_type_simulation(case_name{ii});
+        DNS_cases{ii} = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
+        load(fullfile(cas.dirmat, "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
+        st_DNS{ii} = DNS;
+        if t_sim==1
+            DNS_roi=DNS;
+        end
     end
+    load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
+    Ndat = length(pcmri.locations); % number of slices
     
-    fig = figure('Position', [100, 100, 300*(Ncases+1), 800]);
-    tiledlayout(Ndat, Ncases + 1, "TileSpacing", "compact", "Padding", "loose");
-
+    x_roi =DNS_roi.slices.x;
+    y_roi = DNS_roi.slices.y;
+    roi = cell(1,Ndat);
+    for kk = 1:Ndat    
+        roi{kk} = DNS_roi.slices.u_normal{kk}(:,1)==0;
+    end
+    pcmri = apply_roi_pcmri(pcmri);
+    
+    fig = figure('Position', [100, 100, 200*(Ncases+1), 600]);
+    tiledlayout(Ndat, Ncases + 1, "TileSpacing", "tight", "Padding", "loose");
+    
     % Preallocate movie vector
     numFrames = st_DNS{1}.ts_cycle;
     movieVector(numFrames) = struct('cdata', [], 'colormap', []);
-    % load(fullfile(cas.dirmat, "pcmri_vel.mat"),'pcmri');
 
     % Loop through time steps
     for n = 1:numFrames
+        fprintf('Processing frame %d of %d\n', n, numFrames);
         for loc = 1:Ndat           
             % Plot PC-MRI data/results
-            create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-1), Ncases);
+            create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
 
             for kk = 1:length(DNS_cases)
-                create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases);
+                create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});           
             end
         end
 
@@ -44,7 +53,7 @@ function comparison_results(cas, case_name, mesh_size)
 end
 
 %% auxiliary functions
-function create_animation_ansys(data, loc, Ndat, n, ii, Ncases)
+function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw, y_raw)
     fs = 12;
     % Extract data and rescale
     x = data.x{loc} * 1e2; % [cm]
@@ -71,16 +80,21 @@ function create_animation_ansys(data, loc, Ndat, n, ii, Ncases)
     ylim([min(y) - 0.1 * Dy, max(y) + 0.1 * Dy]);
     set(gca, 'XDir', 'reverse', 'YDir', 'reverse', 'LineWidth', 1, 'TickLength', [0.01, 0.01]);
     box on;
-    if n==1 && ii == 1 + (Ncases+1)*(loc-1) 
-        named_location (gca, data.locations{loc}, fs)
-    end
+    % if n==1 && ii == 1 + (Ncases+1)*(loc-1) 
+    %     named_location (gca, data.locations{loc}, fs)
+    % end
     if ii ~= 1 + Ncases + (Ncases+1)*(loc-1) 
         colorbar off;
     end
     if ii <= Ncases + 1
-        sstt = data.case;  % Assuming 'data.case' is a string
+        sstt = char(data.case);  % Assuming 'data.case' is a string
         if ~strcmp(sstt, 'PC-MRI')  % Use strcmp to compare strings
-            sstt = extractBetween(sstt,1,2) + " DNS";  % Concatenate with " DNS"
+             if ismember(sstt(3), ['b', 't'])
+                sstt = extractBetween(sstt, 1, 3);
+            else
+                sstt = extractBetween(sstt, 1, 2);
+            end
+            sstt = sstt + " DNS";
         end
         title(sstt)
     end
@@ -93,7 +107,36 @@ function create_animation_ansys(data, loc, Ndat, n, ii, Ncases)
     if loc == Ndat
         xlabel('X [cm]', 'Interpreter', 'latex', 'FontSize', fs);
     end
+     xlabel('');
+     ylabel('');
+     xticks([])
+     yticks([])
     set(gcf, 'Color', 'w')
+
+    
+
+if exist('roi_mask', 'var') && ~isempty(roi_mask)
+    hold on
+
+    % Extract ROI points
+    x_roi_pts = x_raw(roi_mask) * 1e2;  % [cm]
+    y_roi_pts = y_raw(roi_mask) * 1e2;
+
+    % Use boundary to extract the outer contour of the ROI points
+    if ~isempty(x_roi_pts)
+        try
+            k = boundary(x_roi_pts, y_roi_pts, 1);  % tight boundary
+            plot(x_roi_pts, y_roi_pts, 'k', 'Marker', '.', 'LineStyle', 'none', 'MarkerSize', 2);
+        catch
+            % fallback if boundary fails
+            plot(x_roi_pts, y_roi_pts, 'k.');
+        end
+    end
+
+    hold off
+end
+
+
 end
 
 function save_animation(movieVector, fileName)
@@ -113,7 +156,7 @@ function named_location (gca, sstt, fs)
     % Compute normalized figure coordinates for the top-left corner of the tile
     % Axes position is in normalized figure coordinates [0, 1], so adjust for annotation
     xPos = axPos(1);  % X position of the tile
-    yPos = axPos(2) + axPos(4)- 0.02;  % Slightly offset from the top (5% from the top edge of the tile)
+    yPos = axPos(2) + axPos(4) ;  % Slightly offset from the top (5% from the top edge of the tile)
     width = 0.2 * axPos(3);  % Width of the textbox (20% of the tile's width)
     height = 0.05 * axPos(4);   % Height of the textbox (5% of figure height)
 

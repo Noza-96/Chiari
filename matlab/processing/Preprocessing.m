@@ -42,20 +42,6 @@ end
 
 %% Auxiliary functions 
 
-% function check_valid_case(case_names, subject)
-%     fprintf('subject: %s\n\n', subject);
-%     valid_cases = ["c0","c1","c2","cn0","cn1","cn2"];
-% 
-%     % Loop through each case to see if its valid
-%     for i = 1:length(case_names)
-%         this_case = string(case_names{i});
-%         if ~ismember(this_case, valid_cases)
-%             error("Invalid case name: '%s'. Must be one of: %s", ...
-%                   this_case, strjoin(valid_cases, ", "));
-%         end
-%     end
-% end
-
 function [cas, dat_PC] = check_subject_initialization(subject, ts_cycle, repeat_initialization)
     if nargin < 3
         repeat_initialization = 0;

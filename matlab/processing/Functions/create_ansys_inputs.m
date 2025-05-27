@@ -100,7 +100,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             template(row_offset + (1:n_points), 3) = num2cell(zz);
             template(8, 1) = {tag + "_vel"};
 
-            vel_sign = strcmp(tag, "top") * -1 + strcmp(tag, "bottom") * 1;
+            vel_sign = strcmp(tag, "top") * 1 + strcmp(tag, "bottom") * 1;
             for n = 1:ts_cycle
                 template(row_offset + (1:n_points), 4) = num2cell(vel_sign * uu(:,n));
                 T = cell2table(template);

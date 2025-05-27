@@ -1,5 +1,12 @@
 function [cas, pcmri, DNS] = read_ansys_reports(subject, cases, mesh_size)
 
+redo_report = false;
+answer = lower(strtrim(input('Do you want to redo data extraction? (y/[n]): ', 's')));
+
+if strcmp(answer, 'y') || strcmp(answer, 'yes')
+    redo_report = true;
+end
+
 for case_name = cases
     % load MRI data for subject
     load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas');
@@ -10,7 +17,7 @@ for case_name = cases
 
     DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
 
-    fprintf('\n%s: \n', DNS_case);
+    fprintf('\n%s: ', DNS_case);
 
     Dz = 5:5:50;
 
@@ -29,15 +36,18 @@ for case_name = cases
     end
 
     if exist(output_file, 'file')
-        answer = input('\nOutput file exists. \nDo you want to use it? ([y]es/[n]o): ', 's');
-        if ~strcmpi(answer, 'n')
-            disp('Continue to next ...');
+        if ~redo_report
+            disp('data already extracted, continue to next ...');
             load(output_file,'DNS');
             continue  % or `continue` if inside a loop
+        else
+            disp('redo data extraction from simulation reports...');
         end
-    end 
+    else
+        fprintf('reading data for the first time ...\n');
+    end
 
-    fprintf('reading data from simulation reports ...\n');
+
     % Define initial cycle number
     N0 = (DNS.cycles - 1) * DNS.ts_cycle;
     Nloc = length(DNS.slices.locations);
@@ -199,7 +209,7 @@ for case_name = cases
             index_0 = index_0 + 1;
         end
 
-        fprintf('compute error ...\n');
+        fprintf('compute RMSE error ...\n');
         [DNS.RMSE,DNS.RMSE_ave] = compute_RMSE(DNS, pcmri);
         save(output_file, 'DNS');
     else
@@ -217,47 +227,91 @@ function data = read_ansys_data(filePath)
     fclose(fileID);
 end
 
-function [RMSE, RMSE_ave] = compute_RMSE(DNS, pcmri)
+function [RMSE, RMSE_ave, RMSE_space] = compute_RMSE(DNS, pcmri)
     % Apply ROI to compare only data points within SAS
     pcmri = apply_roi_pcmri(pcmri);
 
-    RMSE = cell(1, pcmri.Ndat);  % Preallocate as a cell array
+    RMSE = cell(1, pcmri.Ndat);           % RMSE(t) per location
+    RMSE_ave = cell(1, pcmri.Ndat);       % time-averaged RMSE (per pixel, then spatial average)
+    RMSE_space_ave = cell(1, pcmri.Ndat); % RMSE over space, then time average
 
     for iloc = 1:pcmri.Ndat
-        % --- PCMRI data at this location ---
+        % PCMRI data at this location
         Xp = pcmri.x{iloc};
         Yp = pcmri.y{iloc};
         up = pcmri.u_normal{iloc};    % [Npts_p × Nt]
 
-        % --- DNS data at this location ---
+        % DNS data at this location
         Xd = DNS.slices.x{iloc};
         Yd = DNS.slices.y{iloc};
         ud = DNS.slices.u_normal{iloc};  % [Npts_d × Nt]
 
-        rmse_vec = nan(1, pcmri.Nt);  % Initialize vector for this location
+        rmse_vec = zeros(1, pcmri.Nt);    % RMSE(t)
+        sq_err_accum = [];               % To collect squared error per time frame
 
-         for it = 1:pcmri.Nt
-            % === Interpolation in 2D (X, Y only) ===
-            % Suppress warning during interpolant creation
-            evalc("F = scatteredInterpolant(Xd, Yd, ud(:, it), 'linear', 'none');");
+        % Skip location if boundary error should be zero
+        if ( ...
+            (iloc == 1 && (DNS.sim == 2 || (ismember(DNS.sim, 1) && strcmp(DNS.inlet, 'top')))) || ...
+            (iloc == pcmri.Ndat && (DNS.sim == 2 || (ismember(DNS.sim, 1) && strcmp(DNS.inlet, 'bottom')))) ...
+           )
+            fprintf('    %s: zero error\n', pcmri.locations{iloc}); 
+        else
+            for it = 1:pcmri.Nt
+                % Interpolate DNS to PCMRI locations
+                evalc("F = scatteredInterpolant(Xd, Yd, ud(:, it), 'linear', 'none');");
+                u_interp = F(Xp, Yp);  % Interpolated DNS
 
-            u_interp = F(Xp, Yp);  % 2D interpolation
+                valid = ~isnan(u_interp);
+                n_invalid = sum(~valid);
 
-            % Identify valid interpolation points
-            valid = ~isnan(u_interp);
-            n_invalid = sum(~valid);
+                if it == 1
+                    fprintf('    %s: exclude %d PCMRI points that fall outside the DNS interpolation domain\n', ...
+                            pcmri.locations{iloc}, n_invalid);
+                end
 
-            if it == 1
-            fprintf('    Location %s: %d PCMRI points fall outside the DNS interpolation domain (excluded from RMSE)\n', ...
-                    pcmri.locations{iloc}, n_invalid);
+                if any(valid)
+                    diff = u_interp(valid) - up(valid, it);
+                    rmse_vec(it) = sqrt(mean(diff.^2));
+
+                    % Store squared error for spatial averaging
+                    sq_err_accum(:, it) = diff.^2;  % [Npts_valid x Nt]
+                end
             end
+
+            % Compute RMSE(t) → already done in rmse_vec
+            RMSE{iloc} = rmse_vec;
+            RMSE_ave{iloc} = mean(rmse_vec);
+
+            % Compute RMSE over space (for each t), then average over t
+            if ~isempty(valid) && any(valid)
+                % Keep only valid points
+                Xv = Xp(valid);
+                Yv = Yp(valid);
+                Nv = sum(valid);
+                Nt = pcmri.Nt;
             
-            if any(valid)
-                rmse_vec(it) = sqrt(mean((u_interp(valid) - up(valid, it)).^2));
+                % Preallocate error matrix
+                sq_err_all = zeros(Nv, Nt);
+            
+                % Recompute interpolated values at all time points and fill matrix
+                for it = 1:Nt
+                    u_interp = F(Xp, Yp);
+                    diff_t = u_interp(valid) - up(valid, it);
+                    sq_err_all(:, it) = diff_t.^2;
+                end
+            
+                % Compute RMSE at each point (averaged over time)
+                rmse_pts = sqrt(mean(sq_err_all, 2));  % [Nv × 1]
+            
+                % Store results
+                RMSE_space.val{iloc} = rmse_pts;  % RMSE per point
+                RMSE_space.x{iloc} = Xv;
+                RMSE_space.y{iloc} = Yv;
+            else
+                RMSE_space.val{iloc} = [];
+                RMSE_space.x{iloc} = [];
+                RMSE_space.y{iloc} = [];
             end
         end
-
-        RMSE{iloc} = rmse_vec;  % Store RMSE time series for this location
-        RMSE_ave(iloc) = mean(rmse_vec(~isnan(rmse_vec)));
     end
 end
