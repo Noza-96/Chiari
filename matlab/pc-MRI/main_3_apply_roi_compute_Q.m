@@ -47,12 +47,3 @@ function [aux, cas, dat_PC, single_reading] = run_if_empty(subject, model)
         cas = scan_folders_set_cas(cas, single_reading);
         load([cas.dirmat, '/02-crop_set_roi.mat'], 'aux', 'cas', 'dat_PC');
 end
-
-function save_animation(movieVector, fileName)
-    % Save the animation as a video
-    writer = VideoWriter(fileName, 'MPEG-4');
-    writer.FrameRate = 5;
-    open(writer);
-    writeVideo(writer, movieVector);
-    close(writer);
-end

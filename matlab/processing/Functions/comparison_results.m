@@ -3,6 +3,7 @@ function comparison_results(cas, case_name, mesh_size)
     Ncases = length(case_name); 
     DNS_cases = cell (1,Ncases);
     st_DNS = cell (1,Ncases);
+    index_n = 0;
     
     for ii = 1:Ncases
         [t_geom, t_sim, b_inlet] = get_type_simulation(case_name{ii});
@@ -11,16 +12,22 @@ function comparison_results(cas, case_name, mesh_size)
         st_DNS{ii} = DNS;
         if t_sim==1
             DNS_roi=DNS;
+            DNS_roi_n=DNS;
+            index_n = ii;
         end
+
     end
     load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
     Ndat = length(pcmri.locations); % number of slices
     
     x_roi =DNS_roi.slices.x;
     y_roi = DNS_roi.slices.y;
+    x_roi_n =DNS_roi_n.slices.x;
+    y_roi_n = DNS_roi_n.slices.y;
     roi = cell(1,Ndat);
     for kk = 1:Ndat    
         roi{kk} = DNS_roi.slices.u_normal{kk}(:,1)==0;
+        roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
     end
     pcmri = apply_roi_pcmri(pcmri);
     
@@ -38,8 +45,12 @@ function comparison_results(cas, case_name, mesh_size)
             % Plot PC-MRI data/results
             create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
 
-            for kk = 1:length(DNS_cases)
-                create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});           
+            for kk = 1:Ncases
+                if kk==index_n
+                    create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi_n{loc}, x_roi_n{loc}, y_roi_n{loc});           
+                else
+                    create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});           
+                end
             end
         end
 

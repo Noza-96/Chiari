@@ -210,7 +210,7 @@ for case_name = cases
         end
 
         fprintf('compute RMSE error ...\n');
-        [DNS.RMSE,DNS.RMSE_ave] = compute_RMSE(DNS, pcmri);
+        [DNS.RMSE,DNS.RMSE_ave, DNS.RMSE_space] = compute_RMSE(DNS, pcmri);
         save(output_file, 'DNS');
     else
         % File does not exist, provide a warning or handle as needed
@@ -247,7 +247,7 @@ function [RMSE, RMSE_ave, RMSE_space] = compute_RMSE(DNS, pcmri)
         ud = DNS.slices.u_normal{iloc};  % [Npts_d × Nt]
 
         rmse_vec = zeros(1, pcmri.Nt);    % RMSE(t)
-        sq_err_accum = [];               % To collect squared error per time frame
+        zero_error = 1;
 
         % Skip location if boundary error should be zero
         if ( ...
@@ -255,63 +255,55 @@ function [RMSE, RMSE_ave, RMSE_space] = compute_RMSE(DNS, pcmri)
             (iloc == pcmri.Ndat && (DNS.sim == 2 || (ismember(DNS.sim, 1) && strcmp(DNS.inlet, 'bottom')))) ...
            )
             fprintf('    %s: zero error\n', pcmri.locations{iloc}); 
-        else
-            for it = 1:pcmri.Nt
-                % Interpolate DNS to PCMRI locations
-                evalc("F = scatteredInterpolant(Xd, Yd, ud(:, it), 'linear', 'none');");
-                u_interp = F(Xp, Yp);  % Interpolated DNS
-
-                valid = ~isnan(u_interp);
-                n_invalid = sum(~valid);
-
-                if it == 1
-                    fprintf('    %s: exclude %d PCMRI points that fall outside the DNS interpolation domain\n', ...
-                            pcmri.locations{iloc}, n_invalid);
-                end
-
-                if any(valid)
-                    diff = u_interp(valid) - up(valid, it);
-                    rmse_vec(it) = sqrt(mean(diff.^2));
-
-                    % Store squared error for spatial averaging
-                    sq_err_accum(:, it) = diff.^2;  % [Npts_valid x Nt]
-                end
-            end
-
-            % Compute RMSE(t) → already done in rmse_vec
-            RMSE{iloc} = rmse_vec;
-            RMSE_ave{iloc} = mean(rmse_vec);
-
-            % Compute RMSE over space (for each t), then average over t
-            if ~isempty(valid) && any(valid)
-                % Keep only valid points
-                Xv = Xp(valid);
-                Yv = Yp(valid);
-                Nv = sum(valid);
-                Nt = pcmri.Nt;
-            
-                % Preallocate error matrix
-                sq_err_all = zeros(Nv, Nt);
-            
-                % Recompute interpolated values at all time points and fill matrix
-                for it = 1:Nt
-                    u_interp = F(Xp, Yp);
-                    diff_t = u_interp(valid) - up(valid, it);
-                    sq_err_all(:, it) = diff_t.^2;
-                end
-            
-                % Compute RMSE at each point (averaged over time)
-                rmse_pts = sqrt(mean(sq_err_all, 2));  % [Nv × 1]
-            
-                % Store results
-                RMSE_space.val{iloc} = rmse_pts;  % RMSE per point
-                RMSE_space.x{iloc} = Xv;
-                RMSE_space.y{iloc} = Yv;
-            else
-                RMSE_space.val{iloc} = [];
-                RMSE_space.x{iloc} = [];
-                RMSE_space.y{iloc} = [];
-            end
+            zero_error = 0;
         end
+        
+        for it = 1:pcmri.Nt
+            % Interpolate DNS to PCMRI locations
+            evalc("F = scatteredInterpolant(Xd, Yd, ud(:, it), 'linear', 'none');");
+            u_interp = F(Xp, Yp);  % Interpolated DNS
+
+            valid = ~isnan(u_interp);
+            n_invalid = sum(~valid);
+
+            if it == 1 && zero_error
+                fprintf('    %s: exclude %d PCMRI points that fall outside the DNS interpolation domain\n', ...
+                        pcmri.locations{iloc}, n_invalid);
+            end
+
+            diff = u_interp(valid) - up(valid, it);
+            rmse_vec(it) = sqrt(mean(diff.^2));
+            
+        end
+        
+        % Compute RMSE over space (for each t), then average over t
+        % Keep only valid points
+        Nv = sum(valid);
+        Nt = pcmri.Nt;
+    
+        % Preallocate error matrix
+        sq_err_all = zeros(Nv, Nt);
+    
+        % Recompute interpolated values at all time points and fill matrix
+        for it = 1:Nt
+            evalc("F = scatteredInterpolant(Xd, Yd, ud(:, it), 'linear', 'none');");
+            u_interp = F(Xp, Yp);
+            diff_t = u_interp(valid) - up(valid, it);
+            sq_err_all(:, it) = diff_t.^2;
+        end
+
+        % Compute RMSE(t) → already done in rmse_vec
+        RMSE{iloc} = rmse_vec*zero_error;
+        RMSE_ave{iloc} = mean(rmse_vec)*zero_error;
+    
+        % Compute RMSE at each point (averaged over time)
+        rmse_pts = sqrt(mean(sq_err_all, 2));  % [Nv × 1]
+    
+        % Store results
+        RMSE_space.val{iloc} = rmse_pts*zero_error;  % RMSE per point
+        RMSE_space.x{iloc} = Xp(valid);
+        RMSE_space.y{iloc} = Yp(valid);
+           
+        
     end
 end

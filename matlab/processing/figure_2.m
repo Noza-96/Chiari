@@ -3,10 +3,10 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 subject = "s101_b";
-case_name = {"c2", "c1b", "c1t", "c0t"};
+case_name = {"cn2","c2", "c1b", "c1t", "c0t"};
 mesh_size = [0.0002];
 
-fs = 16;
+fs = 14;
 fan = 10;
 rows = 3;
 
@@ -49,7 +49,7 @@ end
 
 % === Plotting ===
 ff = figure;
-set(ff, 'Position', [200, 200, 300, 450]);  % Wider for extra tile
+set(ff, 'Position', [200, 200, 300, 470]);  % Wider for extra tile
 tiledlayout(pcmri.Ndat, rows, "TileSpacing", "tight", "Padding", "compact")
 for k = 1:pcmri.Ndat
     % === Main RMSE plot (columns 1 to 3) ===
@@ -68,13 +68,14 @@ for k = 1:pcmri.Ndat
     grid on
     set(gca, 'XGrid', 'off', 'YGrid', 'on')
 
-    ylim([0, max(max_y(k))*1.1])
+    ylim([0, max(max_y(k)*1.1, 0.01)])
+    % ylim([0, 0.015])
     % ylabel(pcmri.locations{k}, 'Interpreter', 'latex', 'FontSize',fs)
     xticks(0:0.2:1)
-    yticks(0:0.01:0.1)
+    yticks(0:0.005:0.1)
     
     if k == 1
-        title('RMSE [cm/s]', 'Interpreter', 'latex', 'FontSize',fs)
+        title('$\langle {\rm RMSE} \rangle$', 'Interpreter', 'latex', 'FontSize',fs)
     end
 
     if k == pcmri.Ndat
@@ -93,12 +94,13 @@ for k = 1:pcmri.Ndat
     end
     set(gca, 'LineWidth', 0.5, 'TickLength', [0.01 0.01], 'FontSize', fan);
     if k == 1
-        title('$\langle {\rm RMSE} \rangle$ ', 'Interpreter', 'latex', 'FontSize',fs)
+        title('$\langle \overline{{\rm RMSE}} \rangle$ ', 'Interpreter', 'latex', 'FontSize',fs)
     elseif k == pcmri.Ndat
         % xlabel('Configuration', 'Interpreter', 'latex', 'FontSize',fs)
     end
     ylim([0, max(max_y(k))*1.1])
-    yticks(0:0.01:0.1)
+    % ylim([0, 0.015])
+    yticks(0:0.0025:0.1)
     xticklabels([])
     yticklabels([])
     box on

@@ -62,9 +62,14 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
         fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_bottom.txt"), 'r');  % Open the file for reading
         sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
         fclose(fid);
+        if DNS.inlet == 'b'
+            sign_normal_u = "+";
+        elseif DNS.inlet == 't'
+            sign_normal_u = "-";
+        end
 
         named_expression (fileID, "Q_inlet", sstt)
-        named_expression (fileID, "v_inlet", "Q_inlet/Area(['"+DNS.inlet+"'])")
+        named_expression (fileID, "v_inlet", sign_normal_u+"Q_inlet/Area(['"+DNS.inlet+"'])")
         fprintf(fileID,"/define/boundary-conditions/velocity-inlet "+DNS.inlet+" no no yes yes no ""v_inlet"" no 0  q \n");
     end
 

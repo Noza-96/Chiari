@@ -101,10 +101,10 @@ end
 if visualization_plots
     plot_all_velocity_comparisons(30, velocity, dat_PC, cas);
     
-    % ts_cycle = 40; 
-    % movieVector = create_animation(dat_PC, cas, ts_cycle);
+    ts_cycle = 40; 
+    movieVector = create_animation(dat_PC, cas, ts_cycle);
     
-    % save_animation(movieVector, fullfile(cas.dirvid, "flow_measurements_"+cas.subj+".mp4"));
+    save_animation(movieVector, fullfile(cas.dirvid, "flow_measurements_"+cas.subj+".mp4"));
 end
 
 dat_PC = update_data(velocity, dat_PC);
@@ -275,4 +275,12 @@ function roi_mask = read_ROI_nrrd(location, segmentation_dir)
     roi_mask = roi_raw > 0;
 end
 
+function save_animation(movieVector, fileName)
+    % Save the animation as a video
+    writer = VideoWriter(fileName, 'MPEG-4');
+    writer.FrameRate = 5;
+    open(writer);
+    writeVideo(writer, movieVector);
+    close(writer);
+end
 
