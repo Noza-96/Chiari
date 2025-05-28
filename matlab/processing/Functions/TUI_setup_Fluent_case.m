@@ -62,9 +62,9 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
         fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_bottom.txt"), 'r');  % Open the file for reading
         sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
         fclose(fid);
-        if DNS.inlet == 'b'
+        if DNS.inlet == "bottom"
             sign_normal_u = "+";
-        elseif DNS.inlet == 't'
+        elseif DNS.inlet == "top"
             sign_normal_u = "-";
         end
 

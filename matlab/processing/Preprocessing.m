@@ -4,7 +4,7 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_aa"; 
+subject = "s101_b"; 
 
 % c: geometry bounded with 2 pcMRI planes. 
 % c0/c1 for zero pressure top and bottom flow rate/velocity
