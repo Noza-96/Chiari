@@ -3,7 +3,9 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 subject = "s101_b";
-case_name = {"cn2","c2", "c1b", "c1t", "c0t"};
+case_name = {"cn2","c2", "c1b", "c1t"};
+line_sty = ["-", "-", "--", "-"];
+
 mesh_size = [0.0002];
 
 fs = 14;
@@ -61,7 +63,7 @@ for k = 1:pcmri.Ndat
         data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
         load(data_path, 'DNS');
 
-        plot(t, DNS.RMSE{k}, 'LineWidth', 1, 'Color', colors(i, :));
+        plot(t, DNS.RMSE{k}, 'LineStyle',line_sty(i),'LineWidth', 1.5, 'Color', colors(i, :));
         hold on
     end
     set(gca, 'LineWidth', 0.5, 'TickLength', [0.01 0.01], 'FontSize', fan);
@@ -103,6 +105,7 @@ for k = 1:pcmri.Ndat
     yticks(0:0.0025:0.1)
     xticklabels([])
     yticklabels([])
+    set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', 10);
     box on
     grid on
     set(gca, 'XGrid', 'off', 'YGrid', 'on')
