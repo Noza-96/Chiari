@@ -3,8 +3,8 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 subject = "s101_b";
-case_name = {"cn2","c2", "c1b", "c1t"};
-line_sty = ["-", "-", "--", "-"];
+case_name = {"cn2","c2", "c1b", "c1t", "c0t"};
+line_sty = ["-", "-", "--", "-", "-"l];
 
 mesh_size = [0.0002];
 
