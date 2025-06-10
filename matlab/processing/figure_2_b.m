@@ -2,8 +2,8 @@ clear; close all; clc;
 addpath('Functions/');
 addpath('Functions/Others/')
 
-subject = "s101_b";
-case_name = {"cn2","c2", "c1b", "c1t", "c0t"};
+subject = "s101_a";
+case_name = {"cn2", "c2", "c1b", "c0t"};
 mesh_size = [0.0002];
 
 fs = 16;
@@ -93,7 +93,7 @@ function spatial_error_plot(data, name_loc, loc, Ndat, ii, Ncases, roi_mask, x_r
     % if n==1 && ii == 1 + (Ncases+1)*(loc-1) 
     %     named_location (gca, data.locations{loc}, fs)
     % end
-    if ii ~= 4 
+    if ii ~= Ncases 
             colorbar off;
     end
     % if ii <= Ncases
