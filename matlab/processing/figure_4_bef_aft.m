@@ -1,20 +1,26 @@
 close all; clear;
-subject = "s101_a";
-case_name = {"cn2", "c2", "c1b", "c0t"};
+subject = {"s101_b","s101_a"} ;
+case_name = "c0t";
 line_sty = ["-", "-", "--", "-", "-"];
 mesh_size = 0.0002;
 
 fs = 14;
 fan = 10;
 Nt = 100;  % Last N time steps
-n_cases = length(case_name);
+n_cases = length(subject);
 
-mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat");
+red   = [0.8, 0.2, 0.2];
+green = [0.2, 0.6, 0.2];
+blue  = [0.2, 0.4, 0.8];
+
+color_m = {red, blue, green};
+
+
+mri_data_path = fullfile("../../../computations", "pc-mri", subject{1}, "mat", "04-registration.mat");
 load(mri_data_path, 'cas');
 
 % === Load one case to get locations and indices ===
-case_0 = case_name{1};
-[t_geom, t_sim, b_inlet] = get_type_simulation(case_0);
+[t_geom, t_sim, b_inlet] = get_type_simulation(case_name);
 DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
 data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
 load(data_path, 'DNS');
@@ -36,14 +42,15 @@ t = linspace(0,1,Nt);
 for k = 1:length(idx_to_plot)
     j = idx_to_plot(k);
 
-    for i = 1:n_cases
+    for s = 1:length(subject)
+        mri_data_path = fullfile("../../../computations", "pc-mri", subject{s}, "mat", "04-registration.mat");
+        load(mri_data_path, 'cas');
         % Load each case
-        case_i = case_name{i};
+        case_i = case_name;
         [t_geom, t_sim, b_inlet] = get_type_simulation(case_i);
         DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
         data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
         load(data_path, 'DNS');
-
 
         % Pressure difference with respect to last location
         dp_vals = DNS.out.dp.val;
@@ -51,10 +58,11 @@ for k = 1:length(idx_to_plot)
         [ZL,LI_i] = longitudinal_impedance(dp_diff, DNS.out.q_bottom(end-Nt+1:end));
         nexttile(2*k-1)
         hold on;
-        plot(t, dp_diff, 'LineWidth', 1.5, 'LineStyle',line_sty(i),'Color', colors(i,:), 'DisplayName', case_i);
+        plot(t, dp_diff, 'LineWidth', 1.5, 'LineStyle','-','Color', color_m{s});
+
         nexttile(2*k)
         hold on;
-        plot(ZL, 'Color', colors(i,:), 'LineWidth', 1.5, 'LineStyle',line_sty(i));
+        plot(t, DNS.out.q_bottom(end-Nt+1:end)*1e6, 'Color', color_m{s}, 'LineWidth', 1.5, 'LineStyle','-');
     end
     nexttile(2*k-1)
     set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
@@ -79,16 +87,18 @@ for k = 1:length(idx_to_plot)
     % Customize plot appearance
     set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', 10);
     if k == length(idx_to_plot)
-    xlabel("$f\left[{\rm Hz}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
+        xlabel('Cardiac cycle $(t/T)$', 'Interpreter', 'latex', 'FontSize',fs)
     end
     if k == 1
-    title("$Z_L\left[{\rm dyn{\cdot}s}/{\rm cm}^5\right]$", 'Interpreter', 'latex', 'FontSize', fs);
+    title("$Q \, [{\rm ml/s} ]$", 'Interpreter', 'latex', 'FontSize', fs);
     end
-    xlim([1, 8]);
-    xticks(1:10)
+    % xlim([1, 8]);
+    xticks(0:0.25:1)
+    ylim([-2,1.5])
+    yline(0,':',LineWidth=1)
     % ylim([0, 100]);
     box on
 
 end
 
-print(gcf, fullfile(pwd,'Figures', subject+'_fig_3'), '-depsc','-vector');
+print(gcf, fullfile(pwd,'Figures', 'fig_4'), '-depsc','-vector');

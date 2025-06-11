@@ -50,12 +50,6 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     % Set pressure-velocity coupled scheme
     fprintf(fileID,'/solve/set p-v-coupling 24 q  \n');
 
-    % Assign a penetration velocity in DNS.continuity to satisfy continuity
-    if DNS.sim == 2
-        named_expression (fileID, "v_" + DNS.continuity, "-(MassFlow(['top']) + MassFlow(['bottom']))/(rho*Area(['" + DNS.continuity + "']))")
-        fprintf(fileID,"/define/boundary-conditions/velocity-inlet " + DNS.continuity + " no no yes yes no ""v_" + DNS.continuity + """ no 0  q \n");
-    end
-
     % Create velocity inlet
     if DNS.sim == 0
         % independently of boundary inlet, uses flow rate at the bottom
@@ -71,6 +65,32 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
         named_expression (fileID, "Q_inlet", sstt)
         named_expression (fileID, "v_inlet", sign_normal_u+"Q_inlet/Area(['"+DNS.inlet+"'])")
         fprintf(fileID,"/define/boundary-conditions/velocity-inlet "+DNS.inlet+" no no yes yes no ""v_inlet"" no 0  q \n");
+    end
+
+    % Assign a penetration velocity in DNS.continuity to satisfy continuity
+    if DNS.sim == 2
+        named_expression (fileID, "v_" + DNS.continuity, "-(MassFlow(['top']) + MassFlow(['bottom']))/(rho*Area(['" + DNS.continuity + "']))")
+        fprintf(fileID,"/define/boundary-conditions/velocity-inlet " + DNS.continuity + " no no yes yes no ""v_" + DNS.continuity + """ no 0  q \n");
+    end
+
+    if DNS.sim == 3
+        for zone_i = 1:(cas.Ncas-1)
+            if zone_i < (cas.Ncas-1)
+                fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_"+zone_i+".txt"), 'r');  % Open the file for reading
+                sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
+                fclose(fid);
+                named_expression (fileID, "Q_cord_"+zone_i, sstt)
+            end
+            if zone_i == 1
+                sstt = "MassFlow(['top']) - Q_cord_"+zone_i;
+            elseif zone_i == cas.Ncas-1
+                sstt = "Q_cord_" + num2str(zone_i-1) + " - (- MassFlow(['bottom']))";
+            else
+                sstt = "Q_cord_" + num2str(zone_i-1) + " - Q_cord_" + zone_i;
+            end
+            named_expression (fileID, "v_cord_" + zone_i, "-("+sstt+")/(rho*Area(['cord_" + zone_i + "']))")
+            fprintf(fileID,"/define/boundary-conditions/velocity-inlet cord_" + zone_i + " no no yes yes no ""v_cord_" + zone_i + """ no 0  q \n");
+        end
     end
 
     if nargin < 3

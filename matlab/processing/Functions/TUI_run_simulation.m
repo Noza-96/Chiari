@@ -18,7 +18,7 @@ function TUI_run_simulation(dat_PC, cas, DNS, fileID)
         prof_bound = {}; % Do not assign profile but impose flow rate
     elseif DNS.sim == 1
         prof_bound = {DNS.inlet}; % Only assign profile to b_inlet
-    elseif DNS.sim == 2
+    elseif ismember(DNS.sim, [2, 3])
         prof_bound = {"bottom", "top"}; % Two inlets
     end
   
