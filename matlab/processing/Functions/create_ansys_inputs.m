@@ -90,6 +90,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             filename = fullfile(cas.diransys_in, "flow-rates", "Q_" + tag + ".txt");
             write_text_file(filename, eq_str);
 
+
             % --- 3) Save velocity profiles ---
             filename = fullfile("Functions", "empty_inlet_vel.csv");
             template = readcell(filename);
@@ -109,7 +110,28 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             end
 
             fprintf('saved velocity profile, plane, and flow rate for %s-pcmri in ansys input folder\n', tag);
+        else
+            % --- 2) Save flow rate as Fourier series in middle planes---
+            An = -dat_PC.fou.am{ii};
+            T = dat_PC.T{ii};
+            equation_terms = strings(1, modes);
+            Q_recon = zeros(1, ts_cycle);
+            for n = 1:modes
+                omega = n * 2 * pi / T;
+                real_part = real(An(n));
+                imag_part = imag(An(n));
+                equation_terms(n) = sprintf("+%.6f*cos(%.6f*t*1[s^-1]) - %.6f*sin(%.6f*t*1[s^-1])", ...
+                                            real_part, omega, imag_part, omega);
+                Q_recon = Q_recon + 2 * (real_part * cos(omega * t) - imag_part * sin(omega * t));
+            end
+            eq_str = sprintf("(%s)*2E-6[m^3/s]", strjoin(equation_terms, ' '));
+            eq_str = regexprep(eq_str, '\+-', '- ');
+            eq_str = regexprep(eq_str, '-\s*-', '+ ');
+            filename = fullfile(cas.diransys_in, "flow-rates", "Q_" + num2str(ii - 1) + ".txt");
+            write_text_file(filename, eq_str);
         end
+
+
     end
 
     % Output structure

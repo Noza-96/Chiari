@@ -1,4 +1,4 @@
-function all_simulations = GUI_create_mesh(cas, mesh_size)
+function all_simulations = GUI_create_mesh_zones(cas, mesh_size)
 
     n_cores = 12;
 
@@ -12,19 +12,19 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
 
     fileID = fopen(GUI_journal_path, 'w');
         
-    geom = ["c", "cn"];
+    geom = ["c"];
     
     % for type 2 simulation, which boundary has continuity condition
-    continuity_condition = "tonsils";
+    continuity_condition = compose("cord_%d", 1:cas.Ncas);
 
     
-    prox_limit = [0.0002, 0.0008];
+    % prox_limit = [0.0002, 0.0008];
     
     for k = 1: length(geom)
     
         for ii = 1:length(mesh_size)
     
-            case_name = geom(k) + "_dx" + mesh_size(ii);
+            case_name = geom(k) + "_dx" + mesh_size(ii) + "_zones";
             % check if case already exists or needs to be created
             if isfile(fullfile(cas.diransys_in, "case-files", case_name + ".cas.gz"))
                 fprintf('case file %s already exists ...\n', case_name);
@@ -34,14 +34,14 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
                     
                 % Define to which boundaries apply local sizing
                 if contains(geom(k), 'n')
-                    local_sizing = {"cord", "dura", "tonsils", "nerve_roots"};
+                    local_sizing = {continuity_condition, "dura", "tonsils", "nerve_roots"};
                 else
-                    local_sizing = {"cord", "dura", "tonsils"};
+                    local_sizing = {continuity_condition, "dura", "tonsils"};
                 end
             
                 sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
             
-                geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom(k)+ "_geometry.scdoc");
+                geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom(k)+ "_geometry_zones.scdoc");
     
                 if ~isfile(geometry_path)
                     geometry_exist = false; % cannot run simulation
@@ -63,15 +63,15 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
                     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 1,r'BOIControlName': r'wall_sizing',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Face Size',r'BOIFaceLabelList': ["+sstt_sizing+"],r'BOIGrowthRate': 1.1,r'BOISize': "+mesh_size(ii)+",r'BOIZoneorLabel': r'label',})"")\n" );
                     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].AddChildAndUpdate(DeferUpdate=False)"")\n" );
                     % proximity
-                    fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 10,r'BOIControlName': r'proximity',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Proximity',r'BOIFaceLabelList': [r'cord', r'dura'],r'BOIGrowthRate': 1.1,r'BOIMaxSize': "+prox_limit(2)+",r'BOIMinSize': "+prox_limit(1)+",r'BOIZoneorLabel': r'label',})"")\n" );
-                    fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].AddChildAndUpdate(DeferUpdate=False)"")    \n" );
+                    % fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 10,r'BOIControlName': r'proximity',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Proximity',r'BOIFaceLabelList': [r'cord', r'dura'],r'BOIGrowthRate': 1.1,r'BOIMaxSize': "+prox_limit(2)+",r'BOIMinSize': "+prox_limit(1)+",r'BOIZoneorLabel': r'label',})"")\n" );
+                    % fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].AddChildAndUpdate(DeferUpdate=False)"")    \n" );
                 else
                     % wall_sizing
                     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['wall_sizing'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 1,r'BOIControlName': r'wall_sizing',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Face Size',r'BOIFaceLabelList': ["+sstt_sizing+"],r'BOIGrowthRate': 1.1,r'BOISize': "+mesh_size(ii)+",r'BOIZoneorLabel': r'label',r'CompleteFaceLabelList': ["+sstt_sizing+"],r'DrawSizeControl': True,})"")\n" );
                     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['wall_sizing'].Execute()"")\n" );
                     % proximity
-                    fprintf(fileID,"(%%py-exec ""workflow.TaskObject['proximity'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 10,r'BOIControlName': r'proximity',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Proximity',r'BOIFaceLabelList': [r'cord', r'dura'],r'BOIGrowthRate': 1.1,r'BOIMaxSize': "+prox_limit(2)+",r'BOIMinSize': "+prox_limit(1)+",r'BOIZoneorLabel': r'label',})"")\n" );
-                    fprintf(fileID,"(%%py-exec ""workflow.TaskObject['proximity'].Execute()"")\n" );
+                    % fprintf(fileID,"(%%py-exec ""workflow.TaskObject['proximity'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 10,r'BOIControlName': r'proximity',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Proximity',r'BOIFaceLabelList': [r'cord', r'dura'],r'BOIGrowthRate': 1.1,r'BOIMaxSize': "+prox_limit(2)+",r'BOIMinSize': "+prox_limit(1)+",r'BOIZoneorLabel': r'label',})"")\n" );
+                    % fprintf(fileID,"(%%py-exec ""workflow.TaskObject['proximity'].Execute()"")\n" );
                 end    
                 % Generate surface mesh
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Generate the Surface Mesh'].Arguments.set_state({r'CFDSurfaceMeshControls': {r'MaxSize': "+4*mesh_size(ii)+",r'MinSize': "+mesh_size(ii)+",},})"")\n" );
@@ -92,7 +92,8 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].UpdateChildTasks(SetupTypeChanged=True)"")\n" );
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].Execute()"")\n" );
                 
-                fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom', r'" + continuity_condition + "'],r'BoundaryLabelTypeList': [r'velocity-inlet', r'velocity-inlet', r'velocity-inlet'],r'OldBoundaryLabelList': [r'top', r'bottom', r'" + continuity_condition + "'],r'OldBoundaryLabelTypeList': [r'wall', r'wall', r'wall'],})"")\n" );
+                fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom', " + strjoin(compose("r'%s'", continuity_condition),", ") +"],..." + ...
+                    " r'BoundaryLabelTypeList': ["+strjoin(repmat("r'velocity-inlet'", 1, 2 + cas.Ncas),", ")+"],r'OldBoundaryLabelList': [r'top', r'bottom', " + strjoin(compose("r'%s'", continuity_condition),", ") +"] ,r'OldBoundaryLabelTypeList': ["+strjoin(repmat("r'wall'", 1, 2 + cas.Ncas),", ")+"],})"")\n" );
                 
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Execute()"")\n" );
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Regions'].Execute()"")\n" );
