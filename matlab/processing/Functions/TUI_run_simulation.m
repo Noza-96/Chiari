@@ -45,8 +45,10 @@ function TUI_run_simulation(dat_PC, cas, DNS, fileID)
                 fprintf(fileID,"/solve/initialize/ initialize-flow \n");
                 fprintf(fileID,"/solve/initialize/hyb-initialization yes \n");
 
-                % export surface mesh
-                fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n", surface_path));
+                if DNS.sim ~=3
+                    % export surface mesh
+                    fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n", surface_path));
+                end
             end
 
             fprintf(fileID,";" + DNS.case + ": iteration " +n+"/"+DNS.ts_cycle+" cycle "+k+"/"+DNS.cycles+"\n" );

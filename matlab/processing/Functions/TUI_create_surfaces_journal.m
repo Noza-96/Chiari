@@ -29,13 +29,14 @@ function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
         create_plane (fileID,XYZ,"FM-"+Dz)
     end
 
-    % Create surface to export later
-    zone_names = {'cord', 'dura', 'tonsils'};
-    for k = 1:length(zone_names)
-        fprintf(fileID,sprintf('/surface/zone-surface %s_s "%s" q \n', zone_names{k}, zone_names{k}));
+    if DNS.sim ~= 3
+        % Create surface to export later
+        zone_names = {'cord', 'dura', 'tonsils'};
+        for k = 1:length(zone_names)
+            fprintf(fileID,sprintf('/surface/zone-surface %s_s "%s" q \n', zone_names{k}, zone_names{k}));
+        end
+        fprintf(fileID,sprintf('/surface/group-surfaces %s () wall  q \n', strjoin(append(zone_names,'_s'),' ')));
     end
-    fprintf(fileID,sprintf('/surface/group-surfaces %s () wall  q \n', strjoin(append(zone_names,'_s'),' ')));
-
     if nargin < 4
         fclose(fileID);
     end

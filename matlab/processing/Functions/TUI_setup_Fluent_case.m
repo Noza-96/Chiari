@@ -15,7 +15,11 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
         boundary_outlet = "bottom";
     end
 
-    case_name  = DNS.geom + "_dx" + DNS.mesh_size;
+    if DNS.sim == 3
+        case_name  = DNS.geom + "_dx" + DNS.mesh_size+ "_zones";
+    else
+        case_name  = DNS.geom + "_dx" + DNS.mesh_size;
+    end
 
     % read case
     case_path = DNS.ansys_path +"/" + DNS.subject +"/inputs/case-files/"+ case_name + ".cas.gz"; 
@@ -82,11 +86,11 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
                 named_expression (fileID, "Q_cord_"+zone_i, sstt)
             end
             if zone_i == 1
-                sstt = "MassFlow(['top']) - Q_cord_"+zone_i;
+                sstt = "MassFlow(['top']) + Q_cord_"+zone_i;
             elseif zone_i == cas.Ncas-1
-                sstt = "Q_cord_" + num2str(zone_i-1) + " - (- MassFlow(['bottom']))";
+                sstt = "- Q_cord_" + num2str(zone_i-1) + " + MassFlow(['bottom'])";
             else
-                sstt = "Q_cord_" + num2str(zone_i-1) + " - Q_cord_" + zone_i;
+                sstt = "- Q_cord_" + num2str(zone_i-1) + " + Q_cord_" + zone_i;
             end
             named_expression (fileID, "v_cord_" + zone_i, "-("+sstt+")/(rho*Area(['cord_" + zone_i + "']))")
             fprintf(fileID,"/define/boundary-conditions/velocity-inlet cord_" + zone_i + " no no yes yes no ""v_cord_" + zone_i + """ no 0  q \n");

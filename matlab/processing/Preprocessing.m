@@ -28,7 +28,7 @@ DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, 
 % run fluent-meshing to create meshes and corresponding .cas files
 cases_ready = GUI_create_mesh(cas, mesh_size);
 
-GUI_create_mesh_zones(cas, mesh_size);
+cases_ready = GUI_create_mesh_zones(cas, mesh_size);
 
 % visualize output ANSYS console
 visualize_console = 1;

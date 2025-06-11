@@ -15,7 +15,7 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size)
     geom = ["c"];
     
     % for type 2 simulation, which boundary has continuity condition
-    continuity_condition = compose("cord_%d", 1:cas.Ncas);
+    continuity_condition = compose("cord_%d", 1:(cas.Ncas-1));
 
     
     % prox_limit = [0.0002, 0.0008];
@@ -34,13 +34,11 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size)
                     
                 % Define to which boundaries apply local sizing
                 if contains(geom(k), 'n')
-                    local_sizing = {continuity_condition, "dura", "tonsils", "nerve_roots"};
+                    local_sizing = [continuity_condition, "dura", "tonsils", "nerve_roots"];
                 else
-                    local_sizing = {continuity_condition, "dura", "tonsils"};
+                    local_sizing = [continuity_condition, "dura", "tonsils"];
                 end
-            
-                sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
-            
+                sstt_sizing = sprintf("r'%s'", strjoin(local_sizing, "', r'"));            
                 geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom(k)+ "_geometry_zones.scdoc");
     
                 if ~isfile(geometry_path)
@@ -92,9 +90,9 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size)
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].UpdateChildTasks(SetupTypeChanged=True)"")\n" );
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].Execute()"")\n" );
                 
-                fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom', " + strjoin(compose("r'%s'", continuity_condition),", ") +"],..." + ...
-                    " r'BoundaryLabelTypeList': ["+strjoin(repmat("r'velocity-inlet'", 1, 2 + cas.Ncas),", ")+"],r'OldBoundaryLabelList': [r'top', r'bottom', " + strjoin(compose("r'%s'", continuity_condition),", ") +"] ,r'OldBoundaryLabelTypeList': ["+strjoin(repmat("r'wall'", 1, 2 + cas.Ncas),", ")+"],})"")\n" );
-                
+                fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom', " + strjoin(compose("r'%s'", continuity_condition),", ") +"]," + ...
+               " r'BoundaryLabelTypeList': ["+strjoin(repmat("r'velocity-inlet'", 1, 1 + cas.Ncas),", ")+"],r'OldBoundaryLabelList': [r'top', r'bottom', " + strjoin(compose("r'%s'", continuity_condition),", ") +"] ,r'OldBoundaryLabelTypeList': ["+strjoin(repmat("r'wall'", 1, 1 + cas.Ncas),", ")+"],})"")\n" );
+
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Execute()"")\n" );
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Regions'].Execute()"")\n" );
                 

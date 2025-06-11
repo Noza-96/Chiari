@@ -1,0 +1,3212 @@
+Auto-Transcript Start Time:  10:53:04, 11 Jun 2025 Eastern Daylight Time 
+Current Directory: "C:\Users\guill\Documents\chiari\git-chiari\matlab\processing"
+
+              Welcome to ANSYS Fluent 2024 R1
+
+              Copyright 1987-2024 ANSYS, Inc. All Rights Reserved.
+              Unauthorized use, distribution or duplication is prohibited.
+              This product is subject to U.S. laws governing export and re-export.
+              For full Legal Notice, see documentation.
+
+Build Time: Nov 22 2023 10:31:01 EST  Build Id: 10184  
+ 
+Connected License Server List:	1055@its-flexsw-srv.ucsd.edu
+
+     --------------------------------------------------------------
+     This is an academic version of ANSYS FLUENT. Usage of this product
+     license is limited to the terms and conditions specified in your ANSYS
+     license form, additional terms section.
+     --------------------------------------------------------------
+Host spawning Node 0 on machine "Lenovo" (win64).
+
+-----------------------------------------------------------------------------------
+ID    Hostname  Core   O.S.         PID    Vendor                                 
+-----------------------------------------------------------------------------------
+n11   Lenovo    12/32  Windows-x64  13652  13th Gen Intel(R) Core(TM) i9-13900    
+n10   Lenovo    11/32  Windows-x64  27664  13th Gen Intel(R) Core(TM) i9-13900    
+n9    Lenovo    10/32  Windows-x64  24116  13th Gen Intel(R) Core(TM) i9-13900    
+n8    Lenovo    9/32   Windows-x64  12244  13th Gen Intel(R) Core(TM) i9-13900    
+n7    Lenovo    8/32   Windows-x64  23740  13th Gen Intel(R) Core(TM) i9-13900    
+n6    Lenovo    7/32   Windows-x64  28112  13th Gen Intel(R) Core(TM) i9-13900    
+n5    Lenovo    6/32   Windows-x64  16928  13th Gen Intel(R) Core(TM) i9-13900    
+n4    Lenovo    5/32   Windows-x64  7216   13th Gen Intel(R) Core(TM) i9-13900    
+n3    Lenovo    4/32   Windows-x64  24880  13th Gen Intel(R) Core(TM) i9-13900    
+n2    Lenovo    3/32   Windows-x64  14684  13th Gen Intel(R) Core(TM) i9-13900    
+n1    Lenovo    2/32   Windows-x64  4716   13th Gen Intel(R) Core(TM) i9-13900    
+n0*   Lenovo    1/32   Windows-x64  26260  13th Gen Intel(R) Core(TM) i9-13900    
+host  Lenovo           Windows-x64  26580  13th Gen Intel(R) Core(TM) i9-13900    
+
+MPI Option Selected: intel
+Selected system interconnect: default
+-----------------------------------------------------------------------------------
+
+Cleanup script file is C:\\Users\\guill\\Documents\\chiari\\git-chiari\\matlab\\processing\\cleanup-fluent-Lenovo-26580.bat
+
+Posting ANSYS Product Improvement Program startup data
+Done.
+
+Reading journal file C:\Users\guill\Documents\chiari\computations\ansys\s101_b\inputs\journals\c3_dx00002.jou...
+
+> /file/set-tui-version "24.1"
+
+> ;setup case 
+/file read-case C:/Users/guill/Documents/chiari/computations/ansys/s101_b/inputs/case-files/c_dx0.0002.cas.gz
+Note: Rank = 0: Process affinity not being set (6).
+Note: Rank = 1: Process affinity not being set (6).
+Note: Rank = 2: Process affinity not being set (6).
+Note: Rank = 3: Process affinity not being set (6).
+Note: Rank = 4: Process affinity not being set (6).
+Note: Rank = 5: Process affinity not being set (6).
+Note: Rank = 6: Process affinity not being set (6).
+Note: Rank = 7: Process affinity not being set (6).
+Note: Rank = 8: Process affinity not being set (6).
+Note: Rank = 9: Process affinity not being set (6).
+Note: Rank = 10: Process affinity not being set (6).
+Note: Rank = 11: Process affinity not being set (6).
+
+Reading "\"| gunzip -c \\"C:/Users/guill/Documents/chiari/computations/ansys/s101_b/inputs/case-files/c_dx0.0002.cas.gz\\"\""...
+
+Buffering for file scan...
+
+    1471 nodes, binary.
+  218897 nodes, binary.
+  648502 nodes, binary.
+ 6106190 nodes, binary.
+ 8726521 polygonal interior faces, zone 1282, binary.
+  134404 polygonal wall faces, zone 30, binary.
+   69341 polygonal wall faces, zone 28, binary.
+   12044 polygonal velocity-inlet faces, zone 29, binary.
+    3370 polygonal velocity-inlet faces, zone 27, binary.
+    4934 polygonal velocity-inlet faces, zone 26, binary.
+ 1581172 polyhedra cells, zone 1283, binary.
+ 1581172 cell partition ids, zone 1283, 12 partitions, binary.
+
+Building...
+     mesh
+	distributing mesh
+		parts............,
+		faces............,
+		nodes............,
+		cells............,
+        bandwidth reduction using Reverse Cuthill-McKee: 131900/5075 = 25.9901
+     materials,
+     interface,
+     domains,
+     zones,
+	interior--fluid
+	dura
+	cord
+	tonsils
+	bottom
+	top
+	fluid
+     parallel,
+The automatic selection for flux type has changed to Rhie-Chow: momentum based.
+
+Done.
+
+Preparing mesh for display...
+Done.
+
+> /define/models/viscous laminar yes
+
+> /define/named-expressions add "rho" definition "1000 [kg/m^3]" q 
+
+> /define/named-expressions add "mu" definition "0.0007 [kg/(m*s)]" q 
+
+> /define/materials/change-create air csf csf is a fluid
+yes 
+Density
+expression "rho"
+ no no yes 
+Viscosity
+expression "mu"
+ no no no yes q 
+
+> /solve/monitors/residual/print? no q 
+
+> /define/models/unsteady-2nd-order? yes q 
+
+> /solve/set p-v-coupling 24 q  
+
+> /define/named-expressions add "Q_cord_1" definition "(- 0.487712*cos(5.425894*t*1[s^-1]) + 0.406713*sin(5.425894*t*1[s^-1]) +0.149726*cos(10.851788*t*1[s^-1]) + 0.185339*sin(10.851788*t*1[s^-1]) +0.142260*cos(16.277681*t*1[s^-1]) - 0.101822*sin(16.277681*t*1[s^-1]) - 0.020687*cos(21.703575*t*1[s^-1]) - 0.044397*sin(21.703575*t*1[s^-1]) +0.022485*cos(27.129469*t*1[s^-1]) + 0.023054*sin(27.129469*t*1[s^-1]) +0.022903*cos(32.555363*t*1[s^-1]) - 0.050108*sin(32.555363*t*1[s^-1]) - 0.052849*cos(37.981257*t*1[s^-1]) - 0.023241*sin(37.981257*t*1[s^-1]) - 0.017355*cos(43.407151*t*1[s^-1]) + 0.026920*sin(43.407151*t*1[s^-1]) +0.005733*cos(48.833044*t*1[s^-1]) - 0.001800*sin(48.833044*t*1[s^-1]) - 0.017638*cos(54.258938*t*1[s^-1]) - 0.010185*sin(54.258938*t*1[s^-1]) - 0.010147*cos(59.684832*t*1[s^-1]) + 0.017257*sin(59.684832*t*1[s^-1]) +0.001350*cos(65.110726*t*1[s^-1]) + 0.008383*sin(65.110726*t*1[s^-1]) - 0.002609*cos(70.536620*t*1[s^-1]) - 0.000721*sin(70.536620*t*1[s^-1]) - 0.003464*cos(75.962513*t*1[s^-1]) + 0.006215*sin(75.962513*t*1[s^-1]) +0.002475*cos(81.388407*t*1[s^-1]) + 0.000117*sin(81.388407*t*1[s^-1]) +0.002132*cos(86.814301*t*1[s^-1]) - 0.002512*sin(86.814301*t*1[s^-1]) - 0.000448*cos(92.240195*t*1[s^-1]) - 0.000386*sin(92.240195*t*1[s^-1]) +0.000043*cos(97.666089*t*1[s^-1]) - 0.002031*sin(97.666089*t*1[s^-1]) +0.000481*cos(103.091982*t*1[s^-1]) - 0.002806*sin(103.091982*t*1[s^-1]) +0.001204*cos(108.517876*t*1[s^-1]) - 0.000856*sin(108.517876*t*1[s^-1]))*2E-6[m^3/s]" q 
+
+> /define/named-expressions add "v_cord_1" definition "-(MassFlow(['top']) - rho*Q_cord_1)/(rho*Area(['cord_1']))""Warning": Sum: Invalid locations ( cord_1) 
+ q 
+
+> /define/boundary-conditions/velocity-inlet (top bottom tonsils)
+cord_1 Invalid zone.
+no Invalid zone.
+no Invalid zone.
+yes Invalid zone.
+yes Invalid zone.
+no Invalid zone.
+"v_cord_1" Invalid zone.
+no Invalid zone.
+0 Invalid zone.
+ q Invalid zone.
+
+zone id/name [top] /define/named-expressions Invalid zone.
+add Invalid zone.
+"Q_cord_2" Invalid zone.
+definition Invalid zone.
+"(- 0.559884*cos(5.497100*t*1[s^-1]) + 0.524096*sin(5.497100*t*1[s^-1]) +0.202969*cos(10.994200*t*1[s^-1]) + 0.186795*sin(10.994200*t*1[s^-1]) +0.150257*cos(16.491299*t*1[s^-1]) - 0.154840*sin(16.491299*t*1[s^-1]) - 0.047410*cos(21.988399*t*1[s^-1]) - 0.039883*sin(21.988399*t*1[s^-1]) +0.037911*cos(27.485499*t*1[s^-1]) + 0.036139*sin(27.485499*t*1[s^-1]) +0.022028*cos(32.982599*t*1[s^-1]) - 0.076730*sin(32.982599*t*1[s^-1]) - 0.078331*cos(38.479698*t*1[s^-1]) - 0.019242*sin(38.479698*t*1[s^-1]) - 0.008828*cos(43.976798*t*1[s^-1]) + 0.037474*sin(43.976798*t*1[s^-1]) +0.017103*cos(49.473898*t*1[s^-1]) - 0.007505*sin(49.473898*t*1[s^-1]) - 0.033179*cos(54.970998*t*1[s^-1]) - 0.005282*sin(54.970998*t*1[s^-1]) - 0.010380*cos(60.468097*t*1[s^-1]) + 0.028379*sin(60.468097*t*1[s^-1]) +0.012660*cos(65.965197*t*1[s^-1]) + 0.013310*sin(65.965197*t*1[s^-1]) +0.001685*cos(71.462297*t*1[s^-1]) - 0.002048*sin(71.462297*t*1[s^-1]) - 0.005166*cos(76.959397*t*1[s^-1]) + 0.009952*sin(76.959397*t*1[s^-1]) +0.009012*cos(82.456496*t*1[s^-1]) + 0.006490*sin(82.456496*t*1[s^-1]) +0.002384*cos(87.953596*t*1[s^-1]) - 0.003411*sin(87.953596*t*1[s^-1]) +0.001441*cos(93.450696*t*1[s^-1]) + 0.002256*sin(93.450696*t*1[s^-1]) +0.002132*cos(98.947796*t*1[s^-1]) - 0.000265*sin(98.947796*t*1[s^-1]) +0.001604*cos(104.444896*t*1[s^-1]) - 0.002785*sin(104.444896*t*1[s^-1]) - 0.001547*cos(109.941995*t*1[s^-1]) - 0.001102*sin(109.941995*t*1[s^-1]))*2E-6[m^3/s]" No match found with "(- 0.559884*cos(5.497100*t*1[s^-1]) + 0.524096*sin(5.497100*t*1[s^-1]) +0.202969*cos(10.994200*t*1[s^-1]) + 0.186795*sin(10.994200*t*1[s^-1]) +0.150257*cos(16.491299*t*1[s^-1]) - 0.154840*sin(16.491299*t*1[s^-1]) - 0.047410*cos(21.988399*t*1[s^-1]) - 0.039883*sin(21.988399*t*1[s^-1]) +0.037911*cos(27.485499*t*1[s^-1]) + 0.036139*sin(27.485499*t*1[s^-1]) +0.022028*cos(32.982599*t*1[s^-1]) - 0.076730*sin(32.982599*t*1[s^-1]) - 0.078331*cos(38.479698*t*1[s^-1]) - 0.019242*sin(38.479698*t*1[s^-1]) - 0.008828*cos(43.976798*t*1[s^-1]) + 0.037474*sin(43.976798*t*1[s^-1]) +0.017103*cos(49.473898*t*1[s^-1]) - 0.007505*sin(49.473898*t*1[s^-1]) - 0.033179*cos(54.970998*t*1[s^-1]) - 0.005282*sin(54.970998*t*1[s^-1]) - 0.010380*cos(60.468097*t*1[s^-1]) + 0.028379*sin(60.468097*t*1[s^-1]) +0.012660*cos(65.965197*t*1[s^-1]) + 0.013310*sin(65.965197*t*1[s^-1]) +0.001685*cos(71.462297*t*1[s^-1]) - 0.002048*sin(71.462297*t*1[s^-1]) - 0.005166*cos(76.959397*t*1[s^-1]) + 0.009952*sin(76.959397*t*1[s^-1]) +0.009012*cos(82.456496*t*1[s^-1]) + 0.006490*sin(82.456496*t*1[s^-1]) +0.002384*cos(87.953596*t*1[s^-1]) - 0.003411*sin(87.953596*t*1[s^-1]) +0.001441*cos(93.450696*t*1[s^-1]) + 0.002256*sin(93.450696*t*1[s^-1]) +0.002132*cos(98.947796*t*1[s^-1]) - 0.000265*sin(98.947796*t*1[s^-1]) +0.001604*cos(104.444896*t*1[s^-1]) - 0.002785*sin(104.444896*t*1[s^-1]) - 0.001547*cos(109.941995*t*1[s^-1]) - 0.001102*sin(109.941995*t*1[s^-1]))*2E-6[m^3/s]"
+q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(1) ["(- 0.559884*cos(5.497100*t*1[s^-1]) + 0.524096*sin(5.497100*t*1[s^-1]) +0.202969*cos(10.994200*t*1[s^-1]) + 0.186795*sin(10.994200*t*1[s^-1]) +0.150257*cos(16.491299*t*1[s^-1]) - 0.154840*sin(16.491299*t*1[s^-1]) - 0.047410*cos(21.988399*t*1[s^-1]) - 0.039883*sin(21.988399*t*1[s^-1]) +0.037911*cos(27.485499*t*1[s^-1]) + 0.036139*sin(27.485499*t*1[s^-1]) +0.022028*cos(32.982599*t*1[s^-1]) - 0.076730*sin(32.982599*t*1[s^-1]) - 0.078331*cos(38.479698*t*1[s^-1]) - 0.019242*sin(38.479698*t*1[s^-1]) - 0.008828*cos(43.976798*t*1[s^-1]) + 0.037474*sin(43.976798*t*1[s^-1]) +0.017103*cos(49.473898*t*1[s^-1]) - 0.007505*sin(49.473898*t*1[s^-1]) - 0.033179*cos(54.970998*t*1[s^-1]) - 0.005282*sin(54.970998*t*1[s^-1]) - 0.010380*cos(60.468097*t*1[s^-1]) + 0.028379*sin(60.468097*t*1[s^-1]) +0.012660*cos(65.965197*t*1[s^-1]) + 0.013310*sin(65.965197*t*1[s^-1]) +0.001685*cos(71.462297*t*1[s^-1]) - 0.002048*sin(71.462297*t*1[s^-1]) - 0.005166*cos(76.959397*t*1[s^-1]) + 0.009952*sin(76.959397*t*1[s^-1]) +0.009012*cos(82.456496*t*1[s^-1]) + 0.006490*sin(82.456496*t*1[s^-1]) +0.002384*cos(87.953596*t*1[s^-1]) - 0.003411*sin(87.953596*t*1[s^-1]) +0.001441*cos(93.450696*t*1[s^-1]) + 0.002256*sin(93.450696*t*1[s^-1]) +0.002132*cos(98.947796*t*1[s^-1]) - 0.000265*sin(98.947796*t*1[s^-1]) +0.001604*cos(104.444896*t*1[s^-1]) - 0.002785*sin(104.444896*t*1[s^-1]) - 0.001547*cos(109.941995*t*1[s^-1]) - 0.001102*sin(109.941995*t*1[s^-1]))*2E-6[m^3/s]"] /define/named-expressions 
+Error: eval: unbound variable
+Error Object: /define/named-expressions
+
+
+ERROR: Invalid zone(s).
+Error object: /define/named-expressions
+
+[Hit ENTER key to proceed...]
+add 
+Error: eval: unbound variable
+Error Object: add
+
+
+ERROR: Invalid zone(s).
+Error object: add
+
+[Hit ENTER key to proceed...]
+"v_cord_2"
+
+ERROR: Invalid zone(s).
+Error object: "v_cord_2"
+
+[Hit ENTER key to proceed...]
+ definition 
+Error: eval: unbound variable
+Error Object: definition
+
+
+ERROR: Invalid zone(s).
+Error object: definition
+
+[Hit ENTER key to proceed...]
+"-(rho*Q_cord_1 - rho*Q_cord_2)/(rho*Area(['cord_2']))"No match found with -(rho*Q_cord_1 - rho*Q_cord_2)/(rho*Area(['cord_2']))
+ q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(2) [()] /define/boundary-conditions/velocity-inlet 
+Error: eval: unbound variable
+Error Object: /define/boundary-conditions/velocity-inlet
+
+
+ERROR: Invalid zone(s).
+Error object: /define/boundary-conditions/velocity-inlet
+
+[Hit ENTER key to proceed...]
+cord_2 
+Error: eval: unbound variable
+Error Object: cord_2
+
+
+ERROR: Invalid zone(s).
+Error object: cord_2
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+yes 
+Error: eval: unbound variable
+Error Object: yes
+
+
+ERROR: Invalid zone(s).
+Error object: yes
+
+[Hit ENTER key to proceed...]
+yes 
+Error: eval: unbound variable
+Error Object: yes
+
+
+ERROR: Invalid zone(s).
+Error object: yes
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+"v_cord_2"
+
+ERROR: Invalid zone(s).
+Error object: "v_cord_2"
+
+[Hit ENTER key to proceed...]
+ no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+0 
+
+ERROR: Invalid zone(s).
+Error object: 0
+
+[Hit ENTER key to proceed...]
+ q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(2) [()] /define/named-expressions 
+Error: eval: unbound variable
+Error Object: /define/named-expressions
+
+
+ERROR: Invalid zone(s).
+Error object: /define/named-expressions
+
+[Hit ENTER key to proceed...]
+add 
+Error: eval: unbound variable
+Error Object: add
+
+
+ERROR: Invalid zone(s).
+Error object: add
+
+[Hit ENTER key to proceed...]
+"Q_cord_3"
+
+ERROR: Invalid zone(s).
+Error object: "Q_cord_3"
+
+[Hit ENTER key to proceed...]
+ definition 
+Error: eval: unbound variable
+Error Object: definition
+
+
+ERROR: Invalid zone(s).
+Error object: definition
+
+[Hit ENTER key to proceed...]
+"(- 0.514753*cos(5.535846*t*1[s^-1]) + 0.437559*sin(5.535846*t*1[s^-1]) +0.214376*cos(11.071692*t*1[s^-1]) + 0.101280*sin(11.071692*t*1[s^-1]) +0.194619*cos(16.607538*t*1[s^-1]) - 0.138604*sin(16.607538*t*1[s^-1]) - 0.039059*cos(22.143384*t*1[s^-1]) - 0.073675*sin(22.143384*t*1[s^-1]) +0.024480*cos(27.679230*t*1[s^-1]) + 0.046708*sin(27.679230*t*1[s^-1]) +0.039714*cos(33.215077*t*1[s^-1]) - 0.063375*sin(33.215077*t*1[s^-1]) - 0.046497*cos(38.750923*t*1[s^-1]) - 0.035213*sin(38.750923*t*1[s^-1]) - 0.018569*cos(44.286769*t*1[s^-1]) + 0.013299*sin(44.286769*t*1[s^-1]) +0.003707*cos(49.822615*t*1[s^-1]) - 0.001076*sin(49.822615*t*1[s^-1]) - 0.026663*cos(55.358461*t*1[s^-1]) - 0.015512*sin(55.358461*t*1[s^-1]) - 0.016885*cos(60.894307*t*1[s^-1]) + 0.019203*sin(60.894307*t*1[s^-1]) +0.005101*cos(66.430153*t*1[s^-1]) + 0.007823*sin(66.430153*t*1[s^-1]) - 0.004164*cos(71.965999*t*1[s^-1]) - 0.005551*sin(71.965999*t*1[s^-1]) - 0.006847*cos(77.501845*t*1[s^-1]) + 0.003678*sin(77.501845*t*1[s^-1]) +0.002503*cos(83.037691*t*1[s^-1]) + 0.005764*sin(83.037691*t*1[s^-1]) - 0.000068*cos(88.573537*t*1[s^-1]) - 0.005263*sin(88.573537*t*1[s^-1]) - 0.001844*cos(94.109383*t*1[s^-1]) + 0.000945*sin(94.109383*t*1[s^-1]) - 0.001912*cos(99.645230*t*1[s^-1]) - 0.000016*sin(99.645230*t*1[s^-1]) - 0.001910*cos(105.181076*t*1[s^-1]) - 0.002355*sin(105.181076*t*1[s^-1]) - 0.000991*cos(110.716922*t*1[s^-1]) - 0.000341*sin(110.716922*t*1[s^-1]))*2E-6[m^3/s]"No match found with (- 0.514753*cos(5.535846*t*1[s^-1]) + 0.437559*sin(5.535846*t*1[s^-1]) +0.214376*cos(11.071692*t*1[s^-1]) + 0.101280*sin(11.071692*t*1[s^-1]) +0.194619*cos(16.607538*t*1[s^-1]) - 0.138604*sin(16.607538*t*1[s^-1]) - 0.039059*cos(22.143384*t*1[s^-1]) - 0.073675*sin(22.143384*t*1[s^-1]) +0.024480*cos(27.679230*t*1[s^-1]) + 0.046708*sin(27.679230*t*1[s^-1]) +0.039714*cos(33.215077*t*1[s^-1]) - 0.063375*sin(33.215077*t*1[s^-1]) - 0.046497*cos(38.750923*t*1[s^-1]) - 0.035213*sin(38.750923*t*1[s^-1]) - 0.018569*cos(44.286769*t*1[s^-1]) + 0.013299*sin(44.286769*t*1[s^-1]) +0.003707*cos(49.822615*t*1[s^-1]) - 0.001076*sin(49.822615*t*1[s^-1]) - 0.026663*cos(55.358461*t*1[s^-1]) - 0.015512*sin(55.358461*t*1[s^-1]) - 0.016885*cos(60.894307*t*1[s^-1]) + 0.019203*sin(60.894307*t*1[s^-1]) +0.005101*cos(66.430153*t*1[s^-1]) + 0.007823*sin(66.430153*t*1[s^-1]) - 0.004164*cos(71.965999*t*1[s^-1]) - 0.005551*sin(71.965999*t*1[s^-1]) - 0.006847*cos(77.501845*t*1[s^-1]) + 0.003678*sin(77.501845*t*1[s^-1]) +0.002503*cos(83.037691*t*1[s^-1]) + 0.005764*sin(83.037691*t*1[s^-1]) - 0.000068*cos(88.573537*t*1[s^-1]) - 0.005263*sin(88.573537*t*1[s^-1]) - 0.001844*cos(94.109383*t*1[s^-1]) + 0.000945*sin(94.109383*t*1[s^-1]) - 0.001912*cos(99.645230*t*1[s^-1]) - 0.000016*sin(99.645230*t*1[s^-1]) - 0.001910*cos(105.181076*t*1[s^-1]) - 0.002355*sin(105.181076*t*1[s^-1]) - 0.000991*cos(110.716922*t*1[s^-1]) - 0.000341*sin(110.716922*t*1[s^-1]))*2E-6[m^3/s]
+ q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(3) [()] /define/named-expressions 
+Error: eval: unbound variable
+Error Object: /define/named-expressions
+
+
+ERROR: Invalid zone(s).
+Error object: /define/named-expressions
+
+[Hit ENTER key to proceed...]
+add 
+Error: eval: unbound variable
+Error Object: add
+
+
+ERROR: Invalid zone(s).
+Error object: add
+
+[Hit ENTER key to proceed...]
+"v_cord_3"
+
+ERROR: Invalid zone(s).
+Error object: "v_cord_3"
+
+[Hit ENTER key to proceed...]
+ definition 
+Error: eval: unbound variable
+Error Object: definition
+
+
+ERROR: Invalid zone(s).
+Error object: definition
+
+[Hit ENTER key to proceed...]
+"-(rho*Q_cord_2 - rho*Q_cord_3)/(rho*Area(['cord_3']))"No match found with -(rho*Q_cord_2 - rho*Q_cord_3)/(rho*Area(['cord_3']))
+ q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(4) [()] /define/boundary-conditions/velocity-inlet 
+Error: eval: unbound variable
+Error Object: /define/boundary-conditions/velocity-inlet
+
+
+ERROR: Invalid zone(s).
+Error object: /define/boundary-conditions/velocity-inlet
+
+[Hit ENTER key to proceed...]
+cord_3 
+Error: eval: unbound variable
+Error Object: cord_3
+
+
+ERROR: Invalid zone(s).
+Error object: cord_3
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+yes 
+Error: eval: unbound variable
+Error Object: yes
+
+
+ERROR: Invalid zone(s).
+Error object: yes
+
+[Hit ENTER key to proceed...]
+yes 
+Error: eval: unbound variable
+Error Object: yes
+
+
+ERROR: Invalid zone(s).
+Error object: yes
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+"v_cord_3"
+
+ERROR: Invalid zone(s).
+Error object: "v_cord_3"
+
+[Hit ENTER key to proceed...]
+ no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+0 
+
+ERROR: Invalid zone(s).
+Error object: 0
+
+[Hit ENTER key to proceed...]
+ q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(4) [()] /define/named-expressions 
+Error: eval: unbound variable
+Error Object: /define/named-expressions
+
+
+ERROR: Invalid zone(s).
+Error object: /define/named-expressions
+
+[Hit ENTER key to proceed...]
+add 
+Error: eval: unbound variable
+Error Object: add
+
+
+ERROR: Invalid zone(s).
+Error object: add
+
+[Hit ENTER key to proceed...]
+"v_cord_4"
+
+ERROR: Invalid zone(s).
+Error object: "v_cord_4"
+
+[Hit ENTER key to proceed...]
+ definition 
+Error: eval: unbound variable
+Error Object: definition
+
+
+ERROR: Invalid zone(s).
+Error object: definition
+
+[Hit ENTER key to proceed...]
+"-(rho*Q_cord_3 - (- MassFlow(['bottom'])))/(rho*Area(['cord_4']))"No match found with -(rho*Q_cord_3 - (- MassFlow(['bottom'])))/(rho*Area(['cord_4']))
+ q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(5) [()] /define/boundary-conditions/velocity-inlet 
+Error: eval: unbound variable
+Error Object: /define/boundary-conditions/velocity-inlet
+
+
+ERROR: Invalid zone(s).
+Error object: /define/boundary-conditions/velocity-inlet
+
+[Hit ENTER key to proceed...]
+cord_4 
+Error: eval: unbound variable
+Error Object: cord_4
+
+
+ERROR: Invalid zone(s).
+Error object: cord_4
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+yes 
+Error: eval: unbound variable
+Error Object: yes
+
+
+ERROR: Invalid zone(s).
+Error object: yes
+
+[Hit ENTER key to proceed...]
+yes 
+Error: eval: unbound variable
+Error Object: yes
+
+
+ERROR: Invalid zone(s).
+Error object: yes
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+"v_cord_4"
+
+ERROR: Invalid zone(s).
+Error object: "v_cord_4"
+
+[Hit ENTER key to proceed...]
+ no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+0 
+
+ERROR: Invalid zone(s).
+Error object: 0
+
+[Hit ENTER key to proceed...]
+ q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(5) [()] ;create surfaces
+/surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM 
+Error: eval: unbound variable
+Error Object: fm
+
+
+ERROR: Invalid zone(s).
+Error object: fm
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.023029 
+
+ERROR: Invalid zone(s).
+Error object: -0.023029
+
+[Hit ENTER key to proceed...]
+-0.037182 
+
+ERROR: Invalid zone(s).
+Error object: -0.037182
+
+[Hit ENTER key to proceed...]
+-0.064003 
+
+ERROR: Invalid zone(s).
+Error object: -0.064003
+
+[Hit ENTER key to proceed...]
+0.008201 
+
+ERROR: Invalid zone(s).
+Error object: 0.008201
+
+[Hit ENTER key to proceed...]
+0.024377 
+
+ERROR: Invalid zone(s).
+Error object: 0.024377
+
+[Hit ENTER key to proceed...]
+-0.062747 
+
+ERROR: Invalid zone(s).
+Error object: -0.062747
+
+[Hit ENTER key to proceed...]
+0.039408 
+
+ERROR: Invalid zone(s).
+Error object: 0.039408
+
+[Hit ENTER key to proceed...]
+0.024059 
+
+ERROR: Invalid zone(s).
+Error object: 0.024059
+
+[Hit ENTER key to proceed...]
+-0.061143 
+
+ERROR: Invalid zone(s).
+Error object: -0.061143
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+C1C2 
+Error: eval: unbound variable
+Error Object: c1c2
+
+
+ERROR: Invalid zone(s).
+Error object: c1c2
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.022507 
+
+ERROR: Invalid zone(s).
+Error object: -0.022507
+
+[Hit ENTER key to proceed...]
+-0.037682 
+
+ERROR: Invalid zone(s).
+Error object: -0.037682
+
+[Hit ENTER key to proceed...]
+-0.075729 
+
+ERROR: Invalid zone(s).
+Error object: -0.075729
+
+[Hit ENTER key to proceed...]
+0.008722 
+
+ERROR: Invalid zone(s).
+Error object: 0.008722000000000001
+
+[Hit ENTER key to proceed...]
+0.023864 
+
+ERROR: Invalid zone(s).
+Error object: 0.023864
+
+[Hit ENTER key to proceed...]
+-0.073914 
+
+ERROR: Invalid zone(s).
+Error object: -0.07391399999999999
+
+[Hit ENTER key to proceed...]
+0.039929 
+
+ERROR: Invalid zone(s).
+Error object: 0.039929
+
+[Hit ENTER key to proceed...]
+0.023531 
+
+ERROR: Invalid zone(s).
+Error object: 0.023531
+
+[Hit ENTER key to proceed...]
+-0.072299 
+
+ERROR: Invalid zone(s).
+Error object: -0.072299
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+C2C3 
+Error: eval: unbound variable
+Error Object: c2c3
+
+
+ERROR: Invalid zone(s).
+Error object: c2c3
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.096379 
+
+ERROR: Invalid zone(s).
+Error object: -0.09637900000000001
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.097988 
+
+ERROR: Invalid zone(s).
+Error object: -0.09798800000000001
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.096450 
+
+ERROR: Invalid zone(s).
+Error object: -0.09644999999999999
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-5 
+Error: eval: unbound variable
+Error Object: fm-5
+
+
+ERROR: Invalid zone(s).
+Error object: fm-5
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.062000 
+
+ERROR: Invalid zone(s).
+Error object: -0.062
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.062000 
+
+ERROR: Invalid zone(s).
+Error object: -0.062
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.062000 
+
+ERROR: Invalid zone(s).
+Error object: -0.062
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-10 
+Error: eval: unbound variable
+Error Object: fm-10
+
+
+ERROR: Invalid zone(s).
+Error object: fm-10
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.067000 
+
+ERROR: Invalid zone(s).
+Error object: -0.067
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.067000 
+
+ERROR: Invalid zone(s).
+Error object: -0.067
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.067000 
+
+ERROR: Invalid zone(s).
+Error object: -0.067
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-15 
+Error: eval: unbound variable
+Error Object: fm-15
+
+
+ERROR: Invalid zone(s).
+Error object: fm-15
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.072000 
+
+ERROR: Invalid zone(s).
+Error object: -0.07199999999999999
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.072000 
+
+ERROR: Invalid zone(s).
+Error object: -0.07199999999999999
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.072000 
+
+ERROR: Invalid zone(s).
+Error object: -0.07199999999999999
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-20 
+Error: eval: unbound variable
+Error Object: fm-20
+
+
+ERROR: Invalid zone(s).
+Error object: fm-20
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.077000 
+
+ERROR: Invalid zone(s).
+Error object: -0.077
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.077000 
+
+ERROR: Invalid zone(s).
+Error object: -0.077
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.077000 
+
+ERROR: Invalid zone(s).
+Error object: -0.077
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-25 
+Error: eval: unbound variable
+Error Object: fm-25
+
+
+ERROR: Invalid zone(s).
+Error object: fm-25
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.082000 
+
+ERROR: Invalid zone(s).
+Error object: -0.082
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.082000 
+
+ERROR: Invalid zone(s).
+Error object: -0.082
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.082000 
+
+ERROR: Invalid zone(s).
+Error object: -0.082
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-30 
+Error: eval: unbound variable
+Error Object: fm-30
+
+
+ERROR: Invalid zone(s).
+Error object: fm-30
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.087000 
+
+ERROR: Invalid zone(s).
+Error object: -0.08699999999999999
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.087000 
+
+ERROR: Invalid zone(s).
+Error object: -0.08699999999999999
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.087000 
+
+ERROR: Invalid zone(s).
+Error object: -0.08699999999999999
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-35 
+Error: eval: unbound variable
+Error Object: fm-35
+
+
+ERROR: Invalid zone(s).
+Error object: fm-35
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.092000 
+
+ERROR: Invalid zone(s).
+Error object: -0.092
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.092000 
+
+ERROR: Invalid zone(s).
+Error object: -0.092
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.092000 
+
+ERROR: Invalid zone(s).
+Error object: -0.092
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-40 
+Error: eval: unbound variable
+Error Object: fm-40
+
+
+ERROR: Invalid zone(s).
+Error object: fm-40
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.097000 
+
+ERROR: Invalid zone(s).
+Error object: -0.097
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.097000 
+
+ERROR: Invalid zone(s).
+Error object: -0.097
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.097000 
+
+ERROR: Invalid zone(s).
+Error object: -0.097
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-45 
+Error: eval: unbound variable
+Error Object: fm-45
+
+
+ERROR: Invalid zone(s).
+Error object: fm-45
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.102000 
+
+ERROR: Invalid zone(s).
+Error object: -0.102
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.102000 
+
+ERROR: Invalid zone(s).
+Error object: -0.102
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.102000 
+
+ERROR: Invalid zone(s).
+Error object: -0.102
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/plane-surface 
+Error: eval: unbound variable
+Error Object: /surface/plane-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/plane-surface
+
+[Hit ENTER key to proceed...]
+FM-50 
+Error: eval: unbound variable
+Error Object: fm-50
+
+
+ERROR: Invalid zone(s).
+Error object: fm-50
+
+[Hit ENTER key to proceed...]
+three-points 
+Error: eval: unbound variable
+Error Object: three-points
+
+
+ERROR: Invalid zone(s).
+Error object: three-points
+
+[Hit ENTER key to proceed...]
+-0.021118 
+
+ERROR: Invalid zone(s).
+Error object: -0.021118
+
+[Hit ENTER key to proceed...]
+-0.044011 
+
+ERROR: Invalid zone(s).
+Error object: -0.044011
+
+[Hit ENTER key to proceed...]
+-0.107000 
+
+ERROR: Invalid zone(s).
+Error object: -0.107
+
+[Hit ENTER key to proceed...]
+0.010116 
+
+ERROR: Invalid zone(s).
+Error object: 0.010116
+
+[Hit ENTER key to proceed...]
+0.017537 
+
+ERROR: Invalid zone(s).
+Error object: 0.017537
+
+[Hit ENTER key to proceed...]
+-0.107000 
+
+ERROR: Invalid zone(s).
+Error object: -0.107
+
+[Hit ENTER key to proceed...]
+0.041328 
+
+ERROR: Invalid zone(s).
+Error object: 0.041328
+
+[Hit ENTER key to proceed...]
+0.017288 
+
+ERROR: Invalid zone(s).
+Error object: 0.017288
+
+[Hit ENTER key to proceed...]
+-0.107000 
+
+ERROR: Invalid zone(s).
+Error object: -0.107
+
+[Hit ENTER key to proceed...]
+no
+
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid zone(s).
+Error object: no
+
+[Hit ENTER key to proceed...]
+zone(s) id/name(5) [()] /surface/zone-surface 
+Error: eval: unbound variable
+Error Object: /surface/zone-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/zone-surface
+
+[Hit ENTER key to proceed...]
+cord_s 
+Error: eval: unbound variable
+Error Object: cord_s
+
+
+ERROR: Invalid zone(s).
+Error object: cord_s
+
+[Hit ENTER key to proceed...]
+"cord"
+
+ERROR: Invalid zone(s).
+Error object: "cord"
+
+[Hit ENTER key to proceed...]
+ q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(5) [()] /surface/zone-surface 
+Error: eval: unbound variable
+Error Object: /surface/zone-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/zone-surface
+
+[Hit ENTER key to proceed...]
+dura_s 
+Error: eval: unbound variable
+Error Object: dura_s
+
+
+ERROR: Invalid zone(s).
+Error object: dura_s
+
+[Hit ENTER key to proceed...]
+"dura"
+
+ERROR: Invalid zone(s).
+Error object: "dura"
+
+[Hit ENTER key to proceed...]
+ q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(5) [()] /surface/zone-surface 
+Error: eval: unbound variable
+Error Object: /surface/zone-surface
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/zone-surface
+
+[Hit ENTER key to proceed...]
+tonsils_s 
+Error: eval: unbound variable
+Error Object: tonsils_s
+
+
+ERROR: Invalid zone(s).
+Error object: tonsils_s
+
+[Hit ENTER key to proceed...]
+"tonsils" q 
+Error: eval: unbound variable
+Error Object: q
+
+
+ERROR: Invalid zone(s).
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+zone(s) id/name(6) [()] /surface/group-surfaces 
+Error: eval: unbound variable
+Error Object: /surface/group-surfaces
+
+
+ERROR: Invalid zone(s).
+Error object: /surface/group-surfaces
+
+[Hit ENTER key to proceed...]
+cord_s 
+Error: eval: unbound variable
+Error Object: cord_s
+
+
+ERROR: Invalid zone(s).
+Error object: cord_s
+
+[Hit ENTER key to proceed...]
+dura_s 
+Error: eval: unbound variable
+Error Object: dura_s
+
+
+ERROR: Invalid zone(s).
+Error object: dura_s
+
+[Hit ENTER key to proceed...]
+tonsils_s 
+Error: eval: unbound variable
+Error Object: tonsils_s
+
+
+ERROR: Invalid zone(s).
+Error object: tonsils_s
+
+[Hit ENTER key to proceed...]
+() wall 
+
+ERROR: Please answer y[es] or n[o].
+Error object: wall
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Velocity Specification Method: Magnitude and Direction [no] ;reports 
+/solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+pilot 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pilot
+
+[Hit ENTER key to proceed...]
+volume-max 
+
+ERROR: Please answer y[es] or n[o].
+Error object: volume-max
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+velocity-magnitude 
+
+ERROR: Please answer y[es] or n[o].
+Error object: velocity-magnitude
+
+[Hit ENTER key to proceed...]
+zone-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: zone-names
+
+[Hit ENTER key to proceed...]
+fluid 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fluid
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Velocity Specification Method: Magnitude and Direction [no] /solve/report-files/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-files/add
+
+[Hit ENTER key to proceed...]
+pilot_report 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pilot_report
+
+[Hit ENTER key to proceed...]
+frequency 
+
+ERROR: Please answer y[es] or n[o].
+Error object: frequency
+
+[Hit ENTER key to proceed...]
+1 
+
+ERROR: Please answer y[es] or n[o].
+Error object: 1
+
+[Hit ENTER key to proceed...]
+name 
+
+ERROR: Please answer y[es] or n[o].
+Error object: name
+
+[Hit ENTER key to proceed...]
+"pilot_report"
+
+ERROR: Please answer y[es] or n[o].
+Error object: "pilot_report"
+
+[Hit ENTER key to proceed...]
+ report-defs 
+
+ERROR: Please answer y[es] or n[o].
+Error object: report-defs
+
+[Hit ENTER key to proceed...]
+flow-time 
+
+ERROR: Please answer y[es] or n[o].
+Error object: flow-time
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ print? 
+
+ERROR: Please answer y[es] or n[o].
+Error object: print?
+
+[Hit ENTER key to proceed...]
+yes file-name 
+
+ERROR: Please answer y[es] or n[o].
+Error object: file-name
+
+[Hit ENTER key to proceed...]
+"pilot_report"
+
+ERROR: Please answer y[es] or n[o].
+Error object: "pilot_report"
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Reference Frame: Absolute [yes] /solve/report-plot/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-plot/add
+
+[Hit ENTER key to proceed...]
+pilot 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pilot
+
+[Hit ENTER key to proceed...]
+q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Reference Frame: Absolute [yes] /solve/report-plots 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-plots
+
+[Hit ENTER key to proceed...]
+delete-all 
+
+ERROR: Please answer y[es] or n[o].
+Error object: delete-all
+
+[Hit ENTER key to proceed...]
+yes 
+Use Profile for Velocity Magnitude? [no] /solve/report-files 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-files
+
+[Hit ENTER key to proceed...]
+delete-all 
+
+ERROR: Please answer y[es] or n[o].
+Error object: delete-all
+
+[Hit ENTER key to proceed...]
+yes 
+Use UDF Profile for Velocity Magnitude? [no] /solve/report-definitions 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions
+
+[Hit ENTER key to proceed...]
+delete-all 
+
+ERROR: Please answer y[es] or n[o].
+Error object: delete-all
+
+[Hit ENTER key to proceed...]
+yes 
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+u_max 
+
+ERROR: Please answer y[es] or n[o].
+Error object: u_max
+
+[Hit ENTER key to proceed...]
+volume-max 
+
+ERROR: Please answer y[es] or n[o].
+Error object: volume-max
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+velocity-magnitude 
+
+ERROR: Please answer y[es] or n[o].
+Error object: velocity-magnitude
+
+[Hit ENTER key to proceed...]
+zone-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: zone-names
+
+[Hit ENTER key to proceed...]
+fluid 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fluid
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+q_bottom 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q_bottom
+
+[Hit ENTER key to proceed...]
+ surface-volumeflowrate 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-volumeflowrate
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+bottom 
+
+ERROR: Please answer y[es] or n[o].
+Error object: bottom
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+q_top 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q_top
+
+[Hit ENTER key to proceed...]
+ surface-volumeflowrate 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-volumeflowrate
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+top 
+
+ERROR: Please answer y[es] or n[o].
+Error object: top
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+q_tonsils 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q_tonsils
+
+[Hit ENTER key to proceed...]
+ surface-volumeflowrate 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-volumeflowrate
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+tonsils 
+
+ERROR: Please answer y[es] or n[o].
+Error object: tonsils
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-5 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-5
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-5 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-5
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-10 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-10
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-10 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-10
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-15 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-15
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-15 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-15
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-20 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-20
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-20 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-20
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-25 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-25
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-25 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-25
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-30 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-30
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-30 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-30
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-35 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-35
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-35 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-35
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-40 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-40
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-40 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-40
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-45 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-45
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-45 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-45
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-definitions/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-definitions/add
+
+[Hit ENTER key to proceed...]
+p_FM-50 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-50
+
+[Hit ENTER key to proceed...]
+ surface-areaavg 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-areaavg
+
+[Hit ENTER key to proceed...]
+field 
+
+ERROR: Please answer y[es] or n[o].
+Error object: field
+
+[Hit ENTER key to proceed...]
+pressure 
+
+ERROR: Please answer y[es] or n[o].
+Error object: pressure
+
+[Hit ENTER key to proceed...]
+surface-names 
+
+ERROR: Please answer y[es] or n[o].
+Error object: surface-names
+
+[Hit ENTER key to proceed...]
+FM-50 
+
+ERROR: Please answer y[es] or n[o].
+Error object: fm-50
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use Profile for Supersonic/Initial Gauge Pressure? [no] /solve/report-files/add 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /solve/report-files/add
+
+[Hit ENTER key to proceed...]
+c3_dx00002_report 
+
+ERROR: Please answer y[es] or n[o].
+Error object: c3_dx00002_report
+
+[Hit ENTER key to proceed...]
+frequency 
+
+ERROR: Please answer y[es] or n[o].
+Error object: frequency
+
+[Hit ENTER key to proceed...]
+1 
+
+ERROR: Please answer y[es] or n[o].
+Error object: 1
+
+[Hit ENTER key to proceed...]
+name 
+
+ERROR: Please answer y[es] or n[o].
+Error object: name
+
+[Hit ENTER key to proceed...]
+"c3_dx00002_report"
+
+ERROR: Please answer y[es] or n[o].
+Error object: "c3_dx00002_report"
+
+[Hit ENTER key to proceed...]
+ report-defs 
+
+ERROR: Please answer y[es] or n[o].
+Error object: report-defs
+
+[Hit ENTER key to proceed...]
+flow-time 
+
+ERROR: Please answer y[es] or n[o].
+Error object: flow-time
+
+[Hit ENTER key to proceed...]
+u_max 
+
+ERROR: Please answer y[es] or n[o].
+Error object: u_max
+
+[Hit ENTER key to proceed...]
+q_bottom 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q_bottom
+
+[Hit ENTER key to proceed...]
+q_top 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q_top
+
+[Hit ENTER key to proceed...]
+q_tonsils 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q_tonsils
+
+[Hit ENTER key to proceed...]
+p_FM-5 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-5
+
+[Hit ENTER key to proceed...]
+p_FM-10 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-10
+
+[Hit ENTER key to proceed...]
+p_FM-15 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-15
+
+[Hit ENTER key to proceed...]
+p_FM-20 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-20
+
+[Hit ENTER key to proceed...]
+p_FM-25 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-25
+
+[Hit ENTER key to proceed...]
+p_FM-30 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-30
+
+[Hit ENTER key to proceed...]
+p_FM-35 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-35
+
+[Hit ENTER key to proceed...]
+p_FM-40 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-40
+
+[Hit ENTER key to proceed...]
+p_FM-45 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-45
+
+[Hit ENTER key to proceed...]
+p_FM-50 
+
+ERROR: Please answer y[es] or n[o].
+Error object: p_fm-50
+
+[Hit ENTER key to proceed...]
+()
+
+ERROR: Please answer y[es] or n[o].
+Error object: ()
+
+[Hit ENTER key to proceed...]
+ print? 
+
+ERROR: Please answer y[es] or n[o].
+Error object: print?
+
+[Hit ENTER key to proceed...]
+yes file-name 
+
+ERROR: Please answer y[es] or n[o].
+Error object: file-name
+
+[Hit ENTER key to proceed...]
+"c3_dx00002_report"
+
+ERROR: Please answer y[es] or n[o].
+Error object: "c3_dx00002_report"
+
+[Hit ENTER key to proceed...]
+ q 
+
+ERROR: Please answer y[es] or n[o].
+Error object: q
+
+[Hit ENTER key to proceed...]
+
+Use UDF Profile for Supersonic/Initial Gauge Pressure? [no] ;run simulation 
+time-step 
+
+ERROR: Please answer y[es] or n[o].
+Error object: time-step
+
+[Hit ENTER key to proceed...]
+0.01134 
+
+ERROR: Please answer y[es] or n[o].
+Error object: 0.01134
+
+[Hit ENTER key to proceed...]
+
+Use UDF Profile for Supersonic/Initial Gauge Pressure? [no] /file/read-profile 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /file/read-profile
+
+[Hit ENTER key to proceed...]
+"C:/Users/guill/Documents/chiari/computations/ansys/s101_b/inputs/profiles/bottom_prof_1.csv"
+
+ERROR: Please answer y[es] or n[o].
+Error object: "C:/Users/guill/Documents/chiari/computations/ansys/s101_b/inputs/profiles/bottom_prof_1.csv"
+
+[Hit ENTER key to proceed...]
+ 
+Use UDF Profile for Supersonic/Initial Gauge Pressure? [no] /define/boundary-conditions/velocity-inlet 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /define/boundary-conditions/velocity-inlet
+
+[Hit ENTER key to proceed...]
+bottom 
+
+ERROR: Please answer y[es] or n[o].
+Error object: bottom
+
+[Hit ENTER key to proceed...]
+no no yes yes yes no "bottom_vel""Error": name 'bottom_vel' is not defined
+ 
+
+
+ERROR: Invalid 
+Error object: "bottom_vel"
+
+[Hit ENTER key to proceed...]
+ "u1""Error": name 'u1' is not defined
+ 
+
+
+ERROR: Invalid 
+Error object: "u1"
+
+[Hit ENTER key to proceed...]
+ no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid 
+Error object: no
+
+[Hit ENTER key to proceed...]
+0. 
+Use Profile for Axial-Component of Flow Direction? [no] /file/read-profile 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /file/read-profile
+
+[Hit ENTER key to proceed...]
+"C:/Users/guill/Documents/chiari/computations/ansys/s101_b/inputs/profiles/top_prof_1.csv"
+
+ERROR: Please answer y[es] or n[o].
+Error object: "C:/Users/guill/Documents/chiari/computations/ansys/s101_b/inputs/profiles/top_prof_1.csv"
+
+[Hit ENTER key to proceed...]
+ 
+Use Profile for Axial-Component of Flow Direction? [no] /define/boundary-conditions/velocity-inlet 
+
+ERROR: Please answer y[es] or n[o].
+Error object: /define/boundary-conditions/velocity-inlet
+
+[Hit ENTER key to proceed...]
+top 
+
+ERROR: Please answer y[es] or n[o].
+Error object: top
+
+[Hit ENTER key to proceed...]
+no no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid 
+Error object: no
+
+[Hit ENTER key to proceed...]
+yes 
+Error: eval: unbound variable
+Error Object: yes
+
+
+ERROR: Invalid 
+Error object: yes
+
+[Hit ENTER key to proceed...]
+yes 
+Error: eval: unbound variable
+Error Object: yes
+
+
+ERROR: Invalid 
+Error object: yes
+
+[Hit ENTER key to proceed...]
+yes 
+Error: eval: unbound variable
+Error Object: yes
+
+
+ERROR: Invalid 
+Error object: yes
+
+[Hit ENTER key to proceed...]
+no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid 
+Error object: no
+
+[Hit ENTER key to proceed...]
+"top_vel""Error": name 'top_vel' is not defined
+ 
+
+
+ERROR: Invalid 
+Error object: "top_vel"
+
+[Hit ENTER key to proceed...]
+ "u1""Error": name 'u1' is not defined
+ 
+
+
+ERROR: Invalid 
+Error object: "u1"
+
+[Hit ENTER key to proceed...]
+ no 
+Error: eval: unbound variable
+Error Object: no
+
+
+ERROR: Invalid 
+Error object: no
+
+[Hit ENTER key to proceed...]
+0. 
+Error: An error occurred in the previous operation.
+       The details can be found in the text output.
+Error Object: #f
+
+Warning: An error or interrupt occurred while reading the journal file.
+Some commands may not have been completed.
+
+
+> (cx-gui-do cx-activate-item "Information*OK")
+(cx-gui-do cx-activate-item "ToolBar*Mesh Display*fl_mesh_svg_graphics_toolbar")
+(cx-gui-do cx-activate-item "Mesh Display*PanelButtons*PushButton2(Cancel)")
