@@ -1,5 +1,5 @@
 close all; clear;
-subject = {"s101_b","s101_a"} ;
+subject = {"s101_b","s101_a","s101_aa"} ;
 case_name = "c0t";
 line_sty = ["-", "-", "--", "-", "-"];
 mesh_size = 0.0002;

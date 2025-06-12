@@ -1,71 +1,72 @@
-clear; close all; clc;
-addpath('Functions/');
-addpath('Functions/Others/')
-
-subject = "s101_b";
-case_name = {"c3", "c2", "c1b", "c0t"};
-mesh_size = [0.0002];
-
-fs = 16;
-fan = 10;
-rows = 3;
-
-
-% Load MRI data
-mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat");
-load(mri_data_path, 'cas');
-load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
-
-t = linspace(0, 1, pcmri.Nt);
-Ncases = length(case_name);
-colors = lines(Ncases);  % Unique colors per case
-
-
-for i = 1:Ncases
-    case_i = case_name{i};
-    [t_geom, t_sim, b_inlet] = get_type_simulation(case_i);
-    DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
-    data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
-    load(data_path, 'DNS');
-    st_DNS{i} = DNS;
-    if ~exist(data_path, 'file')
-        fprintf(2, 'File "%s" does not exist, simulation needs to be done \n', "DNS_" + DNS_case + ".mat");
-        return
-    end
-    if t_sim==1
-        DNS_roi=DNS;
-    elseif t_geom == "cn"
-        DNS_roi_n=DNS;
-        index_n = i;
-    end
-end
-
-Ndat = pcmri.Ndat;
-% === Plotting ===
-%-----
-x_roi =DNS_roi.slices.x;
-y_roi = DNS_roi.slices.y;
-% x_roi_n =DNS_roi_n.slices.x;
-% y_roi_n = DNS_roi_n.slices.y;
-roi = cell(1,Ndat);
-for kk = 1:Ndat    
-    roi{kk} = DNS_roi.slices.u_normal{kk}(:,1)==0;
-    % roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
-end
+function figure_2_b(subject, case_name, mesh_size)
     
-fig = figure('Position', [100, 100, 150*(Ncases), 450]);
-tt=tiledlayout(Ndat, Ncases , "TileSpacing", "tight", "Padding", "compact");
-title(tt, '$\overline{\mathrm{RMSE}}$', 'FontSize', fs, 'interpreter', 'latex');  % Title for the whole tiled layout
+    fs = 16;
+    fan = 10;
+    rows = 3;
+    
+    
+    % Load MRI data
+    mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat");
+    load(mri_data_path, 'cas');
+    load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
+    
+    t = linspace(0, 1, pcmri.Nt);
+    Ncases = length(case_name);
+    colors = lines(Ncases);  % Unique colors per case
 
-for loc = 1:Ndat           
-    % Plot PC-MRI data/results
-    for kk = 1:Ncases
-        spatial_error_plot(st_DNS{kk}.RMSE_space, st_DNS{kk}.case, loc, Ndat, kk + (Ncases)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc}); 
+    st_DNS = cell(1, Ncases);
+    
+    for i = 1:Ncases
+        case_i = case_name{i};
+        [t_geom, t_sim, b_inlet] = get_type_simulation(case_i);
+        DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
+        data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
+
+        if ~exist(data_path, 'file')
+            fprintf(2, 'File "%s" does not exist, simulation needs to be done \n', "DNS_" + DNS_case + ".mat");
+            continue
+        end
+        load(data_path, 'DNS');
+        st_DNS{i} = DNS;
+        if t_sim==1
+            DNS_roi=DNS;
+        elseif t_geom == "cn"
+            DNS_roi_n=DNS;
+            index_n = i;
+        end
     end
+    
+    Ndat = pcmri.Ndat;
+    % === Plotting ===
+    %-----
+    x_roi =DNS_roi.slices.x;
+    y_roi = DNS_roi.slices.y;
+    % x_roi_n =DNS_roi_n.slices.x;
+    % y_roi_n = DNS_roi_n.slices.y;
+    roi = cell(1,Ndat);
+    for kk = 1:Ndat    
+        roi{kk} = DNS_roi.slices.u_normal{kk}(:,1)==0;
+        % roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
+    end
+        
+    fig = figure('Position', [100, 100, 150*(Ncases), 450]);
+    tt=tiledlayout(Ndat, Ncases , "TileSpacing", "tight", "Padding", "compact");
+    title(tt, '$\overline{\mathrm{RMSE}}$', 'FontSize', fs, 'interpreter', 'latex');  % Title for the whole tiled layout
+    
+    for loc = 1:Ndat           
+        % Plot PC-MRI data/results
+        for kk = 1:Ncases
+            ii = kk + (Ncases)*(loc-1);
+            nexttile(ii);
+            if isempty(st_DNS{kk})
+            continue
+            end
+            spatial_error_plot(st_DNS{kk}.RMSE_space, st_DNS{kk}.case, loc, Ndat, ii, Ncases, roi{loc}, x_roi{loc}, y_roi{loc}); 
+        end
+    end
+    
+    print(gcf, fullfile(pwd,'Figures', subject+'_fig_2_b'), '-depsc','-vector');
 end
-
-print(gcf, fullfile(pwd,'Figures', subject+'_fig_2_b'), '-depsc','-vector');
-
 %% auxiliary functions
 function spatial_error_plot(data, name_loc, loc, Ndat, ii, Ncases, roi_mask, x_raw, y_raw)
     fs = 12;
@@ -75,7 +76,6 @@ function spatial_error_plot(data, name_loc, loc, Ndat, ii, Ncases, roi_mask, x_r
     w = data.val{loc} * 1e2; % [cm/s]
 
     % Plot in the specified tile
-    nexttile(ii);
     scatter(x, y, 10, w, 'filled', 'd');
     % contourf(Xq, Yq, Wq, 40, 'LineColor', 'none');
     colorbar;
