@@ -1,0 +1,123 @@
+Auto-Transcript Start Time:  12:12:35, 11 Jun 2025 Eastern Daylight Time 
+Current Directory: "C:\Users\guill\Documents\chiari\git-chiari\matlab\processing"
+
+              Welcome to ANSYS Fluent 2024 R1
+
+              Copyright 1987-2024 ANSYS, Inc. All Rights Reserved.
+              Unauthorized use, distribution or duplication is prohibited.
+              This product is subject to U.S. laws governing export and re-export.
+              For full Legal Notice, see documentation.
+
+Build Time: Nov 22 2023 10:31:01 EST  Build Id: 10184  
+ 
+Connected License Server List:	1055@its-flexsw-srv.ucsd.edu
+
+     --------------------------------------------------------------
+     This is an academic version of ANSYS FLUENT. Usage of this product
+     license is limited to the terms and conditions specified in your ANSYS
+     license form, additional terms section.
+     --------------------------------------------------------------
+Host spawning Node 0 on machine "Lenovo" (win64).
+
+-----------------------------------------------------------------------------------
+ID    Hostname  Core   O.S.         PID    Vendor                                 
+-----------------------------------------------------------------------------------
+n11   Lenovo    12/32  Windows-x64  32608  13th Gen Intel(R) Core(TM) i9-13900    
+n10   Lenovo    11/32  Windows-x64  30068  13th Gen Intel(R) Core(TM) i9-13900    
+n9    Lenovo    10/32  Windows-x64  11236  13th Gen Intel(R) Core(TM) i9-13900    
+n8    Lenovo    9/32   Windows-x64  29512  13th Gen Intel(R) Core(TM) i9-13900    
+n7    Lenovo    8/32   Windows-x64  26628  13th Gen Intel(R) Core(TM) i9-13900    
+n6    Lenovo    7/32   Windows-x64  31980  13th Gen Intel(R) Core(TM) i9-13900    
+n5    Lenovo    6/32   Windows-x64  32092  13th Gen Intel(R) Core(TM) i9-13900    
+n4    Lenovo    5/32   Windows-x64  27916  13th Gen Intel(R) Core(TM) i9-13900    
+n3    Lenovo    4/32   Windows-x64  31072  13th Gen Intel(R) Core(TM) i9-13900    
+n2    Lenovo    3/32   Windows-x64  31332  13th Gen Intel(R) Core(TM) i9-13900    
+n1    Lenovo    2/32   Windows-x64  30976  13th Gen Intel(R) Core(TM) i9-13900    
+n0*   Lenovo    1/32   Windows-x64  19028  13th Gen Intel(R) Core(TM) i9-13900    
+host  Lenovo           Windows-x64  31872  13th Gen Intel(R) Core(TM) i9-13900    
+
+MPI Option Selected: intel
+Selected system interconnect: default
+-----------------------------------------------------------------------------------
+
+Cleanup script file is C:\\Users\\guill\\Documents\\chiari\\git-chiari\\matlab\\processing\\cleanup-fluent-Lenovo-31872.bat
+
+Posting ANSYS Product Improvement Program startup data
+Done.
+
+Reading journal file C:\Users\guill\Documents\chiari\computations\ansys\s101_b\inputs\journals\c3_dx00002.jou...
+
+> /file/set-tui-version "24.1"
+
+> ;setup case 
+/file read-case C:/Users/guill/Documents/chiari/computations/ansys/s101_b/inputs/case-files/c_dx0.0002_zones.cas.gz
+Note: Rank = 0: Process affinity not being set (6).
+Note: Rank = 1: Process affinity not being set (6).
+Note: Rank = 2: Process affinity not being set (6).
+Note: Rank = 3: Process affinity not being set (6).
+Note: Rank = 4: Process affinity not being set (6).
+Note: Rank = 5: Process affinity not being set (6).
+Note: Rank = 6: Process affinity not being set (6).
+Note: Rank = 7: Process affinity not being set (6).
+Note: Rank = 8: Process affinity not being set (6).
+Note: Rank = 9: Process affinity not being set (6).
+Note: Rank = 10: Process affinity not being set (6).
+Note: Rank = 11: Process affinity not being set (6).
+
+Reading "\"| gunzip -c \\"C:/Users/guill/Documents/chiari/computations/ansys/s101_b/inputs/case-files/c_dx0.0002_zones.cas.gz\\"\""...
+
+Buffering for file scan...
+
+    1985 nodes, binary.
+  218636 nodes, binary.
+  588841 nodes, binary.
+ 5873108 nodes, binary.
+ 8159540 polygonal interior faces, zone 1393, binary.
+   12042 polygonal wall faces, zone 35, binary.
+  134462 polygonal wall faces, zone 36, binary.
+   20122 polygonal velocity-inlet faces, zone 40, binary.
+   11900 polygonal velocity-inlet faces, zone 39, binary.
+   21567 polygonal velocity-inlet faces, zone 38, binary.
+   16349 polygonal velocity-inlet faces, zone 37, binary.
+    2694 polygonal velocity-inlet faces, zone 34, binary.
+    3896 polygonal velocity-inlet faces, zone 33, binary.
+ 1426727 polyhedra cells, zone 1394, binary.
+ 1426727 cell partition ids, zone 1394, 12 partitions, binary.
+
+Building...
+     mesh
+	distributing mesh
+		parts............,
+		faces............,
+		nodes............,
+		cells............,
+        bandwidth reduction using Reverse Cuthill-McKee: 118945/4941 = 24.0731
+     materials,
+     interface,
+     domains,
+     zones,
+	interior--fluid
+	tonsils
+	dura
+	cord_1
+	cord_2
+	cord_3
+	cord_4
+	bottom
+	top
+	fluid
+     parallel,Done.
+
+Preparing mesh for display...
+Done.
+
+> /define/models/viscous laminar yes
+
+> /define/named-expressions 
+Error: invalid command
+Error Object: "named-expressions"
+
+Warning: An error or interrupt occurred while reading the journal file.
+Some commands may not have been completed.
+
+
