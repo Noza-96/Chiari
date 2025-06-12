@@ -17,7 +17,7 @@ mesh_size = [0.0002];    % Array with the different mesh sizes to be simulated
 ts_cycle = 100;     % number of time steps per cycle
 iterations_ts = 20; % iterations per time step
 cycles = 3;         % cyles to be computed
-n_cores = 12;       % number of processors simulation
+n_cores = 14;       % number of processors simulation
 
 % check_valid_case(case_name, subject) 
 
