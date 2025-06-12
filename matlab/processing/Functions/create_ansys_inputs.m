@@ -8,6 +8,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
     t = linspace(0, 1, ts_cycle);  % Time vector
 
     load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
+    T = dat_PC.T{end};
 
     for ii = 1:dat_PC.Ndat
 
@@ -73,7 +74,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
 
             % --- 2) Save flow rate as Fourier series ---
             An = -dat_PC.fou.am{loc_ID(idx_loc)};
-            T = dat_PC.T{loc_ID(idx_loc)};
+
+            % normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes);
             Q_recon = zeros(1, ts_cycle);
             for n = 1:modes
@@ -104,16 +106,16 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             vel_sign = strcmp(tag, "top") * -1 + strcmp(tag, "bottom") * 1;
             for n = 1:ts_cycle
                 template(row_offset + (1:n_points), 4) = num2cell(vel_sign * uu(:,n));
-                T = cell2table(template);
+                tt = cell2table(template);
                 filename = fullfile(cas.diransys_in, "profiles", tag + "_prof_" + num2str(n) + ".csv");
-                writetable(T, filename, 'WriteVariableNames', false);
+                writetable(tt, filename, 'WriteVariableNames', false);
             end
 
             fprintf('saved velocity profile, plane, and flow rate for %s-pcmri in ansys input folder\n', tag);
         else
             % --- 2) Save flow rate as Fourier series in middle planes---
             An = -dat_PC.fou.am{ii};
-            T = dat_PC.T{ii};
+            % normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes);
             Q_recon = zeros(1, ts_cycle);
             for n = 1:modes

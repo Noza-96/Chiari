@@ -2,8 +2,8 @@ clear; close all; clc;
 addpath('Functions/');
 addpath('Functions/Others/')
 
-subject = "s101_a";
-case_name = {"cn2", "c2", "c1b", "c0t"};
+subject = "s101_b";
+case_name = {"c3", "c2", "c1b", "c0t"};
 mesh_size = [0.0002];
 
 fs = 16;
@@ -45,12 +45,12 @@ Ndat = pcmri.Ndat;
 %-----
 x_roi =DNS_roi.slices.x;
 y_roi = DNS_roi.slices.y;
-x_roi_n =DNS_roi_n.slices.x;
-y_roi_n = DNS_roi_n.slices.y;
+% x_roi_n =DNS_roi_n.slices.x;
+% y_roi_n = DNS_roi_n.slices.y;
 roi = cell(1,Ndat);
 for kk = 1:Ndat    
     roi{kk} = DNS_roi.slices.u_normal{kk}(:,1)==0;
-    roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
+    % roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
 end
     
 fig = figure('Position', [100, 100, 150*(Ncases), 450]);
