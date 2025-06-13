@@ -4,14 +4,14 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_aa"; 
+subject = "s101_b"; 
 
 % c: geometry bounded with 2 pcMRI planes. 
 % c0/c1 for zero pressure top and bottom flow rate/velocity
 % c2 for two inlet velocities; continuity: normal velocity tonsils 
 % c3 for two inlet velocities; continuity: multiple regions
 
-case_name = {"c3"};      % Array with the kind of simulations to do
+case_name = {"c3", "c0t"};      % Array with the kind of simulations to do
 mesh_size = [0.0002];    % Array with the different mesh sizes to be simulated
 
 ts_cycle = 100;     % number of time steps per cycle
