@@ -40,13 +40,18 @@ function figure_3_pressure(subject, case_name, mesh_size)
             [t_geom, t_sim, b_inlet] = get_type_simulation(case_i);
             DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
             data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
+
+            if ~exist(data_path, 'file')
+                fprintf(2, 'File "%s" does not exist, simulation needs to be done \n', "DNS_" + DNS_case + ".mat");
+                continue
+            end
+
             load(data_path, 'DNS');
-    
     
             % Pressure difference with respect to last location
             dp_vals = DNS.out.dp.val;
             dp_diff = dp_vals{j}(end-Nt+1:end) - dp_vals{end}(end-Nt+1:end);
-            [ZL,LI_i] = longitudinal_impedance(dp_diff, DNS.out.q_bottom(end-Nt+1:end));
+            [ZL,~] = longitudinal_impedance(dp_diff, DNS.out.q_bottom(end-Nt+1:end));
             nexttile(2*k-1)
             hold on;
             plot(t, dp_diff, 'LineWidth', 1.5, 'LineStyle',line_sty(i),'Color', colors(i,:), 'DisplayName', case_i);

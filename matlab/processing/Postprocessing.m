@@ -9,7 +9,7 @@ subject = "s101_aa";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 % case_name = { "c2", "c1t", "c1b","c0t"}; 
-case_name = {"c0t"}; 
+case_name = {"c3"}; 
 mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file
@@ -19,15 +19,45 @@ mesh_size = [0.0002];
 close all; clear;
 subject = "s101_aa";
 load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas');
-case_name ={"c2", "c1b", "c0t"};
+case_name ={"c3","cn2","c2", "c1b", "c0t"};
 mesh_size = [0.0002];
 warning('off', 'all');
 comparison_results(cas, case_name, mesh_size)
 warning('on', 'all');
 
+%% Compare flow rates
+close all; clear;
+addpath('Functions/');
+
+subject = "s101_aa";
+case_name ="c2";
+
+load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'dat_PC', 'cas');
+Q_reg = -dat_PC.Q_SAS{end}; 
+t_reg = linspace(0,1,length(Q_reg));
+load(fullfile("../../../computations", "pc-mri", subject, "mat", "03-apply_roi_compute_Q.mat"), 'dat_PC');
+Q_PC = -dat_PC.Q_SAS{end}; 
+t_PC = linspace(0,1,length(Q_PC));
+mesh_size = [0.0002];
+
+[t_geom, t_sim, b_inlet] = get_type_simulation(case_name);
+DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
+data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
+load(data_path, 'DNS');
+Q_DNS = DNS.out.q_bottom(end-99:end); 
+t_DNS = linspace(0,1,length(Q_DNS));
+
+
+figure 
+plot(t_DNS, Q_DNS*1e6, '-r')
+hold on
+plot(t_reg, Q_reg, 'Color', 'b')
+hold on
+plot(t_PC, Q_PC, 'Color', 'g')
+
 %% Reports 
-subject = ["s101_aa"];
-case_name = {"cn2", "c2", "c1b", "c0t"};
+subject = ["s101_a"];
+case_name = {"c3","cn2", "c2", "c1b", "c0t"};
 mesh_size = 0.0002;
 
 for s = subject

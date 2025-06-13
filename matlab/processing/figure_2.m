@@ -18,6 +18,7 @@ function figure_2(subject, case_name, mesh_size)
     % === First pass: determine max RMSE for each location ===
     max_y = zeros(1, pcmri.Ndat);  % max RMSE per location
     RMSE_ave_all = zeros(pcmri.Ndat, n_cases);  % [location × case]
+    exist_case = ones(1, n_cases);
     
     for i = 1:n_cases
         case_i = case_name{i};
@@ -27,7 +28,8 @@ function figure_2(subject, case_name, mesh_size)
     
         if ~exist(data_path, 'file')
             fprintf(2, 'File "%s" does not exist, simulation needs to be done \n', "DNS_" + DNS_case + ".mat");
-            return
+            exist_case(i) = 0;
+            continue
         end
     
         load(data_path, 'DNS');
@@ -50,6 +52,7 @@ function figure_2(subject, case_name, mesh_size)
         % === Main RMSE plot (columns 1 to 3) ===
         nexttile(1+(k-1)*rows, [1, rows - 1])  % span 3 columns
         for i = 1:n_cases
+            if exist_case(i)
             case_i = case_name{i};
             [t_geom, t_sim, b_inlet] = get_type_simulation(case_i);
             DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
@@ -58,6 +61,7 @@ function figure_2(subject, case_name, mesh_size)
     
             plot(t, DNS.RMSE{k}, 'LineStyle',line_sty(i),'LineWidth', 1.5, 'Color', colors(i, :));
             hold on
+            end
         end
         set(gca, 'LineWidth', 0.5, 'TickLength', [0.01 0.01], 'FontSize', fan);
         grid on

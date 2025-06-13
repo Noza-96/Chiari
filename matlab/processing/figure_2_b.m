@@ -59,6 +59,8 @@ function figure_2_b(subject, case_name, mesh_size)
             ii = kk + (Ncases)*(loc-1);
             nexttile(ii);
             if isempty(st_DNS{kk})
+            box on
+                 xlabel(''); ylabel(''); xticks([]); yticks([]);
             continue
             end
             spatial_error_plot(st_DNS{kk}.RMSE_space, st_DNS{kk}.case, loc, Ndat, ii, Ncases, roi{loc}, x_roi{loc}, y_roi{loc}); 

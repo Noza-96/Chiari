@@ -1,9 +1,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all;
+addpath("../processing/Functions/")
+addpath('../processing/Functions/Others/')
 
-[cas, dat_PC, t0] = run_if_empty('s101_aa');  % Load data if not already
-visualization_plots = true;
-% do_registration = false;
+[cas, dat_PC, t0] = run_if_empty('s101_b');  % Load data if not already
+visualization_plots = false;
+do_registration = false;
 
 python_venv = "/Users/noza/Documents/chiari/git-chiari/venv/bin/python3.11";
 slicer_3D_path = "/Applications/Slicer.app/Contents/MacOS/Slicer";
@@ -32,10 +34,10 @@ cellfun(@(d) ~exist(d, 'dir') && mkdir(d), ...
 % Check if registration output already exists and is newer than input
 reg_files = dir(fullfile(output_registration_dir, '*.nrrd'));
 
-do_registration = check_if_registration_exists(reg_files, t0);
+% do_registration = check_if_registration_exists(reg_files, t0);
 
 if do_registration
-    % === Loo       p over slices and time steps ===
+    % === Loop over slices and time steps ===
     for i = 1:length(cas.locations)
         % ROI and coordinate grid
         roi = dat_PC.ROI_SAS{i};
@@ -88,19 +90,39 @@ velocity = struct();  % container
 
 velocity.U_SAS = cell(1, length(cas.locations));
 velocity.pixel_coord = cell(1, length(cas.locations));
+velocity.Q_SAS = cell(1, length(cas.locations));
 
 fprintf("Reading velocity & coords from .nrrdd ... ")
+
 
 for i = 1:length(cas.locations)
     location = cas.locations{i};
     Nt = dat_PC.Nt{i};
     [velocity.U_SAS{i}, velocity.pixel_coord{i}] = read_velocity_and_coords(location, Nt, output_registration_dir);
     [velocity.ROI_SAS{i}] = read_ROI_nrrd(location, segmentation_dir);
+
+    % compute flow rate
+    Qi = zeros(1, Nt);
+    mask = velocity.ROI_SAS{i};
+    coords = velocity.pixel_coord{i};
+
+    dx = mean(sqrt(sum((coords(2:end,:, :) - coords(1:end-1,:, :)).^2, 3)), 'all');
+    dy = mean(sqrt(sum((coords(:,2:end,:) - coords(:,1:end-1,:)).^2, 3)), 'all');
+    dA = dx * dy;
+
+    for n = 1:Nt
+        u = velocity.U_SAS{i}(:, :, n);
+        u_roi = u(mask);
+        Qi(n) = sum(u_roi) * dA * 1e-2;
+    end
+    velocity.Q_SAS{i} = Qi;
 end
 
 if visualization_plots
     plot_all_velocity_comparisons(30, velocity, dat_PC, cas);
     
+    plot_flow_rates(velocity, cas);  % <-- add this line
+
     ts_cycle = 40; 
     movieVector = create_animation(dat_PC, cas, ts_cycle);
     
@@ -183,6 +205,7 @@ function [U, xyz] = read_velocity_and_coords(location, Nt, folder)
     z = reshape(xyz_pts(:,3), ny, nx);
     xyz = cat(3, x, y, z);
 end
+
 function plot_all_velocity_comparisons(tstep, velocity, dat_PC, cas)
 % Plot ROI masks (top), unregistered (middle), and registered (bottom)
 % velocity fields for all locations at a specific time step.
@@ -247,7 +270,6 @@ function velocity = update_data(velocity, dat_PC)
     velocity.Nt   = dat_PC.Nt;
     velocity.T    = dat_PC.T;
     velocity.t    = dat_PC.t;
-    velocity.Q_SAS = dat_PC.Q_SAS;
     velocity.fou   = dat_PC.fou;
 end
 
@@ -284,3 +306,22 @@ function save_animation(movieVector, fileName)
     close(writer);
 end
 
+function plot_flow_rates(velocity, cas)
+    N = length(cas.locations);  % number of slices
+    figure('Units', 'normalized', 'Position', [0.1 0.2 0.1 0.6]);
+    tiledlayout(ceil(N), 1, 'TileSpacing', 'compact', 'Padding', 'compact');
+
+    for i = 1:N
+        nexttile
+        Q = - velocity.Q_SAS{i};       % flow rate
+        t = linspace(0,1,length(Q));           % time vector
+        flow_rate(Q)
+        ylim([-2,2])
+        xlabel('Time [s]')
+        ylabel('Flow rate [mm^3/s]')
+        title(cas.locations{i}, 'Interpreter', 'none')
+        grid on
+    end
+
+    sgtitle("Flow Rates over Time", 'FontWeight', 'bold');
+end
