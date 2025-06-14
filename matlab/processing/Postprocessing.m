@@ -5,7 +5,7 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_aa";
+subject = "s101_b";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 % case_name = { "c2", "c1t", "c1b","c0t"}; 
@@ -25,38 +25,8 @@ warning('off', 'all');
 comparison_results(cas, case_name, mesh_size)
 warning('on', 'all');
 
-%% Compare flow rates
-close all; clear;
-addpath('Functions/');
-
-subject = "s101_aa";
-case_name ="c2";
-
-load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'dat_PC', 'cas');
-Q_reg = -dat_PC.Q_SAS{end}; 
-t_reg = linspace(0,1,length(Q_reg));
-load(fullfile("../../../computations", "pc-mri", subject, "mat", "03-apply_roi_compute_Q.mat"), 'dat_PC');
-Q_PC = -dat_PC.Q_SAS{end}; 
-t_PC = linspace(0,1,length(Q_PC));
-mesh_size = [0.0002];
-
-[t_geom, t_sim, b_inlet] = get_type_simulation(case_name);
-DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
-data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
-load(data_path, 'DNS');
-Q_DNS = DNS.out.q_bottom(end-99:end); 
-t_DNS = linspace(0,1,length(Q_DNS));
-
-
-figure 
-plot(t_DNS, Q_DNS*1e6, '-r')
-hold on
-plot(t_reg, Q_reg, 'Color', 'b')
-hold on
-plot(t_PC, Q_PC, 'Color', 'g')
-
 %% Reports 
-subject = ["s101_a"];
+subject = "s101_b";
 case_name = {"c3","cn2", "c2", "c1b", "c0t"};
 mesh_size = 0.0002;
 
@@ -68,6 +38,66 @@ for s = subject
 end
 
 figure_3_LI
+
+%% save-data
+close all; clear;
+addpath('Functions/');
+subject = ["s101_b","s101_a", "s101_aa"];
+
+for s = subject 
+    load(fullfile("../../../computations", "pc-mri", s, "mat", "04-registration.mat"), 'dat_PC', 'cas');
+    for i = 1:dat_PC.Ndat
+        data_PC.U_SAS{i} = - dat_PC.U_SAS{i};
+        data_PC.xyz{i} = dat_PC.pixel_coord{i};
+        data_PC.Q_SAS{i} = - dat_PC.Q_SAS{i};
+        data_PC.ROI_SAS{i} = dat_PC.ROI_SAS{i};
+        data_PC.t{i} = dat_PC.t{i};
+    end
+    filepath = "/Users/noza/My Drive/Chiari Nerve Roots/" + s + "/pcmri/"+s+".mat";
+    save(filepath, "data_PC", '-mat')
+end
+%% check fourier 
+
+% close all; clear;
+addpath('Functions/');
+s = "s101_aa";
+load(fullfile("../../../computations", "pc-mri", s, "mat", "04-registration.mat"), 'dat_PC', 'cas');
+   
+loc = 3;
+% Extract relevant data
+Q_orig = dat_PC.Q_SAS{loc};         % Original flow rate
+t_orig = dat_PC.t{loc};             % Time vector
+T = dat_PC.T{loc};                  % Period
+dt = T / length(t_orig);          % Time step estimate
+t_orig(end) = [];                 % Trim last point for periodicity
+Q_orig(end) = [];
+
+% Fourier components
+fm = dat_PC.fou.fm{loc};            % Frequencies
+am = dat_PC.fou.am{loc};            % Complex amplitudes
+a0 = 0;                           % Default DC term (not included?)
+
+if isfield(dat_PC.fou, 'a0')
+    a0 = dat_PC.fou.a0{loc};        % If a0 saved explicitly
+end
+
+% Reconstruct signal using Fourier series
+zi = 1i;
+Q_fourier = a0 + zeros(size(t_orig));
+for m = 1:length(fm)
+    Q_fourier = Q_fourier + am(m)*exp(zi*fm(m)*t_orig) + conj(am(m))*exp(-zi*fm(m)*t_orig);
+end
+
+% Plot comparison
+figure;
+plot(t_orig, Q_orig, 'k-', 'LineWidth', 2); hold on;
+plot(t_orig, Q_fourier, 'r--', 'LineWidth', 2);
+xlabel('Time [s]');
+ylabel('Flow rate');
+legend('Original Q_{SAS}', 'Fourier reconstruction');
+title('Comparison of original and Fourier-reconstructed flow rate');
+grid on;
+
 %% flow rates 
 close all
 locations = cellfun(@(x) strrep(x, '0', ''), cas.locations, 'UniformOutput', false);

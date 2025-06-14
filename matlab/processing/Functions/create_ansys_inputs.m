@@ -74,15 +74,18 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
 
             % --- 2) Save flow rate as Fourier series ---
             An = -dat_PC.fou.am{loc_ID(idx_loc)};
+            a0 = real(dat_PC.fou.a0{loc_ID(idx_loc)});  % ensure it's real
 
-            % normalize to period of bottom measurement, to be used in simulations
-            equation_terms = strings(1, modes);
-            Q_recon = zeros(1, ts_cycle);
+            % Normalize to period of bottom measurement, to be used in simulations
+            equation_terms = strings(1, modes + 1);  % +1 to include a0
+            Q_recon = a0 * ones(1, ts_cycle);        % initialize with DC component
+            equation_terms(1) = sprintf("%.6f", a0/2); % add a0 as the first term
+
             for n = 1:modes
                 omega = n * 2 * pi / T;
                 real_part = real(An(n));
                 imag_part = imag(An(n));
-                equation_terms(n) = sprintf("+%.6f*cos(%.6f*t*1[s^-1]) - %.6f*sin(%.6f*t*1[s^-1])", ...
+                equation_terms(n+1) = sprintf("+%.6f*cos(%.6f*t*1[s^-1]) - %.6f*sin(%.6f*t*1[s^-1])", ...
                                             real_part, omega, imag_part, omega);
                 Q_recon = Q_recon + 2 * (real_part * cos(omega * t) - imag_part * sin(omega * t));
             end
@@ -113,22 +116,28 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
 
             fprintf('saved velocity profile, plane, and flow rate for %s-pcmri in ansys input folder\n', tag);
         else
-            % --- 2) Save flow rate as Fourier series in middle planes---
+            % --- 2) Save flow rate as Fourier series in middle planes ---
             An = -dat_PC.fou.am{ii};
-            % normalize to period of bottom measurement, to be used in simulations
-            equation_terms = strings(1, modes);
-            Q_recon = zeros(1, ts_cycle);
+            a0 = real(dat_PC.fou.a0{ii});  % Get DC component
+            
+            % Normalize to period of bottom measurement, to be used in simulations
+            equation_terms = strings(1, modes + 1);  % +1 for a0
+            Q_recon = a0 * ones(1, ts_cycle);        % Start with DC component
+            equation_terms(1) = sprintf("%.6f", a0/2); % First term is a0
+            
             for n = 1:modes
                 omega = n * 2 * pi / T;
                 real_part = real(An(n));
                 imag_part = imag(An(n));
-                equation_terms(n) = sprintf("+%.6f*cos(%.6f*t*1[s^-1]) - %.6f*sin(%.6f*t*1[s^-1])", ...
-                                            real_part, omega, imag_part, omega);
+                equation_terms(n+1) = sprintf("+%.6f*cos(%.6f*t*1[s^-1]) - %.6f*sin(%.6f*t*1[s^-1])", ...
+                                              real_part, omega, imag_part, omega);
                 Q_recon = Q_recon + 2 * (real_part * cos(omega * t) - imag_part * sin(omega * t));
             end
+            
             eq_str = sprintf("(%s)*2E-6[m^3/s]", strjoin(equation_terms, ' '));
             eq_str = regexprep(eq_str, '\+-', '- ');
             eq_str = regexprep(eq_str, '-\s*-', '+ ');
+            
             filename = fullfile(cas.diransys_in, "flow-rates", "Q_" + num2str(ii - 1) + ".txt");
             write_text_file(filename, eq_str);
         end
