@@ -23,12 +23,10 @@ n_cores = 14;       % number of processors simulation
 
 [cas, dat_PC] = check_subject_initialization(subject, ts_cycle, 1);
 
-DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle);
+[DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle);
 
 % run fluent-meshing to create meshes and corresponding .cas files
-cases_ready = GUI_create_mesh(cas, mesh_size);
-
-cases_ready = GUI_create_mesh_zones(cas, mesh_size);
+cases_ready = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, nerve_lig_sim, zones_sim);
 
 % visualize output ANSYS console
 visualize_console = 1;

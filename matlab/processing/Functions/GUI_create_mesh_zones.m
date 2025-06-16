@@ -134,9 +134,7 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size)
     fclose(fileID);
 
     % run ansys meshing to run simulations
-    if all_simulations
-        fprintf('all fluent cases already exist. Ready to run simulation!\n');
-    elseif geometry_exist
+    if geometry_exist
         visualize_console = 1;
         fluent_command = get_fluent_command(); 
         fprintf('opening Fluent meshing to create simulation using GUI journal\n');

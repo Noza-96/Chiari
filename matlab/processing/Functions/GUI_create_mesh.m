@@ -1,4 +1,4 @@
-function all_simulations = GUI_create_mesh(cas, mesh_size)
+function all_simulations = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, nerve_lig_sim, zones_sim)
 
     n_cores = 12;
 
@@ -11,8 +11,18 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
     GUI_journal_path = fullfile(full_ansys_path, cas.subj, "inputs", "journals", "create_mesh.jou");
 
     fileID = fopen(GUI_journal_path, 'w');
-        
-    geom = ["c", "cn"];
+
+    geom = "c";
+
+    if nerve_sim
+        geom = [geom, "cn"];
+    end
+    if lig_sim
+        geom = [geom, "cl"];
+    end
+    if nerve_lig_sim
+        geom = [geom, "cnl"];
+    end
     
     % for type 2 simulation, which boundary has continuity condition
     continuity_condition = "tonsils";
@@ -33,10 +43,14 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
                 fprintf('case file %s needs to be created ...\n', case_name);
                     
                 % Define to which boundaries apply local sizing
+                local_sizing = {"cord", "dura", "tonsils"}; 
+
                 if contains(geom(k), 'n')
-                    local_sizing = {"cord", "dura", "tonsils", "nerve_roots"};
-                else
-                    local_sizing = {"cord", "dura", "tonsils"};
+                    local_sizing{end+1} = "nerve_roots";
+                end
+                
+                if contains(geom(k), 'l')
+                    local_sizing{end+1} =  "ligaments";
                 end
             
                 sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
@@ -134,8 +148,12 @@ function all_simulations = GUI_create_mesh(cas, mesh_size)
     fprintf(fileID,"o \n"); 
     fclose(fileID);
 
+    if zones_sim
+        zones_simulation = GUI_create_mesh_zones(cas, mesh_size);
+    end
+
     % run ansys meshing to run simulations
-    if all_simulations
+    if all_simulations && zones_simulation
         fprintf('all fluent cases already exist. Ready to run simulation!\n');
     elseif geometry_exist
         visualize_console = 1;

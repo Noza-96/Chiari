@@ -62,7 +62,7 @@ addpath('Functions/');
 s = "s101_aa";
 load(fullfile("../../../computations", "pc-mri", s, "mat", "04-registration.mat"), 'dat_PC', 'cas');
    
-loc = 3;
+loc = 4;
 % Extract relevant data
 Q_orig = dat_PC.Q_SAS{loc};         % Original flow rate
 t_orig = dat_PC.t{loc};             % Time vector
@@ -73,11 +73,11 @@ Q_orig(end) = [];
 
 % Fourier components
 fm = dat_PC.fou.fm{loc};            % Frequencies
-am = dat_PC.fou.am{loc};            % Complex amplitudes
+am = - dat_PC.fou.am{loc};            % Complex amplitudes
 a0 = 0;                           % Default DC term (not included?)
 
 if isfield(dat_PC.fou, 'a0')
-    a0 = dat_PC.fou.a0{loc};        % If a0 saved explicitly
+    a0 =  - dat_PC.fou.a0{loc};        % If a0 saved explicitly
 end
 
 % Reconstruct signal using Fourier series
@@ -89,7 +89,7 @@ end
 
 % Plot comparison
 figure;
-plot(t_orig, Q_orig, 'k-', 'LineWidth', 2); hold on;
+plot(t_orig, - Q_orig, 'k-', 'LineWidth', 2); hold on;
 plot(t_orig, Q_fourier, 'r--', 'LineWidth', 2);
 xlabel('Time [s]');
 ylabel('Flow rate');
