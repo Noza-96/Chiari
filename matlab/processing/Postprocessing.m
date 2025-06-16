@@ -17,7 +17,7 @@ mesh_size = [0.0002];
 
 %% Animation comparison PC-MRI with Ansys solution -- Animation
 close all; clear;
-subject = "s101_aa";
+subject = "s101_b";
 load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas');
 case_name ={"c3","cn2","c2", "c1b", "c0t"};
 mesh_size = [0.0002];
@@ -34,7 +34,6 @@ for s = subject
     figure_2_b(s, case_name, mesh_size)
     figure_2(s, case_name, mesh_size)
     figure_3_pressure(s, case_name, mesh_size)
-    close all
 end
 
 figure_3_LI

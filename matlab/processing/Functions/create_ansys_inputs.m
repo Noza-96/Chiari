@@ -73,8 +73,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             write_plane_file(filename, plane_data);
 
             % --- 2) Save flow rate as Fourier series ---
-            An = -dat_PC.fou.am{loc_ID(idx_loc)};
-            a0 = real(dat_PC.fou.a0{loc_ID(idx_loc)});  % ensure it's real
+            An = - dat_PC.fou.am{loc_ID(idx_loc)};
+            a0 = - real(dat_PC.fou.a0{loc_ID(idx_loc)});  % ensure it's real
 
             % Normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes + 1);  % +1 to include a0
@@ -117,8 +117,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             fprintf('saved velocity profile, plane, and flow rate for %s-pcmri in ansys input folder\n', tag);
         else
             % --- 2) Save flow rate as Fourier series in middle planes ---
-            An = -dat_PC.fou.am{ii};
-            a0 = real(dat_PC.fou.a0{ii});  % Get DC component
+            An = - dat_PC.fou.am{ii};
+            a0 = - real(dat_PC.fou.a0{ii});  % Get DC component
             
             % Normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes + 1);  % +1 for a0
