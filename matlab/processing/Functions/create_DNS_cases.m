@@ -1,6 +1,6 @@
 function [DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle)
     DNS_cases = cell(length(case_name),length(mesh_size));
-    nerve_sim = false; lig_sim = false; zones_sim = false;
+    nerve_sim = false; lig_sim = false; zones_sim = false; nerve_lig_sim = false;
 
     for i = 1:length(case_name)     
         for j = 1:length(mesh_size)

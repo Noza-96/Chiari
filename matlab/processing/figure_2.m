@@ -1,7 +1,7 @@
 function figure_2(subject, case_name, mesh_size)
-    line_sty = [    "-", "-", "--", "-", "-"];
+    line_sty = [    "-", "-", "-", "-", "-"];
     
-    fs = 14;
+    fs = 16;
     fan = 10;
     rows = 3;
     
@@ -46,7 +46,7 @@ function figure_2(subject, case_name, mesh_size)
     
     % === Plotting ===
     ff = figure;
-    set(ff, 'Position', [200, 200, 300, 470]);  % Wider for extra tile
+    set(ff, 'Position', [200, 200, 450, 450]);  % Wider for extra tile
     tiledlayout(pcmri.Ndat, rows, "TileSpacing", "tight", "Padding", "compact")
     for k = 1:pcmri.Ndat
         % === Main RMSE plot (columns 1 to 3) ===
@@ -66,15 +66,15 @@ function figure_2(subject, case_name, mesh_size)
         set(gca, 'LineWidth', 0.5, 'TickLength', [0.01 0.01], 'FontSize', fan);
         grid on
         set(gca, 'XGrid', 'off', 'YGrid', 'on')
+        box on
     
-        ylim([0, max(max_y(k)*1.1, 0.01)])
-        % ylim([0, 0.015])
-        % ylabel(pcmri.locations{k}, 'Interpreter', 'latex', 'FontSize',fs)
+        % ylim([0, max(max_y(k)*1.1, 0.01)])
+        ylim([0, 0.015])
+        yticks(0:0.005:0.01)
         xticks(0:0.2:1)
-        yticks(0:0.005:0.1)
         
         if k == 1
-            title('$\langle {\rm RMSE} \rangle$', 'Interpreter', 'latex', 'FontSize',fs)
+            title('$\langle {\rm RMSE} \rangle \, \left[{\rm cm/s}\right]$', 'Interpreter', 'latex', 'FontSize',fs)
         end
     
         if k == pcmri.Ndat
@@ -93,16 +93,22 @@ function figure_2(subject, case_name, mesh_size)
         end
         set(gca, 'LineWidth', 0.5, 'TickLength', [0.01 0.01], 'FontSize', fan);
         if k == 1
-            title('$\langle \overline{{\rm RMSE}} \rangle$ ', 'Interpreter', 'latex', 'FontSize',fs)
+            title('$\langle \overline{{\rm RMSE}} \rangle \, \left[{\rm cm/s}\right]$ ', 'Interpreter', 'latex', 'FontSize',fs)
         elseif k == pcmri.Ndat
             % xlabel('Configuration', 'Interpreter', 'latex', 'FontSize',fs)
         end
-        ylim([0, max(max_y(k))*1.1])
-        % ylim([0, 0.015])
-        yticks(0:0.0025:0.1)
+        % ylim([0, max(max(RMSE_ave_all(k, :))*1.1, 0.005)])
+        ylim([0, 0.0075])
+
+        yticks(0:0.005:0.01)
         xticklabels([])
-        yticklabels([])
-        set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', 10);
+        if k == pcmri.Ndat
+        xticklabels({'(I)', '(II)', '(III)', '(IV)', '(V)'});
+        xlabel('Configuration', 'Interpreter', 'latex', 'FontSize',fs)
+        end
+        ax = gca;
+        ax.YAxis.Exponent = 0;
+        % yticklabels([])
         box on
         grid on
         set(gca, 'XGrid', 'off', 'YGrid', 'on')

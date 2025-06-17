@@ -9,7 +9,7 @@ subject = "s101_b";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 % case_name = { "c2", "c1t", "c1b","c0t"}; 
-case_name = {"c3","c0t"}; 
+case_name = {"c1t"}; 
 mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file
@@ -19,24 +19,25 @@ mesh_size = [0.0002];
 close all; clear;
 subject = "s101_b";
 load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas');
-case_name ={"c3","cn2","c2", "c1b", "c0t"};
+case_name ={"c3","cl2","c2", "c1b"};
 mesh_size = [0.0002];
 warning('off', 'all');
 comparison_results(cas, case_name, mesh_size)
 warning('on', 'all');
 
 %% Reports 
+close all; clear;
 subject = "s101_b";
-case_name = {"c3","cn2", "c2", "c1b", "c0t"};
+case_name = {"c0t", "c1t", "c1b", "c2", "c3"};
 mesh_size = 0.0002;
 
 for s = subject
     figure_2_b(s, case_name, mesh_size)
     figure_2(s, case_name, mesh_size)
-    figure_3_pressure(s, case_name, mesh_size)
+    % figure_3_pressure(s, case_name, mesh_size)
 end
 
-figure_3_LI
+% figure_3_LI
 
 %% save-data
 close all; clear;

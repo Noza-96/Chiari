@@ -3,7 +3,7 @@ function figure_2_b(subject, case_name, mesh_size)
     fs = 16;
     fan = 10;
     rows = 3;
-    
+    labels =  {'(I)', '(II)', '(III)', '(IV)', '(V)'};
     
     % Load MRI data
     mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat");
@@ -49,10 +49,11 @@ function figure_2_b(subject, case_name, mesh_size)
         % roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
     end
         
-    fig = figure('Position', [100, 100, 150*(Ncases), 450]);
+    fig = figure('Position', [100, 100, 115*(Ncases), 450]);
     tt=tiledlayout(Ndat, Ncases , "TileSpacing", "tight", "Padding", "compact");
-    title(tt, '$\overline{\mathrm{RMSE}}$', 'FontSize', fs, 'interpreter', 'latex');  % Title for the whole tiled layout
-    
+    title(tt, '$\overline{\mathrm{RMSE}} \, \left[{\rm cm/s}\right]$', 'FontSize', fs, 'interpreter', 'latex');  % Title for the whole tiled layout
+    % title(tt, '$\overline{\mathrm{RMSE}}$', 'FontSize', fs, 'interpreter', 'latex');  % Title for the whole tiled layout
+
     for loc = 1:Ndat           
         % Plot PC-MRI data/results
         for kk = 1:Ncases
@@ -64,6 +65,9 @@ function figure_2_b(subject, case_name, mesh_size)
             continue
             end
             spatial_error_plot(st_DNS{kk}.RMSE_space, st_DNS{kk}.case, loc, Ndat, ii, Ncases, roi{loc}, x_roi{loc}, y_roi{loc}); 
+           if loc == Ndat
+                xlabel(labels{kk});
+           end
         end
     end
     
