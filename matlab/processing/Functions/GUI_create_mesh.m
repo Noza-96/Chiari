@@ -4,6 +4,7 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, n
 
     all_simulations = true; 
     geometry_exist = true;
+    zones_simulation = true;
     count_sim = 1; 
 
     full_ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));
@@ -153,21 +154,19 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, n
     end
 
     % run ansys meshing to run simulations
-    if zones_simulation
-        if all_simulations 
-            fprintf('all fluent cases already exist. Ready to run simulation!\n');
-        elseif geometry_exist
-            visualize_console = 1;
-            fluent_command = get_fluent_command(); 
-            fprintf('opening Fluent meshing to create simulation using GUI journal\n');
-            fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
-            if visualize_console == 0
-                fluent_cmd = fluent_cmd + " > nul";
-            end
-            system(fluent_cmd); % Run with "> nul" to suppress terminal output
-        else
-            fprintf(2, '.scdoc geometry files need to be created!\n');
+    if all_simulations && zones_simulation
+        fprintf('all fluent cases already exist. Ready to run simulation!\n');
+    elseif geometry_exist
+        visualize_console = 1;
+        fluent_command = get_fluent_command(); 
+        fprintf('opening Fluent meshing to create simulation using GUI journal\n');
+        fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
+        if visualize_console == 0
+            fluent_cmd = fluent_cmd + " > nul";
         end
+        system(fluent_cmd); % Run with "> nul" to suppress terminal output
+    else
+        fprintf(2, '.scdoc geometry files need to be created!\n');
     end
 
 end
