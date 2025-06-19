@@ -101,7 +101,7 @@ pcmri.q = q;
             Vs(k) = 0.5 * simps(t, abs(Q), 2);  % Compute the volume
     
             % Call the flow rate function
-            flow_rate(Q, n);
+            flow_rate(Q, 0);
             set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
             % Set x-tick labels conditionally
             if k < length(dat_PC.Q_SAS)

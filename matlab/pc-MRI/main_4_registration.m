@@ -4,7 +4,7 @@ addpath("../processing/Functions/")
 addpath('../processing/Functions/Others/')
 
 [cas, dat_PC, t0] = run_if_empty('s101_aa');  % Load data if not already
-visualization_plots = false;
+visualization_plots = true;
 do_registration = false;
 
 python_venv = "/Users/noza/Documents/chiari/git-chiari/venv/bin/python3.11";
