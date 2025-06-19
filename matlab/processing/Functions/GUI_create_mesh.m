@@ -14,16 +14,6 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, n
     fileID = fopen(GUI_journal_path, 'w');
 
     geom = "c";
-
-    if nerve_sim
-        geom = [geom, "cn"];
-    end
-    if lig_sim
-        geom = [geom, "cl"];
-    end
-    if nerve_lig_sim
-        geom = [geom, "cnl"];
-    end
     
     % for type 2 simulation, which boundary has continuity condition
     continuity_condition = "tonsils";
@@ -150,7 +140,7 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, n
     fclose(fileID);
 
     if zones_sim
-        zones_simulation = GUI_create_mesh_zones(cas, mesh_size);
+        zones_simulation = GUI_create_mesh_zones(cas, mesh_size, nerve_sim, lig_sim, nerve_lig_sim);
     end
 
     % run ansys meshing to run simulations
@@ -173,4 +163,4 @@ end
 
 function filepath = correct_path(filepath)
     filepath = strrep(filepath, '\', '/');
-end
+endnerve_sim

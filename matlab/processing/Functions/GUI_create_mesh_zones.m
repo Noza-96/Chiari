@@ -12,7 +12,17 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size)
 
     fileID = fopen(GUI_journal_path, 'w');
         
-    geom = ["c"];
+    geom = "c";
+
+    if nerve_sim
+        geom = [geom, "cn"];
+    end
+    if lig_sim
+        geom = [geom, "cl"];
+    end
+    if nerve_lig_sim
+        geom = [geom, "cnl"];
+    end
     
     % for type 2 simulation, which boundary has continuity condition
     continuity_condition = compose("cord_%d", 1:(cas.Ncas-1));
@@ -134,7 +144,7 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size)
     fclose(fileID);
 
     % run ansys meshing to run simulations
-    if geometry_exist
+    if geometry_exist && ~all_simulations
         visualize_console = 1;
         fluent_command = get_fluent_command(); 
         fprintf('opening Fluent meshing to create simulation using GUI journal\n');
