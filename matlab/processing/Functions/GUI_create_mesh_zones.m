@@ -1,4 +1,4 @@
-function all_simulations = GUI_create_mesh_zones(cas, mesh_size)
+function all_simulations = GUI_create_mesh_zones(cas, mesh_size, nerve_sim, lig_sim, nerve_lig_sim)
 
     n_cores = 12;
 
