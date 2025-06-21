@@ -6,12 +6,12 @@ addpath('Functions/Others/')
 % Choose subject
 subject = "s101_b"; 
 
-% c: geometry bounded with 2 pcMRI planes. 
+% c: geometry bounded by 2 pcMRI planes. 
 % c0/c1 for zero pressure top and bottom flow rate/velocity
 % c2 for two inlet velocities; continuity: normal velocity tonsils 
 % c3 for two inlet velocities; continuity: multiple regions
 
-case_name = {"c0t"};      % Array with the kind of simulations to do
+case_name = {"b0t"};      % Array with the kind of simulations to do
 mesh_size = [0.0002];    % Array with the different mesh sizes to be simulated
 
 ts_cycle = 100;     % number of time steps per cycle
@@ -19,9 +19,7 @@ iterations_ts = 20; % iterations per time step
 cycles = 3;         % cyles to be computed
 n_cores = 14;       % number of processors simulation
 
-% check_valid_case(case_name, subject) 
-
-[cas, dat_PC] = check_subject_initialization(subject, ts_cycle, 1);
+[cas, dat_PC] = check_subject_initialization(subject, ts_cycle);
 
 [DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle);
 

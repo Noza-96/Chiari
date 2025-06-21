@@ -13,10 +13,11 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, n
 
     fileID = fopen(GUI_journal_path, 'w');
 
-    geom = "c";
+    geom = ["c", "b"];
     
     % for type 2 simulation, which boundary has continuity condition
     continuity_condition = "tonsils";
+
 
     
     prox_limit = [0.0002, 0.0008];

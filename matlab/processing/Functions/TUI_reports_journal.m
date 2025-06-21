@@ -31,12 +31,19 @@ function TUI_reports_journal(DNS, fileID)
         fprintf(fileID,"/solve/report-definitions/add q_" + location + "  surface-volumeflowrate surface-names " + location + " () q \n" );
     end
     
-    for Dz = 5:5:50
+    for Dz = DNS.Dz
         fprintf(fileID,"/solve/report-definitions/add p_FM-" + Dz + "  surface-areaavg field pressure surface-names FM-" + Dz + " () q \n" );
     end
 
+    if startsWith(DNS.geom, 'b')
+        sstt = "FM-"+ DNS.Dz;
+        sstt = strjoin(sstt, ' ');
+        filename = fullfile(DNS.ansys_path, DNS.subject, "outputs", "area-z");
+        fprintf(fileID,"/report/surface-integrals/area " + sstt + " () yes """+strrep(strrep(filename, '\', '\\'), '/', '\\')+""" no yes q \n" );
+    end
+
     % report files
-    variables = ['flow-time', 'u_max', "q_" + inlet_locations(1:end), "p_FM-" + [5:5:50]];
+    variables = ['flow-time', 'u_max', "q_" + inlet_locations(1:end), "p_FM-" + DNS.Dz];
     report_file (fileID, variables, DNS.case, 1);
 
     if nargin < 2

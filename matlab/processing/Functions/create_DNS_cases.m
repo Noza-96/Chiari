@@ -29,6 +29,12 @@ function [DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_
                 DNS.continuity = "tonsils";
             end
 
+            DNS.Dz = 5:5:50; 
+            
+            if startsWith(DNS.geom, 'b')
+                DNS.Dz = 0:1:50;
+            end
+
             % check if any simulation contains ligaments
             if DNS.geom == "cl"
                 lig_sim = true;

@@ -19,10 +19,10 @@ function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
         create_plane (fileID,XYZ,cas.locations{loc})
     end
 
-    % create planes perpendicular to z-dir at 5 mm separation FM  till 50 mm below    
-    for Dz = 5:5:50
+    % create planes perpendicular to z-dir  
+    for Dz = DNS.Dz
         % Dz foramen with respect to top pcmri location
-        Dz_foramen = (anatomy.FM-Dz)/1000; % [m]
+        Dz_foramen = (anatomy.FM-(Dz+0.01))/1000; % [m]
 
          % create plane at the location of the foramen_magnum
         XYZ(:,3) = Dz_foramen;

@@ -1,4 +1,4 @@
-function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_console)
+function run_ANSYS_simulations(cas, dat_PC, DNS_cases,  n_cores, visualize_console)
 
     % Run simulations for each DNS case
     for k = 1:length(DNS_cases)
@@ -15,6 +15,8 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases, n_cores, visualize_consol
         else
             fprintf('\n%s ...\n', DNS_cases{k});
         end  
+
+        
 
         % Create and run the ANSYS journal
         
@@ -57,7 +59,8 @@ end
 % Helper function to run the Fluent simulation through terminal
 function runFluentSimulation(DNS, case_name, n_cores, visualize_console)
     fluent_command = get_fluent_command();
-    fluent_cmd = fluent_command + " 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
+    % fluent_cmd = fluent_command + " 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
+    fluent_cmd = fluent_command + " 3ddp -t" + n_cores + " -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
     if visualize_console == 0
         fluent_cmd = fluent_cmd + " > nul";
     end
