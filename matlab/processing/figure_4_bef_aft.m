@@ -1,7 +1,6 @@
 close all; clear;
 subject = {"s101_b","s101_a","s101_aa"} ;
-case_name = "c0t";
-line_sty = ["-", "-", "--", "-", "-"];
+case_name = "b0t";
 mesh_size = 0.0002;
 
 fs = 14;
@@ -50,6 +49,10 @@ for k = 1:length(idx_to_plot)
         [t_geom, t_sim, b_inlet] = get_type_simulation(case_i);
         DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
         data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
+        if ~exist(data_path, 'file')
+            fprintf(2, 'File "%s" does not exist, simulation needs to be done \n', "DNS_" + DNS_case + ".mat");
+            continue
+        end
         load(data_path, 'DNS');
 
         % Pressure difference with respect to last location

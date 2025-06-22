@@ -26,6 +26,9 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
 
     fprintf(fileID,"/file read-case "+case_path+"\n" );
 
+    % disable flow-warnings (reverse-flow)
+    fprintf(fileID,"/solve/set flow-warnings? no \n" );
+
     % setup viscous laminar model
     fprintf(fileID,"/define/models/viscous laminar yes\n" );
 

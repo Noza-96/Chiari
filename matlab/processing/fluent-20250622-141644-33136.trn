@@ -1,0 +1,422 @@
+Auto-Transcript Start Time:  14:16:44, 22 Jun 2025 Eastern Daylight Time 
+Current Directory: "C:\Users\guill\Documents\chiari\git-chiari\matlab\processing"
+
+              Welcome to ANSYS Fluent 2024 R1
+
+              Copyright 1987-2024 ANSYS, Inc. All Rights Reserved.
+              Unauthorized use, distribution or duplication is prohibited.
+              This product is subject to U.S. laws governing export and re-export.
+              For full Legal Notice, see documentation.
+
+Build Time: Nov 22 2023 10:31:01 EST  Build Id: 10184  
+ 
+Connected License Server List:	1055@its-flexsw-srv.ucsd.edu
+
+     --------------------------------------------------------------
+     This is an academic version of ANSYS FLUENT. Usage of this product
+     license is limited to the terms and conditions specified in your ANSYS
+     license form, additional terms section.
+     --------------------------------------------------------------
+Host spawning Node 0 on machine "Lenovo" (win64).
+
+-----------------------------------------------------------------------------------
+ID    Hostname  Core   O.S.         PID    Vendor                                 
+-----------------------------------------------------------------------------------
+n13   Lenovo    14/32  Windows-x64  45628  13th Gen Intel(R) Core(TM) i9-13900    
+n12   Lenovo    13/32  Windows-x64  38660  13th Gen Intel(R) Core(TM) i9-13900    
+n11   Lenovo    12/32  Windows-x64  45916  13th Gen Intel(R) Core(TM) i9-13900    
+n10   Lenovo    11/32  Windows-x64  40728  13th Gen Intel(R) Core(TM) i9-13900    
+n9    Lenovo    10/32  Windows-x64  49060  13th Gen Intel(R) Core(TM) i9-13900    
+n8    Lenovo    9/32   Windows-x64  39920  13th Gen Intel(R) Core(TM) i9-13900    
+n7    Lenovo    8/32   Windows-x64  49128  13th Gen Intel(R) Core(TM) i9-13900    
+n6    Lenovo    7/32   Windows-x64  48492  13th Gen Intel(R) Core(TM) i9-13900    
+n5    Lenovo    6/32   Windows-x64  38900  13th Gen Intel(R) Core(TM) i9-13900    
+n4    Lenovo    5/32   Windows-x64  45356  13th Gen Intel(R) Core(TM) i9-13900    
+n3    Lenovo    4/32   Windows-x64  47688  13th Gen Intel(R) Core(TM) i9-13900    
+n2    Lenovo    3/32   Windows-x64  2808   13th Gen Intel(R) Core(TM) i9-13900    
+n1    Lenovo    2/32   Windows-x64  43644  13th Gen Intel(R) Core(TM) i9-13900    
+n0*   Lenovo    1/32   Windows-x64  45764  13th Gen Intel(R) Core(TM) i9-13900    
+host  Lenovo           Windows-x64  42488  13th Gen Intel(R) Core(TM) i9-13900    
+
+MPI Option Selected: intel
+Selected system interconnect: default
+-----------------------------------------------------------------------------------
+
+Cleanup script file is C:\\Users\\guill\\Documents\\chiari\\git-chiari\\matlab\\processing\\cleanup-fluent-Lenovo-42488.bat
+
+Posting ANSYS Product Improvement Program startup data
+Done.
+
+Reading journal file C:\Users\guill\Documents\chiari\computations\ansys\s101_a\inputs\journals\b0top_dx00002.jou...
+
+> /file/set-tui-version "24.1"
+
+> ;setup case 
+/file read-case C:/Users/guill/Documents/chiari/computations/ansys/s101_a/inputs/case-files/b_dx0.0002.cas.gz
+Note: Rank = 0: Process affinity not being set (6).
+Note: Rank = 1: Process affinity not being set (6).
+Note: Rank = 2: Process affinity not being set (6).
+Note: Rank = 3: Process affinity not being set (6).
+Note: Rank = 4: Process affinity not being set (6).
+Note: Rank = 5: Process affinity not being set (6).
+Note: Rank = 6: Process affinity not being set (6).
+Note: Rank = 7: Process affinity not being set (6).
+Note: Rank = 8: Process affinity not being set (6).
+Note: Rank = 9: Process affinity not being set (6).
+Note: Rank = 10: Process affinity not being set (6).
+Note: Rank = 11: Process affinity not being set (6).
+Note: Rank = 12: Process affinity not being set (6).
+Note: Rank = 13: Process affinity not being set (6).
+
+Reading "\"| gunzip -c \\"C:/Users/guill/Documents/chiari/computations/ansys/s101_a/inputs/case-files/b_dx0.0002.cas.gz\\"\""...
+
+Buffering for file scan...
+
+    1469 nodes, binary.
+  197495 nodes, binary.
+  574520 nodes, binary.
+ 5574976 nodes, binary.
+ 7886560 polygonal interior faces, zone 1176, binary.
+   58643 polygonal wall faces, zone 32, binary.
+  114052 polygonal wall faces, zone 34, binary.
+   20413 polygonal velocity-inlet faces, zone 33, binary.
+    3077 polygonal velocity-inlet faces, zone 31, binary.
+    6088 polygonal velocity-inlet faces, zone 30, binary.
+ 1413907 polyhedra cells, zone 1177, binary.
+Warning: reading 12 partition grid onto 14 compute node machine;
+         will auto partition.
+ 1413907 cell partition ids, zone 1177, 12 partitions, binary.
+
+Building...
+     mesh
+	auto partitioning mesh by Metis (fast),
+	distributing mesh
+		parts..............,
+		faces..............,
+		nodes..............,
+		cells..............,
+        bandwidth reduction using Reverse Cuthill-McKee: 103190/4542 = 22.7191
+     materials,
+     interface,
+     domains,
+     zones,
+	interior--fluid
+	cord
+	dura
+	tonsils
+	bottom
+	top
+	fluid
+     parallel,
+The automatic selection for flux type has changed to Rhie-Chow: momentum based.
+
+Done.
+
+> /solve/set flow-warnings? no 
+
+> /define/models/viscous laminar yes
+
+> /define/named-expressions add "rho" definition "1000 [kg/m^3]" q 
+
+> /define/named-expressions add "mu" definition "0.0007 [kg/(m*s)]" q 
+
+> /define/materials/change-create air csf csf is a fluid
+yes 
+Density
+expression "rho"
+ no no yes 
+Viscosity
+expression "mu"
+ no no no yes q 
+
+> /define/boundary-conditions/modify-zones/zone-type top velocity-inlet q 
+
+> /define/boundary-conditions/modify-zones/zone-type bottom pressure-outlet q 
+
+> /define/boundary-conditions/modify-zones/zone-type tonsils wall 
+ Zone not slit.q 
+
+> /define/boundary-conditions/modify-zones/zone-type cord wall 
+ Zone not slit.q 
+
+> /solve/monitors/residual/print? no q 
+
+> /define/models/unsteady-2nd-order? yes q 
+
+> /solve/set p-v-coupling 24 q  
+
+> /define/named-expressions add "Q_inlet" definition "(0.038315 - 0.309878*cos(6.088358*t*1[s^-1]) + 0.341899*sin(6.088358*t*1[s^-1]) +0.116703*cos(12.176716*t*1[s^-1]) + 0.027938*sin(12.176716*t*1[s^-1]) +0.142851*cos(18.265074*t*1[s^-1]) - 0.100704*sin(18.265074*t*1[s^-1]) - 0.024467*cos(24.353433*t*1[s^-1]) - 0.017812*sin(24.353433*t*1[s^-1]) +0.059754*cos(30.441791*t*1[s^-1]) + 0.046232*sin(30.441791*t*1[s^-1]) +0.043916*cos(36.530149*t*1[s^-1]) - 0.049798*sin(36.530149*t*1[s^-1]) - 0.015631*cos(42.618507*t*1[s^-1]) - 0.017479*sin(42.618507*t*1[s^-1]) +0.001461*cos(48.706865*t*1[s^-1]) + 0.013456*sin(48.706865*t*1[s^-1]) +0.019728*cos(54.795223*t*1[s^-1]) - 0.013947*sin(54.795223*t*1[s^-1]) - 0.010315*cos(60.883582*t*1[s^-1]) - 0.015835*sin(60.883582*t*1[s^-1]) - 0.009326*cos(66.971940*t*1[s^-1]) - 0.001802*sin(66.971940*t*1[s^-1]) - 0.003691*cos(73.060298*t*1[s^-1]) + 0.002316*sin(73.060298*t*1[s^-1]) - 0.004781*cos(79.148656*t*1[s^-1]) - 0.002924*sin(79.148656*t*1[s^-1]) - 0.001754*cos(85.237014*t*1[s^-1]) + 0.007128*sin(85.237014*t*1[s^-1]) - 0.000207*cos(91.325372*t*1[s^-1]) - 0.001117*sin(91.325372*t*1[s^-1]) +0.000926*cos(97.413730*t*1[s^-1]) + 0.005053*sin(97.413730*t*1[s^-1]) +0.003008*cos(103.502089*t*1[s^-1]) + 0.000376*sin(103.502089*t*1[s^-1]) +0.004541*cos(109.590447*t*1[s^-1]) + 0.000689*sin(109.590447*t*1[s^-1]) - 0.002502*cos(115.678805*t*1[s^-1]) + 0.001807*sin(115.678805*t*1[s^-1]) - 0.002502*cos(121.767163*t*1[s^-1]) - 0.001807*sin(121.767163*t*1[s^-1]))*2E-6[m^3/s]" q 
+
+> /define/named-expressions add "v_inlet" definition "-Q_inlet/Area(['top'])" q 
+
+> /define/boundary-conditions/velocity-inlet (top)
+top no no yes yes no "v_inlet" no 0  q 
+
+> ;create surfaces
+/surface/plane-surface C1C2 three-points -0.025720 -0.035264 -0.064063 0.005422 0.026303 -0.061597 0.036541 0.025993 -0.058757 no
+
+> /surface/plane-surface C2C3 three-points -0.021095 -0.040774 -0.087472 0.010047 0.020793 -0.085001 0.041166 0.020482 -0.082160 no
+
+> /surface/plane-surface FM-0 three-points -0.021095 -0.040774 -0.045010 0.010047 0.020793 -0.045010 0.041166 0.020482 -0.045010 no
+
+> /surface/plane-surface FM-1 three-points -0.021095 -0.040774 -0.046010 0.010047 0.020793 -0.046010 0.041166 0.020482 -0.046010 no
+
+> /surface/plane-surface FM-2 three-points -0.021095 -0.040774 -0.047010 0.010047 0.020793 -0.047010 0.041166 0.020482 -0.047010 no
+
+> /surface/plane-surface FM-3 three-points -0.021095 -0.040774 -0.048010 0.010047 0.020793 -0.048010 0.041166 0.020482 -0.048010 no
+
+> /surface/plane-surface FM-4 three-points -0.021095 -0.040774 -0.049010 0.010047 0.020793 -0.049010 0.041166 0.020482 -0.049010 no
+
+> /surface/plane-surface FM-5 three-points -0.021095 -0.040774 -0.050010 0.010047 0.020793 -0.050010 0.041166 0.020482 -0.050010 no
+
+> /surface/plane-surface FM-6 three-points -0.021095 -0.040774 -0.051010 0.010047 0.020793 -0.051010 0.041166 0.020482 -0.051010 no
+
+> /surface/plane-surface FM-7 three-points -0.021095 -0.040774 -0.052010 0.010047 0.020793 -0.052010 0.041166 0.020482 -0.052010 no
+
+> /surface/plane-surface FM-8 three-points -0.021095 -0.040774 -0.053010 0.010047 0.020793 -0.053010 0.041166 0.020482 -0.053010 no
+
+> /surface/plane-surface FM-9 three-points -0.021095 -0.040774 -0.054010 0.010047 0.020793 -0.054010 0.041166 0.020482 -0.054010 no
+
+> /surface/plane-surface FM-10 three-points -0.021095 -0.040774 -0.055010 0.010047 0.020793 -0.055010 0.041166 0.020482 -0.055010 no
+
+> /surface/plane-surface FM-11 three-points -0.021095 -0.040774 -0.056010 0.010047 0.020793 -0.056010 0.041166 0.020482 -0.056010 no
+
+> /surface/plane-surface FM-12 three-points -0.021095 -0.040774 -0.057010 0.010047 0.020793 -0.057010 0.041166 0.020482 -0.057010 no
+
+> /surface/plane-surface FM-13 three-points -0.021095 -0.040774 -0.058010 0.010047 0.020793 -0.058010 0.041166 0.020482 -0.058010 no
+
+> /surface/plane-surface FM-14 three-points -0.021095 -0.040774 -0.059010 0.010047 0.020793 -0.059010 0.041166 0.020482 -0.059010 no
+
+> /surface/plane-surface FM-15 three-points -0.021095 -0.040774 -0.060010 0.010047 0.020793 -0.060010 0.041166 0.020482 -0.060010 no
+
+> /surface/plane-surface FM-16 three-points -0.021095 -0.040774 -0.061010 0.010047 0.020793 -0.061010 0.041166 0.020482 -0.061010 no
+
+> /surface/plane-surface FM-17 three-points -0.021095 -0.040774 -0.062010 0.010047 0.020793 -0.062010 0.041166 0.020482 -0.062010 no
+
+> /surface/plane-surface FM-18 three-points -0.021095 -0.040774 -0.063010 0.010047 0.020793 -0.063010 0.041166 0.020482 -0.063010 no
+
+> /surface/plane-surface FM-19 three-points -0.021095 -0.040774 -0.064010 0.010047 0.020793 -0.064010 0.041166 0.020482 -0.064010 no
+
+> /surface/plane-surface FM-20 three-points -0.021095 -0.040774 -0.065010 0.010047 0.020793 -0.065010 0.041166 0.020482 -0.065010 no
+
+> /surface/plane-surface FM-21 three-points -0.021095 -0.040774 -0.066010 0.010047 0.020793 -0.066010 0.041166 0.020482 -0.066010 no
+
+> /surface/plane-surface FM-22 three-points -0.021095 -0.040774 -0.067010 0.010047 0.020793 -0.067010 0.041166 0.020482 -0.067010 no
+
+> /surface/plane-surface FM-23 three-points -0.021095 -0.040774 -0.068010 0.010047 0.020793 -0.068010 0.041166 0.020482 -0.068010 no
+
+> /surface/plane-surface FM-24 three-points -0.021095 -0.040774 -0.069010 0.010047 0.020793 -0.069010 0.041166 0.020482 -0.069010 no
+
+> /surface/plane-surface FM-25 three-points -0.021095 -0.040774 -0.070010 0.010047 0.020793 -0.070010 0.041166 0.020482 -0.070010 no
+
+> /surface/plane-surface FM-26 three-points -0.021095 -0.040774 -0.071010 0.010047 0.020793 -0.071010 0.041166 0.020482 -0.071010 no
+
+> /surface/plane-surface FM-27 three-points -0.021095 -0.040774 -0.072010 0.010047 0.020793 -0.072010 0.041166 0.020482 -0.072010 no
+
+> /surface/plane-surface FM-28 three-points -0.021095 -0.040774 -0.073010 0.010047 0.020793 -0.073010 0.041166 0.020482 -0.073010 no
+
+> /surface/plane-surface FM-29 three-points -0.021095 -0.040774 -0.074010 0.010047 0.020793 -0.074010 0.041166 0.020482 -0.074010 no
+
+> /surface/plane-surface FM-30 three-points -0.021095 -0.040774 -0.075010 0.010047 0.020793 -0.075010 0.041166 0.020482 -0.075010 no
+
+> /surface/plane-surface FM-31 three-points -0.021095 -0.040774 -0.076010 0.010047 0.020793 -0.076010 0.041166 0.020482 -0.076010 no
+
+> /surface/plane-surface FM-32 three-points -0.021095 -0.040774 -0.077010 0.010047 0.020793 -0.077010 0.041166 0.020482 -0.077010 no
+
+> /surface/plane-surface FM-33 three-points -0.021095 -0.040774 -0.078010 0.010047 0.020793 -0.078010 0.041166 0.020482 -0.078010 no
+
+> /surface/plane-surface FM-34 three-points -0.021095 -0.040774 -0.079010 0.010047 0.020793 -0.079010 0.041166 0.020482 -0.079010 no
+
+> /surface/plane-surface FM-35 three-points -0.021095 -0.040774 -0.080010 0.010047 0.020793 -0.080010 0.041166 0.020482 -0.080010 no
+
+> /surface/plane-surface FM-36 three-points -0.021095 -0.040774 -0.081010 0.010047 0.020793 -0.081010 0.041166 0.020482 -0.081010 no
+
+> /surface/plane-surface FM-37 three-points -0.021095 -0.040774 -0.082010 0.010047 0.020793 -0.082010 0.041166 0.020482 -0.082010 no
+
+> /surface/plane-surface FM-38 three-points -0.021095 -0.040774 -0.083010 0.010047 0.020793 -0.083010 0.041166 0.020482 -0.083010 no
+
+> /surface/plane-surface FM-39 three-points -0.021095 -0.040774 -0.084010 0.010047 0.020793 -0.084010 0.041166 0.020482 -0.084010 no
+
+> /surface/plane-surface FM-40 three-points -0.021095 -0.040774 -0.085010 0.010047 0.020793 -0.085010 0.041166 0.020482 -0.085010 no
+
+> /surface/plane-surface FM-41 three-points -0.021095 -0.040774 -0.086010 0.010047 0.020793 -0.086010 0.041166 0.020482 -0.086010 no
+
+> /surface/plane-surface FM-42 three-points -0.021095 -0.040774 -0.087010 0.010047 0.020793 -0.087010 0.041166 0.020482 -0.087010 no
+
+> /surface/plane-surface FM-43 three-points -0.021095 -0.040774 -0.088010 0.010047 0.020793 -0.088010 0.041166 0.020482 -0.088010 no
+
+> /surface/plane-surface FM-44 three-points -0.021095 -0.040774 -0.089010 0.010047 0.020793 -0.089010 0.041166 0.020482 -0.089010 no
+
+> /surface/plane-surface FM-45 three-points -0.021095 -0.040774 -0.090010 0.010047 0.020793 -0.090010 0.041166 0.020482 -0.090010 no
+
+> /surface/plane-surface FM-46 three-points -0.021095 -0.040774 -0.091010 0.010047 0.020793 -0.091010 0.041166 0.020482 -0.091010 no
+
+> /surface/plane-surface FM-47 three-points -0.021095 -0.040774 -0.092010 0.010047 0.020793 -0.092010 0.041166 0.020482 -0.092010 no
+
+> /surface/plane-surface FM-48 three-points -0.021095 -0.040774 -0.093010 0.010047 0.020793 -0.093010 0.041166 0.020482 -0.093010 no
+
+> /surface/plane-surface FM-49 three-points -0.021095 -0.040774 -0.094010 0.010047 0.020793 -0.094010 0.041166 0.020482 -0.094010 no
+
+> /surface/plane-surface FM-50 three-points -0.021095 -0.040774 -0.095010 0.010047 0.020793 -0.095010 0.041166 0.020482 -0.095010 no
+
+> /surface/zone-surface cord_s "cord" q 
+
+> /surface/zone-surface dura_s "dura" q 
+
+> /surface/zone-surface tonsils_s "tonsils" q 
+
+> /surface/group-surfaces cord_s dura_s tonsils_s () wall  q 
+
+> ;reports 
+/solve/report-definitions/add pilot volume-max field velocity-magnitude zone-names fluid () q 
+
+> /solve/report-files/add pilot_report frequency 1 name "pilot_report" report-defs flow-time () print? yes file-name "pilot_report" q 
+
+> /solve/report-plot/add pilot q 
+
+> /solve/report-plots delete-all yes 
+
+> /solve/report-files delete-all yes 
+
+> /solve/report-definitions delete-all yes 
+ Report Definition "delta-time" is not deletable
+ Report Definition "iters-per-timestep" is not deletable
+ Report Definition "flow-time" is not deletable
+
+> /solve/report-definitions/add u_max volume-max field velocity-magnitude zone-names fluid () q 
+
+> /solve/report-definitions/add q_bottom  surface-volumeflowrate surface-names bottom () q 
+
+> /solve/report-definitions/add q_top  surface-volumeflowrate surface-names top () q 
+
+> /solve/report-definitions/add q_tonsils  surface-volumeflowrate surface-names tonsils () q 
+
+> /solve/report-definitions/add p_FM-0  surface-areaavg field pressure surface-names FM-0 () q 
+
+> /solve/report-definitions/add p_FM-1  surface-areaavg field pressure surface-names FM-1 () q 
+
+> /solve/report-definitions/add p_FM-2  surface-areaavg field pressure surface-names FM-2 () q 
+
+> /solve/report-definitions/add p_FM-3  surface-areaavg field pressure surface-names FM-3 () q 
+
+> /solve/report-definitions/add p_FM-4  surface-areaavg field pressure surface-names FM-4 () q 
+
+> /solve/report-definitions/add p_FM-5  surface-areaavg field pressure surface-names FM-5 () q 
+
+> /solve/report-definitions/add p_FM-6  surface-areaavg field pressure surface-names FM-6 () q 
+
+> /solve/report-definitions/add p_FM-7  surface-areaavg field pressure surface-names FM-7 () q 
+
+> /solve/report-definitions/add p_FM-8  surface-areaavg field pressure surface-names FM-8 () q 
+
+> /solve/report-definitions/add p_FM-9  surface-areaavg field pressure surface-names FM-9 () q 
+
+> /solve/report-definitions/add p_FM-10  surface-areaavg field pressure surface-names FM-10 () q 
+
+> /solve/report-definitions/add p_FM-11  surface-areaavg field pressure surface-names FM-11 () q 
+
+> /solve/report-definitions/add p_FM-12  surface-areaavg field pressure surface-names FM-12 () q 
+
+> /solve/report-definitions/add p_FM-13  surface-areaavg field pressure surface-names FM-13 () q 
+
+> /solve/report-definitions/add p_FM-14  surface-areaavg field pressure surface-names FM-14 () q 
+
+> /solve/report-definitions/add p_FM-15  surface-areaavg field pressure surface-names FM-15 () q 
+
+> /solve/report-definitions/add p_FM-16  surface-areaavg field pressure surface-names FM-16 () q 
+
+> /solve/report-definitions/add p_FM-17  surface-areaavg field pressure surface-names FM-17 () q 
+
+> /solve/report-definitions/add p_FM-18  surface-areaavg field pressure surface-names FM-18 () q 
+
+> /solve/report-definitions/add p_FM-19  surface-areaavg field pressure surface-names FM-19 () q 
+
+> /solve/report-definitions/add p_FM-20  surface-areaavg field pressure surface-names FM-20 () q 
+
+> /solve/report-definitions/add p_FM-21  surface-areaavg field pressure surface-names FM-21 () q 
+
+> /solve/report-definitions/add p_FM-22  surface-areaavg field pressure surface-names FM-22 () q 
+
+> /solve/report-definitions/add p_FM-23  surface-areaavg field pressure surface-names FM-23 () q 
+
+> /solve/report-definitions/add p_FM-24  surface-areaavg field pressure surface-names FM-24 () q 
+
+> /solve/report-definitions/add p_FM-25  surface-areaavg field pressure surface-names FM-25 () q 
+
+> /solve/report-definitions/add p_FM-26  surface-areaavg field pressure surface-names FM-26 () q 
+
+> /solve/report-definitions/add p_FM-27  surface-areaavg field pressure surface-names FM-27 () q 
+
+> /solve/report-definitions/add p_FM-28  surface-areaavg field pressure surface-names FM-28 () q 
+
+> /solve/report-definitions/add p_FM-29  surface-areaavg field pressure surface-names FM-29 () q 
+
+> /solve/report-definitions/add p_FM-30  surface-areaavg field pressure surface-names FM-30 () q 
+
+> /solve/report-definitions/add p_FM-31  surface-areaavg field pressure surface-names FM-31 () q 
+
+> /solve/report-definitions/add p_FM-32  surface-areaavg field pressure surface-names FM-32 () q 
+
+> /solve/report-definitions/add p_FM-33  surface-areaavg field pressure surface-names FM-33 () q 
+
+> /solve/report-definitions/add p_FM-34  surface-areaavg field pressure surface-names FM-34 () q 
+
+> /solve/report-definitions/add p_FM-35  surface-areaavg field pressure surface-names FM-35 () q 
+
+> /solve/report-definitions/add p_FM-36  surface-areaavg field pressure surface-names FM-36 () q 
+
+> /solve/report-definitions/add p_FM-37  surface-areaavg field pressure surface-names FM-37 () q 
+
+> /solve/report-definitions/add p_FM-38  surface-areaavg field pressure surface-names FM-38 () q 
+
+> /solve/report-definitions/add p_FM-39  surface-areaavg field pressure surface-names FM-39 () q 
+
+> /solve/report-definitions/add p_FM-40  surface-areaavg field pressure surface-names FM-40 () q 
+
+> /solve/report-definitions/add p_FM-41  surface-areaavg field pressure surface-names FM-41 () q 
+
+> /solve/report-definitions/add p_FM-42  surface-areaavg field pressure surface-names FM-42 () q 
+
+> /solve/report-definitions/add p_FM-43  surface-areaavg field pressure surface-names FM-43 () q 
+
+> /solve/report-definitions/add p_FM-44  surface-areaavg field pressure surface-names FM-44 () q 
+
+> /solve/report-definitions/add p_FM-45  surface-areaavg field pressure surface-names FM-45 () q 
+
+> /solve/report-definitions/add p_FM-46  surface-areaavg field pressure surface-names FM-46 () q 
+
+> /solve/report-definitions/add p_FM-47  surface-areaavg field pressure surface-names FM-47 () q 
+
+> /solve/report-definitions/add p_FM-48  surface-areaavg field pressure surface-names FM-48 () q 
+
+> /solve/report-definitions/add p_FM-49  surface-areaavg field pressure surface-names FM-49 () q 
+
+> /solve/report-definitions/add p_FM-50  surface-areaavg field pressure surface-names FM-50 () q 
+
+> /report/surface-integrals/area FM-0 FM-1 FM-2 FM-3 FM-4 FM-5 FM-6 FM-7 FM-8 FM-9 FM-10 FM-11 FM-12 FM-13 FM-14 FM-15 FM-16 FM-17 FM-18 FM-19 FM-20 FM-21 FM-22 FM-23 FM-24 FM-25 FM-26 FM-27 FM-28 FM-29 FM-30 FM-31 FM-32 FM-33 FM-34 FM-35 FM-36 FM-37 FM-38 FM-39 FM-40 FM-41 FM-42 FM-43 FM-44 FM-45 FM-46 FM-47 FM-48 FM-49 FM-50 () yes "C:\Users\guill\Documents\chiari\computations\ansys\s101_a\outputs\area-z" no yes q 
+
+> /solve/report-files/add b0top_dx00002_report frequency 1 name "b0top_dx00002_report" report-defs flow-time u_max q_bottom q_top q_tonsils p_FM-0 p_FM-1 p_FM-2 p_FM-3 p_FM-4 p_FM-5 p_FM-6 p_FM-7 p_FM-8 p_FM-9 p_FM-10 p_FM-11 p_FM-12 p_FM-13 p_FM-14 p_FM-15 p_FM-16 p_FM-17 p_FM-18 p_FM-19 p_FM-20 p_FM-21 p_FM-22 p_FM-23 p_FM-24 p_FM-25 p_FM-26 p_FM-27 p_FM-28 p_FM-29 p_FM-30 p_FM-31 p_FM-32 p_FM-33 p_FM-34 p_FM-35 p_FM-36 p_FM-37 p_FM-38 p_FM-39 p_FM-40 p_FM-41 p_FM-42 p_FM-43 p_FM-44 p_FM-45 p_FM-46 p_FM-47 p_FM-48 p_FM-49 p_FM-50 () print? yes file-name "b0top_dx00002_report" q 
+
+> ;run simulation 
+time-step 0.01032 
+
+> /solve/initialize/ initialize-flow 
+Note: Settings to improve the robustness of pathline and
+      particle tracking have been automatically enabled.
+
+
+
+> /solve/initialize/hyb-initialization yes 
+Initialize using the hybrid initialization method.
+
+Checking case topology... 
+-This case has both inlets & outlets 
+-Pressure information is not available at the boundaries.
+ Case will be initialized with constant pressure
+
+	iter		scalar-0
+
+	1		1.000000e+00
+	2		4.584472e-05
+	3		4.094146e-06
+	4		7.771747e-07

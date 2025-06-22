@@ -5,11 +5,11 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_b";
+subject = "s101_a";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 % case_name = { "c2", "c1t", "c1b","c0t"}; 
-case_name = {"c3", "c1t", "c0t"}; 
+case_name = {"b0t"}; 
 mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file

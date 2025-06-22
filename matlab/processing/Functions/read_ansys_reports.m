@@ -19,8 +19,6 @@ for case_name = cases
 
     fprintf('\n%s: ', DNS_case);
 
-    Dz = 5:5:50;
-
     % Load DNS files
     if ~exist(fullfile(cas.dirmat, "DNS_"+DNS_case+".mat"), 'file')
         fprintf(2,'File "%s" does not exist, simulation needs to be done \n', "DNS_"+DNS_case+".mat");
@@ -68,6 +66,7 @@ for case_name = cases
     w_combined = cell(Nloc, 1); 
     p_combined = cell(Nloc, 1); 
     slice_z = zeros(Nloc, 1);
+    Dz = DNS.Dz;
 
     % Calculate mean z-location slices
     for i = 1:pcmri.Ndat
@@ -100,59 +99,65 @@ for case_name = cases
 
         % Velocity components
         [W, V, U, P] = deal(data{5}, data{6}, data{7}, data{8});
-        
-        % Loop through DNS locations and store data
-        for k = 1:length(DNS.slices.locz)
-            if n == 1
-                % Find indices where Z is within range of current location
-                index{k} = find(abs(Z - DNS.slices.locz(k)) <= 0.2*1e-2); 
+
+        if startsWith(DNS.geom, 'b')
+            fileID = fopen(fullfile(DNS.path_out_report,'..', "area-z"), 'r');
+            data = textscan(fileID, '%s %f', 'HeaderLines', 4);
+            DNS.out.area = data{2};
+        else
+            % Loop through DNS locations and store data
+            for k = 1:length(DNS.slices.locz)
+                if n == 1
+                    % Find indices where Z is within range of current location
+                    index{k} = find(abs(Z - DNS.slices.locz(k)) <= 0.2*1e-2); 
+                    
+                    % Store coordinates for current location
+                    x_DNS{k} = X(index{k});
+                    y_DNS{k} = Y(index{k});
+                    z_DNS{k} = Z(index{k});
+                end
+    
+                % Assign specific points to x_coords, y_coords, and z_coords
+                x_coords = [x_DNS{k}(1), x_DNS{k}(floor(end/2)), x_DNS{k}(end)];
+                y_coords = [y_DNS{k}(1), y_DNS{k}(floor(end/2)), y_DNS{k}(end)];
+                z_coords = [z_DNS{k}(1), z_DNS{k}(floor(end/2)), z_DNS{k}(end)];
                 
-                % Store coordinates for current location
-                x_DNS{k} = X(index{k});
-                y_DNS{k} = Y(index{k});
-                z_DNS{k} = Z(index{k});
+                % Define points on the plane
+                P1 = [x_coords(1), y_coords(1), z_coords(1)];
+                P2 = [x_coords(2), y_coords(2), z_coords(2)];
+                P3 = [x_coords(3), y_coords(3), z_coords(3)];
+                
+                % Calculate vectors and normal
+                V1 = P2 - P1;
+                V2 = P3 - P1;
+                
+                % Normal vector and normalization
+                nn = cross(V1, V2);
+                nn = nn / norm(nn); % Normalize
+                
+                % Ensure the z-component of the normal vector is positive
+                if nn(3) < 0
+                    nn = -nn; % Flip the normal vector
+                end
+                
+                normal_v{k} = nn;        
+                % Store velocity and pressure for current time step
+                u_DNS{k, n} = U(index{k});
+                v_DNS{k, n} = V(index{k});
+                w_DNS{k, n} = W(index{k});
+                p_DNS{k, n} = P(index{k});
+    
+                % Extract velocity components for the current indices
+                u_vel = u_DNS{k, n}; % x-component
+                v_vel = v_DNS{k, n}; % y-component
+                w_vel = w_DNS{k, n}; % z-component
+                
+                % Combine velocity components into a single velocity vector
+                velocity_vector = [u_vel(:), v_vel(:), w_vel(:)];
+                
+                % Calculate normal velocity component for each point
+                un_DNS{k, n} = velocity_vector * (normal_v{k})'; % Dot product
             end
-
-            % Assign specific points to x_coords, y_coords, and z_coords
-            x_coords = [x_DNS{k}(1), x_DNS{k}(floor(end/2)), x_DNS{k}(end)];
-            y_coords = [y_DNS{k}(1), y_DNS{k}(floor(end/2)), y_DNS{k}(end)];
-            z_coords = [z_DNS{k}(1), z_DNS{k}(floor(end/2)), z_DNS{k}(end)];
-            
-            % Define points on the plane
-            P1 = [x_coords(1), y_coords(1), z_coords(1)];
-            P2 = [x_coords(2), y_coords(2), z_coords(2)];
-            P3 = [x_coords(3), y_coords(3), z_coords(3)];
-            
-            % Calculate vectors and normal
-            V1 = P2 - P1;
-            V2 = P3 - P1;
-            
-            % Normal vector and normalization
-            nn = cross(V1, V2);
-            nn = nn / norm(nn); % Normalize
-            
-            % Ensure the z-component of the normal vector is positive
-            if nn(3) < 0
-                nn = -nn; % Flip the normal vector
-            end
-            
-            normal_v{k} = nn;        
-            % Store velocity and pressure for current time step
-            u_DNS{k, n} = U(index{k});
-            v_DNS{k, n} = V(index{k});
-            w_DNS{k, n} = W(index{k});
-            p_DNS{k, n} = P(index{k});
-
-            % Extract velocity components for the current indices
-            u_vel = u_DNS{k, n}; % x-component
-            v_vel = v_DNS{k, n}; % y-component
-            w_vel = w_DNS{k, n}; % z-component
-            
-            % Combine velocity components into a single velocity vector
-            velocity_vector = [u_vel(:), v_vel(:), w_vel(:)];
-            
-            % Calculate normal velocity component for each point
-            un_DNS{k, n} = velocity_vector * (normal_v{k})'; % Dot product
         end
     end
 
@@ -209,8 +214,10 @@ for case_name = cases
             index_0 = index_0 + 1;
         end
 
-        fprintf('compute RMSE error ...\n');
-        [DNS.RMSE,DNS.RMSE_ave, DNS.RMSE_space] = compute_RMSE(DNS, pcmri);
+        if ~startsWith(DNS.geom, 'b')
+            fprintf('compute RMSE error ...\n');
+            [DNS.RMSE,DNS.RMSE_ave, DNS.RMSE_space] = compute_RMSE(DNS, pcmri);
+        end
         save(output_file, 'DNS');
     else
         % File does not exist, provide a warning or handle as needed
