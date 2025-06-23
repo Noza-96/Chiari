@@ -2,8 +2,8 @@ subject = {"s101_b","s101_a","s101_aa"} ;
 case_name = "b0t";
 mesh_size = 0.0002;
 
-fs = 14;
-fan = 10;
+fs = 16;
+fan = 14;
 Nt = 100;  % Last N time steps
 n_cases = length(case_name);
 

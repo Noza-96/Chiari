@@ -2,7 +2,7 @@ function figure_2(subject, case_name, mesh_size)
     line_sty = [    "-", "-", "-", "-", "-"];
     
     fs = 16;
-    fan = 10;
+    fan = 14;
     rows = 3;
     
     
@@ -46,7 +46,7 @@ function figure_2(subject, case_name, mesh_size)
     
     % === Plotting ===
     ff = figure;
-    set(ff, 'Position', [200, 200, 450, 450]);  % Wider for extra tile
+    set(ff, 'Position', [200, 200, 450, 80*pcmri.Ndat]);  % Wider for extra tile
     tiledlayout(pcmri.Ndat, rows, "TileSpacing", "tight", "Padding", "compact")
     for k = 1:pcmri.Ndat
         % === Main RMSE plot (columns 1 to 3) ===
@@ -63,22 +63,26 @@ function figure_2(subject, case_name, mesh_size)
             hold on
             end
         end
-        set(gca, 'LineWidth', 0.5, 'TickLength', [0.01 0.01], 'FontSize', fan);
+        set(gca, 'LineWidth', 0.8, 'TickLength', [0.005 0.005], 'FontSize', fan);
         grid on
+        ax = gca;
+        ax.YAxis.Exponent = 0;
         set(gca, 'XGrid', 'off', 'YGrid', 'on')
         box on
     
-        % ylim([0, max(max_y(k)*1.1, 0.01)])
-        ylim([0, 0.015])
-        yticks(0:0.005:0.01)
-        xticks(0:0.2:1)
+        ylim([0, max(ceil(max_y(k)*1000/5)*5/1000, 0.01)])
+        % ylim([0, 0.015])
+        yticks(0.005:0.005:(max(ceil(max_y(k)*1000/5)*5/1000, 0.01)-0.001))
+        xticks(0:0.5:1)
+        xticklabels([])
+        yticklabels([])
         
         if k == 1
-            title('$\langle {\rm RMSE} \rangle \, \left[{\rm cm/s}\right]$', 'Interpreter', 'latex', 'FontSize',fs)
+            % title('$\langle {\rm RMSE} \rangle \, \left[{\rm cm/s}\right]$', 'Interpreter', 'latex', 'FontSize',fs)
         end
     
         if k == pcmri.Ndat
-            xlabel('Cardiac cycle $(t/T)$', 'Interpreter', 'latex', 'FontSize',fs)
+            % xlabel('Cardiac cycle $(t/T)$', 'Interpreter', 'latex', 'FontSize',fs)
         else
             xticklabels([])
         end
@@ -91,20 +95,21 @@ function figure_2(subject, case_name, mesh_size)
             h = findobj(gca, 'Type', 'Bar');
             h.CData(i, :) = bar_color;
         end
-        set(gca, 'LineWidth', 0.5, 'TickLength', [0.01 0.01], 'FontSize', fan);
+        set(gca, 'LineWidth', 0.8, 'TickLength', [0.005 0.005], 'FontSize', fan, 'YAxisLocation', 'right');
         if k == 1
-            title('$\langle \overline{{\rm RMSE}} \rangle \, \left[{\rm cm/s}\right]$ ', 'Interpreter', 'latex', 'FontSize',fs)
+            % title('$\langle \overline{{\rm RMSE}} \rangle \, \left[{\rm cm/s}\right]$ ', 'Interpreter', 'latex', 'FontSize',fs)
         elseif k == pcmri.Ndat
             % xlabel('Configuration', 'Interpreter', 'latex', 'FontSize',fs)
         end
         % ylim([0, max(max(RMSE_ave_all(k, :))*1.1, 0.005)])
-        ylim([0, 0.0075])
+        % ylim([0, 0.0075])
+        ylim([0, max(ceil(max_y(k)*1000/5)*5/1000, 0.01)])
 
-        yticks(0:0.005:0.01)
+        yticks(0.005:0.005:(max(ceil(max_y(k)*1000/5)*5/1000, 0.01)-0.001))
         xticklabels([])
         if k == pcmri.Ndat
-        xticklabels({'(I)', '(II)', '(III)', '(IV)', '(V)'});
-        xlabel('Configuration', 'Interpreter', 'latex', 'FontSize',fs)
+        % xticklabels({'(I)', '(II)', '(III)', '(IV)', '(V)'});
+        % xlabel('Configuration', 'Interpreter', 'latex', 'FontSize',fs)
         end
         ax = gca;
         ax.YAxis.Exponent = 0;

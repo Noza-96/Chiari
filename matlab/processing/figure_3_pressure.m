@@ -1,9 +1,9 @@
 function figure_3_pressure(subject, case_name, mesh_size)
 
-    line_sty = ["-", "-", "--", "-", "-"];
+    line_sty = ["-", "-", "-", "-", "-"];
     
-    fs = 14;
-    fan = 10;
+    fs = 16;
+    fan = 14;
     Nt = 100;  % Last N time steps
     n_cases = length(case_name);
     
