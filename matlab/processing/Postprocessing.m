@@ -5,11 +5,11 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_a";
+subject = "s101_aa";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 % case_name = { "c2", "c1t", "c1b","c0t"}; 
-case_name = {"c0t", "c1t", "c3"}; 
+case_name = {"b0t"}; 
 mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file
@@ -38,6 +38,10 @@ for s = subject
 end
 
 % figure_3_LI
+%% Longitudinal Analysis 
+figure_3_LI;
+figure_4_bef_aft;
+
 
 %% save-data
 close all; clear;
