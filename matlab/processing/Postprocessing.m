@@ -29,12 +29,12 @@ warning('on', 'all');
 close all; clear;
 subject = ["s101_b", "s101_a", "s101_aa"];
 case_name = {"c0t", "c1t", "c1b", "c2", "c3"};
-mesh_size = 0.0002;he
+mesh_size = 0.0002;
 
 for s = subject
-    figure_2_b(s, case_name, mesh_size)
-    figure_2(s, case_name, mesh_size)
-    % figure_3_pressure(s, case_name, mesh_size)
+    % figure_2_b(s, case_name, mesh_size)
+    % figure_2(s, case_name, mesh_size)
+    figure_3_pressure(s, case_name, mesh_size)
 end
 
 % figure_3_LI

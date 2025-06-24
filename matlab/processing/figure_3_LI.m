@@ -28,8 +28,8 @@ Nloc = length(dp_locs);
 ref_loc = dp_locs{end};
 
 ff=figure('Name', 'LI values', 'NumberTitle', 'off');
-tiledlayout(1, 3, 'TileSpacing', 'compact', 'Padding', 'compact');
-set(ff, 'Position', [200, 200, 600, 500]);  % Wider for extra tile
+tiledlayout(1, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
+set(ff, 'Position', [200, 200, 500, 450]);  % Wider for extra tile
 
 t = linspace(0,1,Nt);
 
@@ -72,8 +72,8 @@ for s = 1:length(subject)
     plot(LI_vals, y_vals, '-o', 'LineWidth', 1.5, 'MarkerSize', 2, 'Color', color_m{s});
     hold on
     % set(gca, 'YTick', 1:length(labels), 'YTickLabel', labels, 'YDir', 'reverse');
-    xlabel("$\left[{\rm dyn}/{\rm cm}^5\right]$", 'Interpreter', 'latex', 'FontSize', fs);
-    title('Longitudinal impedance',  'Interpreter', 'latex','FontSize', fs);
+    xlabel("$\int _1 ^8 Z_L {\rm d}f\, \left[{\rm dyn}/{\rm cm}^5\right]$", 'Interpreter', 'latex', 'FontSize', fs);
+    title('ILI', 'FontSize', fs, 'FontWeight', 'normal');
     ylabel('$z$ [{\rm cm}]',  'Interpreter', 'latex','FontSize', fs);
     ax = gca;
     ax.XGrid = 'off';
@@ -84,26 +84,26 @@ for s = 1:length(subject)
     plot(area, y_vals, '-o', 'LineWidth', 1.5, 'MarkerSize', 2, 'Color', color_m{s});
     hold on
     % set(gca, 'YTick', 1:length(labels), 'YTickLabel', labels, 'YDir', 'reverse');
-    xlabel("$\left[{\rm cm}^2\right]$", 'Interpreter', 'latex', 'FontSize', fs);
-    title('Cross-sectional area',  'Interpreter', 'latex','FontSize', fs);
+   xlabel('$A\, \left[{\rm cm}^2\right]$', 'Interpreter', 'latex', 'FontSize', fs, 'FontWeight', 'normal', 'FontName', 'Helvetica');
+   title('Cross-sectional area', 'FontSize', fs, 'FontWeight', 'normal');
     ax = gca;
     ax.XGrid = 'off';
     ax.YGrid = 'on';
     set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
     yticklabels([]);
-    xlim([0,4])
+    xlim([0,3])
 
-    nexttile(3)
-    plot(vol, y_vals, '-o', 'LineWidth', 1.5, 'MarkerSize', 2, 'Color', color_m{s});
-    title('Cumulative volume',  'Interpreter', 'latex','FontSize', fs);
-    xlabel("$\left[{\rm cm}^3\right]$", 'Interpreter', 'latex', 'FontSize', fs);
-    hold on
-    ax = gca;
-    ax.XGrid = 'off';
-    ax.YGrid = 'on';
-    set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
-    yticklabels([]);
-    xlim([0,15])
+    % nexttile(3)
+    % plot(vol, y_vals, '-o', 'LineWidth', 1.5, 'MarkerSize', 2, 'Color', color_m{s});
+    % title('Cumulative volume', 'FontSize', fs, 'FontWeight', 'normal');
+    % xlabel("$\left[{\rm cm}^3\right]$", 'Interpreter', 'latex', 'FontSize', fs);
+    % hold on
+    % ax = gca;
+    % ax.XGrid = 'off';
+    % ax.YGrid = 'on';
+    % set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
+    % yticklabels([]);
+    % xlim([0,10])
 
 
     % cumsimps(x,y,dim)

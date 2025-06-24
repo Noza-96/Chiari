@@ -1,7 +1,7 @@
 function figure_2_b(subject, case_name, mesh_size)
     
     fs = 16;
-    fan = 10;
+    fan = 14;
     rows = 3;
     labels =  {'(I)', '(II)', '(III)', '(IV)', '(V)'};
     
