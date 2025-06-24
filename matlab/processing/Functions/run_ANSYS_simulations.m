@@ -42,15 +42,6 @@ function run_ANSYS_simulations(cas, dat_PC, DNS_cases,  n_cores, visualize_conso
     end
 end
 
-% Helper function to check if the case file exists
-function exists = checkCaseFile(cas, case_name)
-    file_path = fullfile(cas.diransys_in, "case-files", case_name + ".cas.gz");
-    exists = isfile(file_path);
-    if ~exists
-        fprintf(2, 'Error: Case file %s not found.\n', case_name);
-    end
-end
-
 % Helper function to load DNS data
 function DNS = loadDNSData(cas, case_name)
     load(fullfile(cas.dirmat, "DNS_" + case_name + ".mat"), 'DNS');

@@ -6,6 +6,7 @@ answer = lower(strtrim(input('Do you want to redo data extraction? (y/[n]): ', '
 if strcmp(answer, 'y') || strcmp(answer, 'yes')
     redo_report = true;
 end
+version = cell(1,5);
 
 for case_name = cases
     % load MRI data for subject
@@ -13,9 +14,9 @@ for case_name = cases
     
     load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
 
-    [t_geom, t_sim, b_inlet] = get_type_simulation(case_name{1});
+    [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name{1});
 
-    DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
+    DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
 
     fprintf('\n%s: ', DNS_case);
 
