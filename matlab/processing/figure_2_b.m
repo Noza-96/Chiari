@@ -49,9 +49,9 @@ function figure_2_b(subject, case_name, mesh_size)
         % roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
     end
         
-    fig = figure('Position', [100, 100, 115*(Ncases), 450]);
+    fig = figure('Position', [100, 100, 115*(Ncases), 80*Ndat]);
     tt=tiledlayout(Ndat, Ncases , "TileSpacing", "tight", "Padding", "compact");
-    title(tt, '$\overline{\mathrm{RMSE}} \, \left[{\rm cm/s}\right]$', 'FontSize', fs, 'interpreter', 'latex');  % Title for the whole tiled layout
+    % title(tt, '$\overline{\mathrm{RMSE}} \, \left[{\rm cm/s}\right]$', 'FontSize', fs, 'interpreter', 'latex');  % Title for the whole tiled layout
     % title(tt, '$\overline{\mathrm{RMSE}}$', 'FontSize', fs, 'interpreter', 'latex');  % Title for the whole tiled layout
 
     for loc = 1:Ndat           
@@ -65,9 +65,6 @@ function figure_2_b(subject, case_name, mesh_size)
             continue
             end
             spatial_error_plot(st_DNS{kk}.RMSE_space, st_DNS{kk}.case, loc, Ndat, ii, Ncases, roi{loc}, x_roi{loc}, y_roi{loc}); 
-           if loc == Ndat
-                xlabel(labels{kk});
-           end
         end
     end
     
@@ -86,7 +83,8 @@ function spatial_error_plot(data, name_loc, loc, Ndat, ii, Ncases, roi_mask, x_r
     % contourf(Xq, Yq, Wq, 40, 'LineColor', 'none');
     colorbar;
     colormap('parula');       % or 'parula', etc.
-    caxis([0 2]);  % set the color limits
+    caxis([0 2]);  % set the color limits'
+    colorbar 'off'
     % bluetored(6);
 
     % Set axis limits and properties
@@ -102,18 +100,7 @@ function spatial_error_plot(data, name_loc, loc, Ndat, ii, Ncases, roi_mask, x_r
     if ii ~= Ncases 
             colorbar off;
     end
-    % if ii <= Ncases
-    %     sstt = char(name_loc);  % Assuming 'data.case' is a string
-    %     if ~strcmp(sstt, 'PC-MRI')  % Use strcmp to compare strings
-    %          if ismember(sstt(3), ['b', 't'])
-    %             sstt = extractBetween(sstt, 1, 3);
-    %         else
-    %             sstt = extractBetween(sstt, 1, 2);
-    %         end
-    %         sstt = sstt + " DNS";
-    %     end
-    %     title(sstt)
-    % end
+
     if ii == 1 + (Ncases+1)*(loc-1)
         ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
     else
