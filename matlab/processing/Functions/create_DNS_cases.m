@@ -7,9 +7,9 @@ function [DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_
             case_i = case_name {i};
             mesh_j = mesh_size (j);
     
-            [DNS.geom, DNS.sim, DNS.inlet] = get_type_simulation(case_i);
+            [DNS.geom, DNS.sim, DNS.inlet, DNS.version] = get_type_simulation(case_i);
             DNS.mesh_size = mesh_j;
-            DNS.case = DNS.geom + string(DNS.sim) + DNS.inlet + "_dx" + formatDecimal(DNS.mesh_size);
+            DNS.case = DNS.geom + string(DNS.sim) + DNS.inlet + "_dx" + formatDecimal(DNS.mesh_size) + DNS.version;
             
             % full ansys folder path
             DNS.ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));

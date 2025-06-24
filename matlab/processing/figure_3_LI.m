@@ -19,8 +19,8 @@ mri_data_path = fullfile("../../../computations", "pc-mri", subject{1}, "mat", "
 load(mri_data_path, 'cas');
 
 % === Load one case to get locations and indices ===
-[t_geom, t_sim, b_inlet] = get_type_simulation(case_name);
-DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
+[t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name);
+DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
 data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
 load(data_path, 'DNS');
 dp_locs = DNS.out.dp.loc;

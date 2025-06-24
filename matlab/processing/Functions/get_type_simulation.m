@@ -1,5 +1,14 @@
-function [type_geometry, type_simulation, boundary_inlet] = get_type_simulation(DNS_case)
+function [type_geometry, type_simulation, boundary_inlet, version] = get_type_simulation(DNS_case)
     DNS_case = char(DNS_case);
+
+    if contains(DNS_case, "_")
+        suffix = extractAfter(DNS_case, "_");
+        version = ['_' suffix];  % include the underscore
+        DNS_case = extractBefore(DNS_case, "_");
+    else
+        version = "";
+    end
+
     type_geometry = regexp(DNS_case, '^[a-zA-Z]+', 'match', 'once');
     type_simulation = str2double(regexp(DNS_case, '\d+', 'match', 'once'));
     if ismember(type_simulation, [0, 1])
@@ -12,4 +21,6 @@ function [type_geometry, type_simulation, boundary_inlet] = get_type_simulation(
     else
         boundary_inlet = '';
     end
+
+
 end
