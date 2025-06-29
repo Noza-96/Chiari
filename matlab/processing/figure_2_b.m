@@ -28,7 +28,7 @@ function figure_2_b(subject, case_name, mesh_size)
         end
         load(data_path, 'DNS');
         st_DNS{i} = DNS;
-        if t_sim==1
+        if t_sim==0
             DNS_roi=DNS;
         elseif t_geom == "cn"
             DNS_roi_n=DNS;

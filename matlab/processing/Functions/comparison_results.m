@@ -7,6 +7,7 @@ function comparison_results(cas, case_name, mesh_size)
     
     for ii = 1:Ncases
         [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name{ii});
+        version
         DNS_cases{ii} = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
         load(fullfile(cas.dirmat, "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
         st_DNS{ii} = DNS;

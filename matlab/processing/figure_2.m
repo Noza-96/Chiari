@@ -54,8 +54,8 @@ function figure_2(subject, case_name, mesh_size)
         for i = 1:n_cases
             if exist_case(i)
             case_i = case_name{i};
-            [t_geom, t_sim, b_inlet] = get_type_simulation(case_i);
-            DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size);
+            [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_i);
+            DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size)+version;
             data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
             load(data_path, 'DNS');
     

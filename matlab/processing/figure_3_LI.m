@@ -77,7 +77,8 @@ for s = 1:length(subject)
     ylabel('$z$ [{\rm cm}]',  'Interpreter', 'latex','FontSize', fs);
     ax = gca;
     ax.XGrid = 'off';
-    ax.YGrid = 'on';
+    ax.YGrid = 'off';
+    yline([-1,-2,-3])
     set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
 
     nexttile(2)
@@ -88,10 +89,10 @@ for s = 1:length(subject)
    title('Cross-sectional area', 'FontSize', fs, 'FontWeight', 'normal');
     ax = gca;
     ax.XGrid = 'off';
-    ax.YGrid = 'on';
+    ax.YGrid = 'off';
     set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
     yticklabels([]);
-    xlim([0,3])
+    xlim([0,3.5])
 
     % nexttile(3)
     % plot(vol, y_vals, '-o', 'LineWidth', 1.5, 'MarkerSize', 2, 'Color', color_m{s});
