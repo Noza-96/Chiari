@@ -11,7 +11,7 @@ out_path = fullfile(pwd, 'Figures');
 if ~exist(out_path, 'dir'), mkdir(out_path); end
 
 ftit = 16; fs = 12; fan = 10;
-max_c = [10, 10, 10];
+max_c = [8, 8, 8];
 
 for s = 1:length(subjects)
     subject = subjects{s};
