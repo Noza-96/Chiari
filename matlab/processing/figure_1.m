@@ -107,7 +107,7 @@ for s=1:length(subjects)
         set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
     
         for j = 1:length(t_T)
-             plot([t_T(j), t_T(j)], [-3,3], 'LineStyle', '--', 'Color', gray_c, 'LineWidth', 0.5);
+             % plot([t_T(j), t_T(j)], [-3,3], 'LineStyle', '--', 'Color', gray_c, 'LineWidth', 0.5);
         end
         ylabel("$Q\left[{\rm ml/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
         yline(0,LineWidth=1,LineStyle=":")
