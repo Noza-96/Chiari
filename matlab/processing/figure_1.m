@@ -33,7 +33,7 @@ data_table.Vs      = NaN(length(subjects), Ndata);  % stroke volume
 data_table.Dz      = NaN(length(subjects), Ndata);  % stroke volume
 
 
-t_T= [0.4, 0.65, 0.8];
+t_T= [0.4, 0.7, 0.8];
 
 % Set up figure properties
 figure;

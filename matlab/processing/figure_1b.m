@@ -3,8 +3,8 @@ addpath('Functions/');
 addpath('Functions/Others/');
 
 subjects = {"s101_b", "s101_a", "s101_aa"};
-frame_idx = [41, 66, 81];
-t_T= [0.4, 0.65, 0.8];
+frame_idx = [40, 70, 80];
+t_T= [0.4, 0.7, 0.8];
 
 % Export options
 out_path = fullfile(pwd, 'Figures');

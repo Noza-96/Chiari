@@ -1,32 +1,43 @@
-function comparison_results(cas, case_name, mesh_size)
 
-    Ncases = length(case_name); 
-    DNS_cases = cell (1,Ncases);
-    st_DNS = cell (1,Ncases);
-    index_n = 0;
+subject = "s101_b";
+case_name ={"c3", "cl3_v2","cl3_v3","cl3_v4"};
+mesh_size = 0.0002;
+    
+    fs = 16;
+    fan = 14;
+    rows = 3;
 
     load(fullfile(cas.dirmat, "DNS_c0top_dx00002.mat"), 'DNS');
     DNS_roi=DNS;
-    % DNS_roi_n=DNS;
-    % index_n = ii;
     
-    for ii = 1:Ncases
-        [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name{ii});
-        version
-        DNS_cases{ii} = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
-        load(fullfile(cas.dirmat, "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
-        st_DNS{ii} = DNS;
-        % if t_sim==0
-        %     DNS_roi=DNS;
-        %     % DNS_roi_n=DNS;
-        %     % index_n = ii;
-        % end
-    end
-
-
+    % Load MRI data
+    mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat");
+    load(mri_data_path, 'cas');
     load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
-    Ndat = length(pcmri.locations); % number of slices
     
+    t = linspace(0, 1, pcmri.Nt);
+    Ncases = length(case_name);
+    colors = lines(Ncases);  % Unique colors per case
+
+    st_DNS = cell(1, Ncases);
+    
+    for i = 1:Ncases
+        case_i = case_name{i};
+        [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_i);
+        DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
+        data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
+
+        if ~exist(data_path, 'file')
+            fprintf(2, 'File "%s" does not exist, simulation needs to be done \n', "DNS_" + DNS_case + ".mat");
+            continue
+        end
+        load(data_path, 'DNS');
+        st_DNS{i} = DNS;
+    end
+    
+    Ndat = pcmri.Ndat;
+    % === Plotting ===
+    %-----
     x_roi =DNS_roi.slices.x;
     y_roi = DNS_roi.slices.y;
     % x_roi_n =DNS_roi_n.slices.x;
@@ -36,60 +47,45 @@ function comparison_results(cas, case_name, mesh_size)
         roi{kk} = DNS_roi.slices.u_normal{kk}(:,1)==0;
         % roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
     end
-    pcmri = apply_roi_pcmri(pcmri);
-    
-    fig = figure('Position', [100, 100, 200*(Ncases+1), 600]);
-    tiledlayout(Ndat, Ncases + 1, "TileSpacing", "tight", "Padding", "loose");
-    
-    % Preallocate movie vector
-    numFrames = st_DNS{1}.ts_cycle;
-    movieVector(numFrames) = struct('cdata', [], 'colormap', []);
-
-    % Loop through time steps
-    for n = 1:numFrames
-        fprintf('Processing frame %d of %d\n', n, numFrames);
-        for loc = 1:Ndat           
-            % Plot PC-MRI data/results
-            create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
-
-            for kk = 1:Ncases
-                % if kk==index_n
-                %     create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi_n{loc}, x_roi_n{loc}, y_roi_n{loc});           
-                % else
-                    create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});           
-                % end
-            end
-        end
-
-        plot_flow_rate (pcmri.q{Ndat},n)
         
-        % Capture the frame
-        movieVector(n) = getframe(fig);
+    fig = figure('Position', [100, 100, 100*(Ncases), 300]);
+    tt=tiledlayout(Ndat-2, Ncases , "TileSpacing", "tight", "Padding", "compact");
+    % title(tt, '$\overline{\mathrm{RMSE}} \, \left[{\rm cm/s}\right]$', 'FontSize', fs, 'interpreter', 'latex');  % Title for the whole tiled layout
+    title(tt, '$\overline{\mathrm{RMSE}}$', 'FontSize', 18, 'interpreter', 'latex');  % Title for the whole tiled layout
+
+    for loc = 2:Ndat-1           
+        % Plot PC-MRI data/results
+        for kk = 1:Ncases
+            ii = kk + (Ncases)*(loc-2);
+            nexttile(ii);
+            if isempty(st_DNS{kk})
+            box on
+                 xlabel(''); ylabel(''); xticks([]); yticks([]);
+            continue
+            end
+            spatial_error_plot(st_DNS{kk}.RMSE_space, st_DNS{kk}.case, loc, Ndat, ii, Ncases, roi{loc}, x_roi{loc}, y_roi{loc}); 
+        end
     end
+    % title(tt, "$t/T = " +num2str(selected_times(nt)/100)+ "$", 'Interpreter', 'latex', 'fontsize', 18);
+    
+    print(gcf, fullfile(pwd,'Figures', 'fig_4_anatomy'), '-depsc','-vector');
 
-    save_animation(movieVector, fullfile(cas.dirvid, "2D_comparison_" + strjoin(string([DNS_cases{:}]), '_vs_')));
-end
-
-%% auxiliary functions
-function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw, y_raw)
+    %% auxiliary functions
+function spatial_error_plot(data, name_loc, loc, Ndat, ii, Ncases, roi_mask, x_raw, y_raw)
     fs = 12;
     % Extract data and rescale
     x = data.x{loc} * 1e2; % [cm]
     y = data.y{loc} * 1e2; % [cm]
-    w = data.u_normal{loc}(:, n) * 1e2; % [cm/s]
-
-    % Create interpolation grid
-    xq = linspace(min(x), max(x), 1000);
-    yq = linspace(min(y), max(y), 1000);
-    [Xq, Yq] = meshgrid(xq, yq);
-    Wq = griddata(x, y, w, Xq, Yq, 'cubic');
+    w = data.val{loc} * 1e2; % [cm/s]
 
     % Plot in the specified tile
-    nexttile(ii);
     scatter(x, y, 10, w, 'filled', 'd');
     % contourf(Xq, Yq, Wq, 40, 'LineColor', 'none');
     colorbar;
-    bluetored(6);
+    colormap('parula');       % or 'parula', etc.
+    caxis([0 2]);  % set the color limits'
+    colorbar 'off'
+    % bluetored(6);
 
     % Set axis limits and properties
     Dx = max(x) - min(x);
@@ -101,21 +97,10 @@ function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw,
     % if n==1 && ii == 1 + (Ncases+1)*(loc-1) 
     %     named_location (gca, data.locations{loc}, fs)
     % end
-    if ii ~= 1 + Ncases + (Ncases+1)*(loc-1) 
-        colorbar off;
+    if ii ~= Ncases 
+            colorbar off;
     end
-    if ii <= Ncases + 1
-        sstt = char(data.case);  % Assuming 'data.case' is a string
-        if ~strcmp(sstt, 'PC-MRI')  % Use strcmp to compare strings
-             if ismember(sstt(3), ['b', 't'])
-                sstt = extractBetween(sstt, 1, 3);
-            else
-                sstt = extractBetween(sstt, 1, 2);
-            end
-            sstt = sstt + " DNS";
-        end
-        title(sstt)
-    end
+
     if ii == 1 + (Ncases+1)*(loc-1)
         ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
     else
@@ -143,7 +128,6 @@ if exist('roi_mask', 'var') && ~isempty(roi_mask)
     % Use boundary to extract the outer contour of the ROI points
     if ~isempty(x_roi_pts)
         try
-            k = boundary(x_roi_pts, y_roi_pts, 1);  % tight boundary
             plot(x_roi_pts, y_roi_pts, 'k', 'Marker', '.', 'LineStyle', 'none', 'MarkerSize', 2);
         catch
             % fallback if boundary fails
@@ -155,15 +139,6 @@ if exist('roi_mask', 'var') && ~isempty(roi_mask)
 end
 
 
-end
-
-function save_animation(movieVector, fileName)
-    % Save the animation as a video
-    writer = VideoWriter(fileName, 'MPEG-4');
-    writer.FrameRate = 5;
-    open(writer);
-    writeVideo(writer, movieVector);
-    close(writer);
 end
 
 function named_location (gca, sstt, fs)

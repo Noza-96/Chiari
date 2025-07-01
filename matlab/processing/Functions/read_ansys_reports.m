@@ -76,7 +76,12 @@ for case_name = cases
 
     % Load data for each time step
     for n = 1:DNS.ts_cycle
-        N = N0 + n;
+        N = N0 + n + 1;
+
+        if n == DNS.ts_cycle
+            N = N0 + 1; % last is first
+        end
+
         
         % Define file path for velocity data
         filePath = fullfile(DNS.path_out_report, DNS.case + "_report-" + sprintf('%04d', N)); 

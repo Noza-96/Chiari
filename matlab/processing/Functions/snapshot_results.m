@@ -1,4 +1,4 @@
-function comparison_results(cas, case_name, mesh_size)
+function snapshot_results(cas, case_name, mesh_size, selected_times)
 
     Ncases = length(case_name); 
     DNS_cases = cell (1,Ncases);
@@ -12,7 +12,6 @@ function comparison_results(cas, case_name, mesh_size)
     
     for ii = 1:Ncases
         [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name{ii});
-        version
         DNS_cases{ii} = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
         load(fullfile(cas.dirmat, "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
         st_DNS{ii} = DNS;
@@ -23,52 +22,52 @@ function comparison_results(cas, case_name, mesh_size)
         % end
     end
 
-
     load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
     Ndat = length(pcmri.locations); % number of slices
     
-    x_roi =DNS_roi.slices.x;
+    x_roi = DNS_roi.slices.x;
     y_roi = DNS_roi.slices.y;
-    % x_roi_n =DNS_roi_n.slices.x;
+    % x_roi_n = DNS_roi_n.slices.x;
     % y_roi_n = DNS_roi_n.slices.y;
-    roi = cell(1,Ndat);
+    roi = cell(1, Ndat);
+    roi_n = cell(1, Ndat);
     for kk = 1:Ndat    
         roi{kk} = DNS_roi.slices.u_normal{kk}(:,1)==0;
         % roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
     end
-    pcmri = apply_roi_pcmri(pcmri);
-    
-    fig = figure('Position', [100, 100, 200*(Ncases+1), 600]);
-    tiledlayout(Ndat, Ncases + 1, "TileSpacing", "tight", "Padding", "loose");
-    
-    % Preallocate movie vector
-    numFrames = st_DNS{1}.ts_cycle;
-    movieVector(numFrames) = struct('cdata', [], 'colormap', []);
 
-    % Loop through time steps
-    for n = 1:numFrames
-        fprintf('Processing frame %d of %d\n', n, numFrames);
-        for loc = 1:Ndat           
-            % Plot PC-MRI data/results
-            create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
+    pcmri = apply_roi_pcmri(pcmri);
+
+    for nt = 1:length(selected_times)
+        n = selected_times(nt);
+        fig = figure('Position', [100, 100, 100*(Ncases+1), 300]);
+        tt = tiledlayout(Ndat-2, Ncases + 1, "TileSpacing", "tight", "Padding", "loose");
+
+        for loc = 2:Ndat-1
+            % PC-MRI data
+            create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-2), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
 
             for kk = 1:Ncases
-                % if kk==index_n
-                %     create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi_n{loc}, x_roi_n{loc}, y_roi_n{loc});           
+                % if kk == index_n
+                    % create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi_n{loc}, x_roi_n{loc}, y_roi_n{loc});
                 % else
-                    create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});           
+                create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-2), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
                 % end
             end
         end
 
-        plot_flow_rate (pcmri.q{Ndat},n)
-        
-        % Capture the frame
-        movieVector(n) = getframe(fig);
-    end
+        title(tt, "$t/T = " +num2str(selected_times(nt)/100)+ "$", 'Interpreter', 'latex', 'fontsize', 18);
+        % Optional: plot flow rate indicator in corner
+        % plot_flow_rate(pcmri.q{Ndat}, n);
 
-    save_animation(movieVector, fullfile(cas.dirvid, "2D_comparison_" + strjoin(string([DNS_cases{:}]), '_vs_')));
+        % Save figure
+        print(gcf, fullfile(cas.dirfig, "snap_"+n+"_fig_4"), '-depsc','-vector');
+    end
 end
+
+% create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-2), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
+
+
 
 %% auxiliary functions
 function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw, y_raw)
@@ -114,7 +113,7 @@ function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw,
             end
             sstt = sstt + " DNS";
         end
-        title(sstt)
+        % title(sstt)
     end
     if ii == 1 + (Ncases+1)*(loc-1)
         ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
