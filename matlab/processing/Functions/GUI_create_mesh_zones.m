@@ -29,10 +29,10 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
             case_name = geom + "_dx" + mesh_size(ii) + "_zones" + version;
             % check if case already exists or needs to be created
             if isfile(fullfile(cas.diransys_in, "case-files", case_name + ".cas.gz"))
-                fprintf('case file %s already exists! \n', case_name);
+                fprintf('case file %s already exists! \n', case_name + ".cas.gz");
             else
                 all_simulations = false;
-                fprintf(2, 'case file %s needs to be created ...\n', case_name);
+                fprintf(2, 'case file %s needs to be created ...\n', case_name + ".cas.gz");
                     
                 % Define to which boundaries apply local sizing
                 if contains(geom, 'n')
@@ -45,7 +45,7 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
     
                 if ~isfile(geometry_path)
                     geometry_exist = false; % cannot run simulation
-                    fprintf(2, 'Geometry file does not exist: %s\n', geom+ "_geometry_zones"+version+".scdoc");
+                    fprintf(2, 'geometry file %s does not exist ...\n', geom+ "_geometry_zones"+version+".scdoc");
                 end
             
                 if count_sim == 1
@@ -148,8 +148,6 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
             end
             system(fluent_cmd); % Run with "> nul" to suppress terminal output
             return;
-        else
-            fprintf(2, '.scdoc geometry files need to be created!\n');
         end
     end
 
