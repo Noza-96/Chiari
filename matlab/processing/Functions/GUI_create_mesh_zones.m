@@ -21,7 +21,7 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
     
     for k = 1: length(cases_zones)
 
-        [geom, ~, ~, version] = get_type_simulation(cases_zones(k));
+        [geom, ~, ~, version] = get_type_simulation(cases_zones{k});
 
     
         for ii = 1:length(mesh_size)
@@ -141,12 +141,13 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
         if geometry_exist
             visualize_console = 1;
             fluent_command = get_fluent_command(); 
-            fprintf('opening Fluent meshing to create simulation using GUI journal\n');
+            fprintf('opening Fluent meshing to create case. MATLAB execution stopped. \n');
             fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
             if visualize_console == 0
                 fluent_cmd = fluent_cmd + " > nul";
             end
             system(fluent_cmd); % Run with "> nul" to suppress terminal output
+            return;
         else
             fprintf(2, '.scdoc geometry files need to be created!\n');
         end
