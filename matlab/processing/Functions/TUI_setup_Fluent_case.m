@@ -16,9 +16,9 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     end
 
     if DNS.sim == 3
-        case_name  = DNS.geom + "_dx" + DNS.mesh_size+ "_zones";
+        case_name  = DNS.geom + "_dx" + DNS.mesh_size+ "_zones" + DNS.version;
     else
-        case_name  = DNS.geom + "_dx" + DNS.mesh_size;
+        case_name  = DNS.geom + "_dx" + DNS.mesh_size + DNS.version;
     end
 
     % read case

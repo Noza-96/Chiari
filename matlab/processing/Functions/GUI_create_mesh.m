@@ -34,7 +34,7 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
             case_i = geom(k) + "_dx" + mesh_size(ii);
             % check if case already exists or needs to be created
             if isfile(fullfile(cas.diransys_in, "case-files", case_i + ".cas.gz"))
-                fprintf('case file %s already exists! n', case_i + ".cas.gz");
+                fprintf('case file %s already exists! \n', case_i + ".cas.gz");
             else
                 all_simulations = false;
                 fprintf('case file %s needs to be created ...\n', case_i + ".cas.gz");
