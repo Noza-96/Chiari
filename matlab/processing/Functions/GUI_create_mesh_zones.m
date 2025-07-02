@@ -1,4 +1,4 @@
-function all_simulations = GUI_create_mesh_zones(cas, mesh_size, nerve_sim, lig_sim, nerve_lig_sim)
+function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
 
     n_cores = 12;
 
@@ -6,53 +6,46 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, nerve_sim, lig_
     geometry_exist = true;
     count_sim = 1; 
 
+
     full_ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));
     
     GUI_journal_path = fullfile(full_ansys_path, cas.subj, "inputs", "journals", "create_mesh.jou");
 
     fileID = fopen(GUI_journal_path, 'w');
-        
-    geom = "c";
-
-    if nerve_sim
-        geom = [geom, "cn"];
-    end
-    if lig_sim
-        geom = [geom, "cl"];
-    end
-    if nerve_lig_sim
-        geom = [geom, "cnl"];
-    end
-    
+       
     % for type 2 simulation, which boundary has continuity condition
     continuity_condition = compose("cord_%d", 1:(cas.Ncas-1));
 
     
     % prox_limit = [0.0002, 0.0008];
     
-    for k = 1: length(geom)
+    for k = 1: length(cases_zones)
+
+        [geom, ~, ~, version] = get_type_simulation(case_i);
+
     
         for ii = 1:length(mesh_size)
     
-            case_name = geom(k) + "_dx" + mesh_size(ii) + "_zones";
+            case_name = geom + "_dx" + mesh_size(ii) + "_zones" + version;
             % check if case already exists or needs to be created
             if isfile(fullfile(cas.diransys_in, "case-files", case_name + ".cas.gz"))
-                fprintf('case file %s already exists ...\n', case_name);
+                fprintf('case file %s already exists! \n', case_name);
             else
                 all_simulations = false;
-                fprintf('case file %s needs to be created ...\n', case_name);
+                fprintf(2, 'case file %s needs to be created ...\n', case_name);
                     
                 % Define to which boundaries apply local sizing
-                if contains(geom(k), 'n')
+                if contains(geom, 'n')
                     local_sizing = [continuity_condition, "dura", "tonsils", "nerve_roots"];
                 else
                     local_sizing = [continuity_condition, "dura", "tonsils"];
                 end
                 sstt_sizing = sprintf("r'%s'", strjoin(local_sizing, "', r'"));            
-                geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom(k)+ "_geometry_zones.scdoc");
+                geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom+ "_geometry_zones"+version+".scdoc");
     
                 if ~isfile(geometry_path)
                     geometry_exist = false; % cannot run simulation
+                    fprintf(2, 'Geometry file does not exist: %s\n', geom+ "_geometry_zones"+version+".scdoc");
                 end
             
                 if count_sim == 1

@@ -1,4 +1,4 @@
-function all_simulations = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, nerve_lig_sim, zones_sim)
+function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
 
     n_cores = 12;
 
@@ -13,12 +13,16 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, n
 
     fileID = fopen(GUI_journal_path, 'w');
 
-    geom = ["c", "b"];
+    geom = [];
+    if any(startsWith(string(case_name), 'c'))
+        geom = [geom, "c"];
+    end
+    if any(startsWith(string(case_name), 'b'))
+        geom = [geom, "b"];
+    end
     
     % for type 2 simulation, which boundary has continuity condition
     continuity_condition = "tonsils";
-
-
     
     prox_limit = [0.0002, 0.0008];
     
@@ -140,8 +144,11 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, nerve_sim, lig_sim, n
     fprintf(fileID,"o \n"); 
     fclose(fileID);
 
-    if zones_sim
-        zones_simulation = GUI_create_mesh_zones(cas, mesh_size, nerve_sim, lig_sim, nerve_lig_sim);
+    % Get cases  with first digit 3
+    cases_zones = case_name(cellfun(@(s) ~isempty(regexp(s, '\D*3', 'once')), case_name));
+
+    if isempty(cases_zones)   
+        zones_simulation = GUI_create_mesh_zones(cas, mesh_size, cases_zones);
     end
 
     % run ansys meshing to run simulations
