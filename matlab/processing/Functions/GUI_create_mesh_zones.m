@@ -21,7 +21,7 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
     
     for k = 1: length(cases_zones)
 
-        [geom, ~, ~, version] = get_type_simulation(case_i);
+        [geom, ~, ~, version] = get_type_simulation(cases_zones(k));
 
     
         for ii = 1:length(mesh_size)

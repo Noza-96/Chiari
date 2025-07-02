@@ -14,10 +14,11 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
     fileID = fopen(GUI_journal_path, 'w');
 
     geom = [];
-    if any(startsWith(string(case_name), 'c'))
+    if any(cellfun(@(s) ~isempty(regexp(s, '^c\d', 'once')), case_name))
         geom = [geom, "c"];
     end
-    if any(startsWith(string(case_name), 'b'))
+    
+    if any(cellfun(@(s) ~isempty(regexp(s, '^b\d', 'once')), case_name))
         geom = [geom, "b"];
     end
     
@@ -147,7 +148,7 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
     % Get cases  with first digit 3
     cases_zones = case_name(cellfun(@(s) ~isempty(regexp(s, '\D*3', 'once')), case_name));
 
-    if isempty(cases_zones)   
+    if ~isempty(cases_zones)   
         zones_simulation = GUI_create_mesh_zones(cas, mesh_size, cases_zones);
     end
 
