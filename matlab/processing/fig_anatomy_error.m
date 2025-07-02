@@ -1,19 +1,22 @@
 
 subject = "s101_b";
-case_name ={"c3", "cl3_v2","cl3_v3","cl3_v4"};
+case_name ={"c3", "cl3_v2", "cl3_v3","cl3_v4"};
 mesh_size = 0.0002;
     
     fs = 16;
     fan = 14;
     rows = 3;
+    
+
+    % Load MRI data
+    mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat");
+
+
+    load(mri_data_path, 'cas');
+    load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
 
     load(fullfile(cas.dirmat, "DNS_c0top_dx00002.mat"), 'DNS');
     DNS_roi=DNS;
-    
-    % Load MRI data
-    mri_data_path = fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat");
-    load(mri_data_path, 'cas');
-    load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
     
     t = linspace(0, 1, pcmri.Nt);
     Ncases = length(case_name);

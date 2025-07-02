@@ -4,7 +4,7 @@ addpath("../processing/Functions/")
 addpath('../processing/Functions/Others/')
 
 [cas, dat_PC, t0] = run_if_empty('s101_aa');  % Load data if not already
-visualization_plots = true;
+visualization_plots = false;
 do_registration = false;
 
 python_venv = "/Users/noza/Documents/chiari/git-chiari/venv/bin/python3.11";
@@ -130,6 +130,9 @@ if visualization_plots
 end
 
 dat_PC = update_data(velocity, dat_PC);
+
+dat_PC.dx = dx;
+dat_PC.dy = dy;
 
 disp("Saving everything in a .mat file ..." + newline)
 save(fullfile(cas.dirmat, "04-registration.mat"), 'cas', 'dat_PC');

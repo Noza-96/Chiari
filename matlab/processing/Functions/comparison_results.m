@@ -7,20 +7,12 @@ function comparison_results(cas, case_name, mesh_size)
 
     load(fullfile(cas.dirmat, "DNS_c0top_dx00002.mat"), 'DNS');
     DNS_roi=DNS;
-    % DNS_roi_n=DNS;
-    % index_n = ii;
     
     for ii = 1:Ncases
         [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name{ii});
-        version
         DNS_cases{ii} = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
-        load(fullfile(cas.dirmat, "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
+        load(fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
         st_DNS{ii} = DNS;
-        % if t_sim==0
-        %     DNS_roi=DNS;
-        %     % DNS_roi_n=DNS;
-        %     % index_n = ii;
-        % end
     end
 
 
@@ -38,7 +30,7 @@ function comparison_results(cas, case_name, mesh_size)
     end
     pcmri = apply_roi_pcmri(pcmri);
     
-    fig = figure('Position', [100, 100, 200*(Ncases+1), 600]);
+    fig = figure('Position', [100, 100, 150*(Ncases+1), 100*Ndat]);
     tiledlayout(Ndat, Ncases + 1, "TileSpacing", "tight", "Padding", "loose");
     
     % Preallocate movie vector
@@ -53,10 +45,12 @@ function comparison_results(cas, case_name, mesh_size)
             create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
 
             for kk = 1:Ncases
-                % if kk==index_n
-                %     create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi_n{loc}, x_roi_n{loc}, y_roi_n{loc});           
-                % else
-                    create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});           
+                if isfield(st_DNS{kk}, 'RMSE_space') && isfield(st_DNS{kk}.RMSE_space, 'u_normal')
+                    vel_data = st_DNS{kk}.RMSE_space;
+                else
+                    vel_data = st_DNS{kk}.slices;
+                end
+                    create_animation_ansys(vel_data, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});           
                 % end
             end
         end
@@ -103,18 +97,6 @@ function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw,
     % end
     if ii ~= 1 + Ncases + (Ncases+1)*(loc-1) 
         colorbar off;
-    end
-    if ii <= Ncases + 1
-        sstt = char(data.case);  % Assuming 'data.case' is a string
-        if ~strcmp(sstt, 'PC-MRI')  % Use strcmp to compare strings
-             if ismember(sstt(3), ['b', 't'])
-                sstt = extractBetween(sstt, 1, 3);
-            else
-                sstt = extractBetween(sstt, 1, 2);
-            end
-            sstt = sstt + " DNS";
-        end
-        title(sstt)
     end
     if ii == 1 + (Ncases+1)*(loc-1)
         ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
@@ -165,28 +147,6 @@ function save_animation(movieVector, fileName)
     writeVideo(writer, movieVector);
     close(writer);
 end
-
-function named_location (gca, sstt, fs)
-        % Get the position of the current tile (in normalized figure coordinates)
-    ax = gca;  % Get the current axis handle
-    axPos = ax.Position;  % Position of the axis [left, bottom, width, height]
-
-    % Compute normalized figure coordinates for the top-left corner of the tile
-    % Axes position is in normalized figure coordinates [0, 1], so adjust for annotation
-    xPos = axPos(1);  % X position of the tile
-    yPos = axPos(2) + axPos(4) ;  % Slightly offset from the top (5% from the top edge of the tile)
-    width = 0.2 * axPos(3);  % Width of the textbox (20% of the tile's width)
-    height = 0.05 * axPos(4);   % Height of the textbox (5% of figure height)
-
-    % Position it in the top-left corner of the tile using normalized figure coordinates
-   dim = [xPos, yPos, width, height];
-    
-    % Create the textbox
-    annotation('textbox', dim, 'String', sstt, 'FontSize', fs, 'Color', 'black', ...
-               'EdgeColor', 'none', 'BackgroundColor', 'none', 'Interpreter', 'latex');
-end
-
-
 
 function plot_flow_rate(q,n)
     prev_ax = gca; % Save the current axis before switching

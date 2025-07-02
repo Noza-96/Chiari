@@ -9,11 +9,12 @@ function snapshot_results(cas, case_name, mesh_size, selected_times)
     DNS_roi=DNS;
     % DNS_roi_n=DNS;
     % index_n = ii;
+    colo_lim = [6,3,6];
     
     for ii = 1:Ncases
         [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name{ii});
         DNS_cases{ii} = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
-        load(fullfile(cas.dirmat, "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
+        load(fullfile(cas.dirmat,"DNS-results", "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
         st_DNS{ii} = DNS;
         % if t_sim==0
         %     DNS_roi=DNS;
@@ -40,25 +41,31 @@ function snapshot_results(cas, case_name, mesh_size, selected_times)
 
     for nt = 1:length(selected_times)
         n = selected_times(nt);
-        fig = figure('Position', [100, 100, 100*(Ncases+1), 300]);
+        fig = figure('Position', [100, 100, 100*(Ncases+1), 100*(Ndat-2)]);
         tt = tiledlayout(Ndat-2, Ncases + 1, "TileSpacing", "tight", "Padding", "loose");
 
         for loc = 2:Ndat-1
             % PC-MRI data
             create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-2), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
-
+            bluetored(colo_lim(nt));
+            colorbar off;
             for kk = 1:Ncases
-                % if kk == index_n
-                    % create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-1), Ncases, roi_n{loc}, x_roi_n{loc}, y_roi_n{loc});
-                % else
-                create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-2), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
+                if isfield(st_DNS{kk}, 'RMSE_space') && isfield(st_DNS{kk}.RMSE_space, 'u_normal')
+                % The field exists and is not empty
+                    vel_data = st_DNS{kk}.RMSE_space;
+                else
+                    vel_data = st_DNS{kk}.slices;
+                end
+                create_animation_ansys(vel_data, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-2), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
+                bluetored(colo_lim(nt));
+                colorbar off;
                 % end
             end
         end
 
         title(tt, "$t/T = " +num2str(selected_times(nt)/100)+ "$", 'Interpreter', 'latex', 'fontsize', 18);
         % Optional: plot flow rate indicator in corner
-        % plot_flow_rate(pcmri.q{Ndat}, n);
+        plot_flow_rate(pcmri.q{Ndat}, n);
 
         % Save figure
         print(gcf, fullfile(cas.dirfig, "snap_"+n+"_fig_4"), '-depsc','-vector');
@@ -71,6 +78,7 @@ end
 
 %% auxiliary functions
 function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw, y_raw)
+    
     fs = 12;
     % Extract data and rescale
     x = data.x{loc} * 1e2; % [cm]
@@ -85,10 +93,10 @@ function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw,
 
     % Plot in the specified tile
     nexttile(ii);
-    scatter(x, y, 10, w, 'filled', 'd');
+    scatter(x, y, 7, w, 'filled', 'd');
     % contourf(Xq, Yq, Wq, 40, 'LineColor', 'none');
     colorbar;
-    bluetored(6);
+    % bluetored(colo_lim(loc-1));
 
     % Set axis limits and properties
     Dx = max(x) - min(x);
@@ -103,18 +111,18 @@ function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw,
     if ii ~= 1 + Ncases + (Ncases+1)*(loc-1) 
         colorbar off;
     end
-    if ii <= Ncases + 1
-        sstt = char(data.case);  % Assuming 'data.case' is a string
-        if ~strcmp(sstt, 'PC-MRI')  % Use strcmp to compare strings
-             if ismember(sstt(3), ['b', 't'])
-                sstt = extractBetween(sstt, 1, 3);
-            else
-                sstt = extractBetween(sstt, 1, 2);
-            end
-            sstt = sstt + " DNS";
-        end
-        % title(sstt)
-    end
+    % if ii <= Ncases + 1
+    %     sstt = char(data.case);  % Assuming 'data.case' is a string
+    %     if ~strcmp(sstt, 'PC-MRI')  % Use strcmp to compare strings
+    %          if ismember(sstt(3), ['b', 't'])
+    %             sstt = extractBetween(sstt, 1, 3);
+    %         else
+    %             sstt = extractBetween(sstt, 1, 2);
+    %         end
+    %         sstt = sstt + " DNS";
+    %     end
+    %     % title(sstt)
+    % end
     if ii == 1 + (Ncases+1)*(loc-1)
         ylabel('Y [cm]', 'Interpreter', 'latex', 'FontSize', fs);
     else
@@ -189,7 +197,7 @@ end
 
 function plot_flow_rate(q,n)
     prev_ax = gca; % Save the current axis before switching
-    
+    q(n)
     % Switch to ax1 and plot - to be completed
     ax1 = axes('Position', [0.15 0.12 0.08 0.04]);
     flow_rate(q, 0)

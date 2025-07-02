@@ -55,7 +55,6 @@ mesh_size = 0.0002;
     tiledlayout(pcmri.Ndat-2, rows, "TileSpacing", "tight", "Padding", "compact")
     for k = 2:pcmri.Ndat-1
         % === Main RMSE plot (columns 1 to 3) ===
-        1+(k-2)*rows
         nexttile(1+(k-2)*rows, [1, rows - 1])  % span 3 columns
         for i = 1:n_cases
             if exist_case(i)

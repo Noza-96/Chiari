@@ -1,4 +1,4 @@
-function [cas, pcmri, DNS] = read_ansys_reports(subject, cases, mesh_size)
+function [cas, dat_PC, pcmri, DNS] = read_ansys_reports(subject, cases, mesh_size)
 
 redo_report = false;
 answer = lower(strtrim(input('Do you want to redo data extraction? (y/[n]): ', 's')));
@@ -6,11 +6,10 @@ answer = lower(strtrim(input('Do you want to redo data extraction? (y/[n]): ', '
 if strcmp(answer, 'y') || strcmp(answer, 'yes')
     redo_report = true;
 end
-version = cell(1,5);
 
 for case_name = cases
     % load MRI data for subject
-    load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas');
+    load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas', 'dat_PC');
     
     load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
 
@@ -76,11 +75,11 @@ for case_name = cases
 
     % Load data for each time step
     for n = 1:DNS.ts_cycle
-        N = N0 + n + 1;
-
-        if n == DNS.ts_cycle
-            N = N0 + 1; % last is first
-        end
+        N = N0 + n;
+        % N = N0 + n + 1;
+        % if n == DNS.ts_cycle
+        %     N = N0 + 1; % last is first
+        % end
 
         
         % Define file path for velocity data
@@ -210,9 +209,9 @@ for case_name = cases
         DNS.out.t = data{2};         % Second column - flow-time
         DNS.out.u_max = data{3};     % Third column - dp
 
-        DNS.out.q_bottom = data{4};  % Fourth column - q_bottom
-        DNS.out.q_top = data{5};  
-        DNS.out.q_cont = data{6};
+        % DNS.out.q_bottom = data{4};  % Fourth column - q_bottom
+        % DNS.out.q_top = data{5};  
+        % DNS.out.q_cont = data{6};
 
         for ii = 1:length(Dz)
             DNS.out.dp.val{ii} = data{index_0}; 
@@ -222,7 +221,7 @@ for case_name = cases
 
         if ~startsWith(DNS.geom, 'b')
             fprintf('compute RMSE error ...\n');
-            [DNS.RMSE,DNS.RMSE_ave, DNS.RMSE_space] = compute_RMSE(DNS, pcmri);
+            [DNS.RMSE,DNS.RMSE_ave, DNS.RMSE_space, DNS.out.q] = compute_RMSE(DNS, pcmri, [dat_PC.dx,dat_PC.dy]/1000);
         end
         save(output_file, 'DNS');
     else
@@ -240,13 +239,14 @@ function data = read_ansys_data(filePath)
     fclose(fileID);
 end
 
-function [RMSE, RMSE_ave, RMSE_space] = compute_RMSE(DNS, pcmri)
+function [RMSE, RMSE_ave, RMSE_space, q] = compute_RMSE(DNS, pcmri, pixel_size)
+    dx = pixel_size(1); dy = pixel_size(2);
     % Apply ROI to compare only data points within SAS
     pcmri = apply_roi_pcmri(pcmri);
 
     RMSE = cell(1, pcmri.Ndat);           % RMSE(t) per location
     RMSE_ave = cell(1, pcmri.Ndat);       % time-averaged RMSE (per pixel, then spatial average)
-    RMSE_space_ave = cell(1, pcmri.Ndat); % RMSE over space, then time average
+    q = cell(1, pcmri.Ndat); % RMSE over space, then time average
 
     for iloc = 1:pcmri.Ndat
         % PCMRI data at this location
@@ -272,40 +272,58 @@ function [RMSE, RMSE_ave, RMSE_space] = compute_RMSE(DNS, pcmri)
         end
         
         for it = 1:pcmri.Nt
-            % Interpolate DNS to PCMRI locations
-            evalc("F = scatteredInterpolant(Xd, Yd, ud(:, it), 'linear', 'none');");
-            u_interp = F(Xp, Yp);  % Interpolated DNS
-
-            valid = ~isnan(u_interp);
+            u_avg = NaN(size(Xp));  % preallocate
+            for i = 1:length(Xp)
+                % Find DNS points inside square of side dx × dy centered at (Xp(i), Yp(i))
+                in_square = abs(Xd - Xp(i)) <= dx/2 & abs(Yd - Yp(i)) <= dy/2;
+                if any(in_square)
+                    u_avg(i) = mean(ud(in_square, it), 'omitnan');
+                end
+            end
+        
+            valid = ~isnan(u_avg);
             n_invalid = sum(~valid);
-
+        
             if it == 1 && zero_error
-                fprintf('    %s: exclude %d PCMRI points that fall outside the DNS interpolation domain\n', ...
+                fprintf('    %s: exclude %d PCMRI points that fall outside the DNS averaging domain\n', ...
                         pcmri.locations{iloc}, n_invalid);
             end
-
-            diff = u_interp(valid) - up(valid, it);
-            rmse_vec(it) = sqrt(mean(diff.^2));
-            
-        end
         
+            diff = u_avg(valid) - up(valid, it);
+            rmse_vec(it) = sqrt(mean(diff.^2));
+        end
         % Compute RMSE over space (for each t), then average over t
-        % Keep only valid points
         Nv = sum(valid);
         Nt = pcmri.Nt;
     
         % Preallocate error matrix
         sq_err_all = zeros(Nv, Nt);
+        u_ave_time = zeros(Nv, Nt);
     
         % Recompute interpolated values at all time points and fill matrix
         for it = 1:Nt
-            evalc("F = scatteredInterpolant(Xd, Yd, ud(:, it), 'linear', 'none');");
-            u_interp = F(Xp, Yp);
-            diff_t = u_interp(valid) - up(valid, it);
+
+            % interpolate;
+            % evalc("F = scatteredInterpolant(Xd, Yd, ud(:, it), 'linear', 'none');");
+            % u_interp = F(Xp, Yp);
+            % diff_t = u_interp(valid) - up(valid, it);
+            % sq_err_all(:, it) = diff_t.^2;
+
+            % Loop through each PCMRI point and compute local average
+
+            u_avg = NaN(size(Xp));
+            for i = 1:length(Xp)
+                in_square = abs(Xd - Xp(i)) <= dx/2 & abs(Yd - Yp(i)) <= dy/2;
+                if any(in_square)
+                    u_avg(i) = mean(ud(in_square, it), 'omitnan');
+                end
+            end
+            diff_t = u_avg(valid) - up(valid, it);
             sq_err_all(:, it) = diff_t.^2;
+            u_ave_time(:, it) = u_avg(valid);
         end
 
-        % Compute RMSE(t) → already done in rmse_vec
+        % Compute RMSE(t)
         RMSE{iloc} = rmse_vec*zero_error;
         RMSE_ave{iloc} = mean(rmse_vec)*zero_error;
     
@@ -316,7 +334,7 @@ function [RMSE, RMSE_ave, RMSE_space] = compute_RMSE(DNS, pcmri)
         RMSE_space.val{iloc} = rmse_pts*zero_error;  % RMSE per point
         RMSE_space.x{iloc} = Xp(valid);
         RMSE_space.y{iloc} = Yp(valid);
-           
-        
+        RMSE_space.u_normal{iloc} = u_ave_time;  
+        q{iloc} = sum(u_ave_time*(dx*dy)*1e6,1);         
     end
 end

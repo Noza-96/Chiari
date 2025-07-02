@@ -9,16 +9,16 @@ subject = "s101_b";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 % case_name = { "c2", "c1t", "c1b","c0t"}; 
-case_name = {"cn2"};
+case_name = {"c3"};
 mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file
-[cas, pcmri, DNS] = read_ansys_reports(subject, case_name, mesh_size);
+[cas, dat_PC, pcmri, DNS] = read_ansys_reports(subject, case_name, mesh_size);
 
 %% Animation comparison PC-MRI with Ansys solution -- Animation
 close all; clear;
 subject = "s101_b";
-load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas');
+load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas', 'dat_PC');
 case_name ={ "c3", "cl3_v2","cl3_v3","cl3_v4"};
 mesh_size = [0.0002];
 warning('off', 'all');
@@ -29,7 +29,7 @@ warning('on', 'all');
 close all; clear;
 subject = "s101_b";
 load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas');
-case_name ={"c3", "cl3_v2","cl3_v3","cl3_v4"};
+case_name ={"c0t", "c3", "cl3_v2","cl3_v3","cl3_v4"};
 mesh_size = [0.0002];
 warning('off', 'all');
 selected_times = [40,70,80];
