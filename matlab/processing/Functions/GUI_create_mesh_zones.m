@@ -29,7 +29,7 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
             case_name = geom + "_dx" + mesh_size(ii) + "_zones" + version;
             % check if case already exists or needs to be created
             if isfile(fullfile(cas.diransys_in, "case-files", case_name + ".cas.gz"))
-                fprintf('case file %s already exists! \n', case_name + ".cas.gz");
+                fprintf('case file %s already exists ... \n', case_name + ".cas.gz");
             else
                 all_simulations = false;
                 fprintf(2, 'case file %s needs to be created ...\n', case_name + ".cas.gz");
@@ -137,17 +137,19 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
     fclose(fileID);
 
     % run ansys meshing to run simulations
-    if ~all_simulations
+    if all_simulations
+        fprintf('all fluent cases w anatomy exist... \n \nready to run CFD simulation! \n');
+        else
         if geometry_exist
             visualize_console = 1;
             fluent_command = get_fluent_command(); 
-            fprintf('opening Fluent meshing to create case. MATLAB execution stopped. \n');
+            
             fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
             if visualize_console == 0
                 fluent_cmd = fluent_cmd + " > nul";
             end
             system(fluent_cmd); % Run with "> nul" to suppress terminal output
-            return;
+            input('Press Enter when done with ANSYS to continue code execution...\n', 's');
         end
     end
 

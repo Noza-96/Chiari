@@ -1,0 +1,219 @@
+Auto-Transcript Start Time:  10:48:26, 03 Jul 2025 Eastern Daylight Time 
+Current Directory: "C:\Users\guill\Documents\chiari\git-chiari\matlab\processing"
+
+              Welcome to ANSYS Fluent 2024 R1
+
+              Copyright 1987-2024 ANSYS, Inc. All Rights Reserved.
+              Unauthorized use, distribution or duplication is prohibited.
+              This product is subject to U.S. laws governing export and re-export.
+              For full Legal Notice, see documentation.
+
+Build Time: Nov 22 2023 10:31:01 EST  Build Id: 10184  
+ 
+Connected License Server List:	1055@its-flexsw-srv.ucsd.edu
+
+     --------------------------------------------------------------
+     This is an academic version of ANSYS FLUENT. Usage of this product
+     license is limited to the terms and conditions specified in your ANSYS
+     license form, additional terms section.
+     --------------------------------------------------------------
+Host spawning Node 0 on machine "Lenovo" (win64).
+
+-----------------------------------------------------------------------------------
+ID    Hostname  Core   O.S.         PID    Vendor                                 
+-----------------------------------------------------------------------------------
+n13   Lenovo    14/32  Windows-x64  2328   13th Gen Intel(R) Core(TM) i9-13900    
+n12   Lenovo    13/32  Windows-x64  30464  13th Gen Intel(R) Core(TM) i9-13900    
+n11   Lenovo    12/32  Windows-x64  10236  13th Gen Intel(R) Core(TM) i9-13900    
+n10   Lenovo    11/32  Windows-x64  33108  13th Gen Intel(R) Core(TM) i9-13900    
+n9    Lenovo    10/32  Windows-x64  17808  13th Gen Intel(R) Core(TM) i9-13900    
+n8    Lenovo    9/32   Windows-x64  34632  13th Gen Intel(R) Core(TM) i9-13900    
+n7    Lenovo    8/32   Windows-x64  21056  13th Gen Intel(R) Core(TM) i9-13900    
+n6    Lenovo    7/32   Windows-x64  34532  13th Gen Intel(R) Core(TM) i9-13900    
+n5    Lenovo    6/32   Windows-x64  25192  13th Gen Intel(R) Core(TM) i9-13900    
+n4    Lenovo    5/32   Windows-x64  31548  13th Gen Intel(R) Core(TM) i9-13900    
+n3    Lenovo    4/32   Windows-x64  38232  13th Gen Intel(R) Core(TM) i9-13900    
+n2    Lenovo    3/32   Windows-x64  29396  13th Gen Intel(R) Core(TM) i9-13900    
+n1    Lenovo    2/32   Windows-x64  11876  13th Gen Intel(R) Core(TM) i9-13900    
+n0*   Lenovo    1/32   Windows-x64  2580   13th Gen Intel(R) Core(TM) i9-13900    
+host  Lenovo           Windows-x64  13152  13th Gen Intel(R) Core(TM) i9-13900    
+
+MPI Option Selected: intel
+Selected system interconnect: default
+-----------------------------------------------------------------------------------
+
+Cleanup script file is C:\\Users\\guill\\Documents\\chiari\\git-chiari\\matlab\\processing\\cleanup-fluent-Lenovo-13152.bat
+
+Posting ANSYS Product Improvement Program startup data
+Done.
+
+Reading journal file C:\Users\guill\Documents\chiari\computations\ansys\s101_a\inputs\journals\c2_dx00002.jou...
+
+> /file/set-tui-version "24.1"
+
+> ;setup case 
+/file read-case C:/Users/guill/Documents/chiari/computations/ansys/s101_a/inputs/case-files/c_dx0.0002.cas.gz
+Note: Rank = 0: Process affinity not being set (6).
+Note: Rank = 1: Process affinity not being set (6).
+Note: Rank = 2: Process affinity not being set (6).
+Note: Rank = 3: Process affinity not being set (6).
+Note: Rank = 4: Process affinity not being set (6).
+Note: Rank = 5: Process affinity not being set (6).
+Note: Rank = 6: Process affinity not being set (6).
+Note: Rank = 7: Process affinity not being set (6).
+Note: Rank = 8: Process affinity not being set (6).
+Note: Rank = 9: Process affinity not being set (6).
+Note: Rank = 10: Process affinity not being set (6).
+Note: Rank = 11: Process affinity not being set (6).
+Note: Rank = 12: Process affinity not being set (6).
+Note: Rank = 13: Process affinity not being set (6).
+
+Reading "\"| gunzip -c \\"C:/Users/guill/Documents/chiari/computations/ansys/s101_a/inputs/case-files/c_dx0.0002.cas.gz\\"\""...
+
+Buffering for file scan...
+
+    1309 nodes, binary.
+  159978 nodes, binary.
+  475551 nodes, binary.
+ 4726330 nodes, binary.
+ 6688237 polygonal interior faces, zone 724, binary.
+   51813 polygonal wall faces, zone 29, binary.
+   97476 polygonal wall faces, zone 30, binary.
+    3363 polygonal velocity-inlet faces, zone 28, binary.
+    5460 polygonal velocity-inlet faces, zone 27, binary.
+    6176 polygonal velocity-inlet faces, zone 26, binary.
+ 1201137 polyhedra cells, zone 725, binary.
+Warning: reading 8 partition grid onto 14 compute node machine;
+         will auto partition.
+ 1201137 cell partition ids, zone 725, 8 partitions, binary.
+
+Building...
+     mesh
+	auto partitioning mesh by Metis (fast),
+	distributing mesh
+		parts..............,
+		faces..............,
+		nodes..............,
+		cells..............,
+        bandwidth reduction using Reverse Cuthill-McKee: 85093/4737 = 17.9635
+     materials,
+     interface,
+     domains,
+     zones,
+	interior--fluid
+	cord
+	dura
+	bottom-dura-c_geometry-fluid
+	tonsils
+	top
+	fluid
+     parallel,
+The automatic selection for flux type has changed to Rhie-Chow: momentum based.
+
+Done.
+
+> /solve/set flow-warnings? no 
+
+> /define/models/viscous laminar yes
+
+> /define/named-expressions add "rho" definition "1000 [kg/m^3]" q 
+
+> /define/named-expressions add "mu" definition "0.0007 [kg/(m*s)]" q 
+
+> /define/materials/change-create air csf csf is a fluid
+yes 
+Density
+expression "rho"
+ no no yes 
+Viscosity
+expression "mu"
+ no no no yes q 
+
+> /solve/monitors/residual/print? no q 
+
+> /define/models/unsteady-2nd-order? yes q 
+
+> /solve/set p-v-coupling 24 q  
+
+> /define/named-expressions add "Q_b" definition "(0.038315 - 0.309878*cos(6.088358*t*1[s^-1]) + 0.341899*sin(6.088358*t*1[s^-1]) +0.116703*cos(12.176716*t*1[s^-1]) + 0.027938*sin(12.176716*t*1[s^-1]) +0.142851*cos(18.265074*t*1[s^-1]) - 0.100704*sin(18.265074*t*1[s^-1]) - 0.024467*cos(24.353433*t*1[s^-1]) - 0.017812*sin(24.353433*t*1[s^-1]) +0.059754*cos(30.441791*t*1[s^-1]) + 0.046232*sin(30.441791*t*1[s^-1]) +0.043916*cos(36.530149*t*1[s^-1]) - 0.049798*sin(36.530149*t*1[s^-1]) - 0.015631*cos(42.618507*t*1[s^-1]) - 0.017479*sin(42.618507*t*1[s^-1]) +0.001461*cos(48.706865*t*1[s^-1]) + 0.013456*sin(48.706865*t*1[s^-1]) +0.019728*cos(54.795223*t*1[s^-1]) - 0.013947*sin(54.795223*t*1[s^-1]) - 0.010315*cos(60.883582*t*1[s^-1]) - 0.015835*sin(60.883582*t*1[s^-1]) - 0.009326*cos(66.971940*t*1[s^-1]) - 0.001802*sin(66.971940*t*1[s^-1]) - 0.003691*cos(73.060298*t*1[s^-1]) + 0.002316*sin(73.060298*t*1[s^-1]) - 0.004781*cos(79.148656*t*1[s^-1]) - 0.002924*sin(79.148656*t*1[s^-1]) - 0.001754*cos(85.237014*t*1[s^-1]) + 0.007128*sin(85.237014*t*1[s^-1]) - 0.000207*cos(91.325372*t*1[s^-1]) - 0.001117*sin(91.325372*t*1[s^-1]) +0.000926*cos(97.413730*t*1[s^-1]) + 0.005053*sin(97.413730*t*1[s^-1]) +0.003008*cos(103.502089*t*1[s^-1]) + 0.000376*sin(103.502089*t*1[s^-1]) +0.004541*cos(109.590447*t*1[s^-1]) + 0.000689*sin(109.590447*t*1[s^-1]) - 0.002502*cos(115.678805*t*1[s^-1]) + 0.001807*sin(115.678805*t*1[s^-1]) - 0.002502*cos(121.767163*t*1[s^-1]) - 0.001807*sin(121.767163*t*1[s^-1]))*2E-6[m^3/s]" q 
+
+> /define/named-expressions add "Q_t" definition "(0.078735 - 0.337280*cos(6.088358*t*1[s^-1]) + 0.387424*sin(6.088358*t*1[s^-1]) +0.210115*cos(12.176716*t*1[s^-1]) + 0.045541*sin(12.176716*t*1[s^-1]) +0.052608*cos(18.265074*t*1[s^-1]) - 0.110369*sin(18.265074*t*1[s^-1]) - 0.027402*cos(24.353433*t*1[s^-1]) + 0.018796*sin(24.353433*t*1[s^-1]) +0.067024*cos(30.441791*t*1[s^-1]) - 0.008247*sin(30.441791*t*1[s^-1]) - 0.023767*cos(36.530149*t*1[s^-1]) - 0.061795*sin(36.530149*t*1[s^-1]) - 0.020353*cos(42.618507*t*1[s^-1]) + 0.021275*sin(42.618507*t*1[s^-1]) +0.010917*cos(48.706865*t*1[s^-1]) - 0.000747*sin(48.706865*t*1[s^-1]) - 0.018751*cos(54.795223*t*1[s^-1]) - 0.016143*sin(54.795223*t*1[s^-1]) - 0.011686*cos(60.883582*t*1[s^-1]) + 0.021474*sin(60.883582*t*1[s^-1]) +0.006619*cos(66.971940*t*1[s^-1]) + 0.008245*sin(66.971940*t*1[s^-1]) - 0.001720*cos(73.060298*t*1[s^-1]) - 0.003494*sin(73.060298*t*1[s^-1]) - 0.003627*cos(79.148656*t*1[s^-1]) + 0.013720*sin(79.148656*t*1[s^-1]) +0.008641*cos(85.237014*t*1[s^-1]) + 0.000816*sin(85.237014*t*1[s^-1]) +0.003438*cos(91.325372*t*1[s^-1]) + 0.001089*sin(91.325372*t*1[s^-1]) +0.004213*cos(97.413730*t*1[s^-1]) - 0.000304*sin(97.413730*t*1[s^-1]) +0.003612*cos(103.502089*t*1[s^-1]) - 0.003180*sin(103.502089*t*1[s^-1]) +0.001169*cos(109.590447*t*1[s^-1]) - 0.002312*sin(109.590447*t*1[s^-1]) +0.002427*cos(115.678805*t*1[s^-1]) - 0.000296*sin(115.678805*t*1[s^-1]) +0.002427*cos(121.767163*t*1[s^-1]) + 0.000296*sin(121.767163*t*1[s^-1]))*2E-6[m^3/s]" q 
+
+> /define/named-expressions add "v_tonsils" definition "-(-Q_t + Q_b)/(Area(['tonsils']))" q 
+
+> /define/boundary-conditions/velocity-inlet (top tonsils bottom-dura-c_geometry-fluid)
+tonsils no no yes yes no "v_tonsils" no 0  q 
+
+> ;create surfaces
+/surface/plane-surface C1C2 three-points -0.025720 -0.035264 -0.064063 0.005422 0.026303 -0.061597 0.036541 0.025993 -0.058757 no
+
+> /surface/plane-surface C2C3 three-points -0.021095 -0.040774 -0.087472 0.010047 0.020793 -0.085001 0.041166 0.020482 -0.082160 no
+
+> /surface/plane-surface FM-5 three-points -0.021095 -0.040774 -0.050010 0.010047 0.020793 -0.050010 0.041166 0.020482 -0.050010 no
+
+> /surface/plane-surface FM-10 three-points -0.021095 -0.040774 -0.055010 0.010047 0.020793 -0.055010 0.041166 0.020482 -0.055010 no
+
+> /surface/plane-surface FM-15 three-points -0.021095 -0.040774 -0.060010 0.010047 0.020793 -0.060010 0.041166 0.020482 -0.060010 no
+
+> /surface/plane-surface FM-20 three-points -0.021095 -0.040774 -0.065010 0.010047 0.020793 -0.065010 0.041166 0.020482 -0.065010 no
+
+> /surface/plane-surface FM-25 three-points -0.021095 -0.040774 -0.070010 0.010047 0.020793 -0.070010 0.041166 0.020482 -0.070010 no
+
+> /surface/plane-surface FM-30 three-points -0.021095 -0.040774 -0.075010 0.010047 0.020793 -0.075010 0.041166 0.020482 -0.075010 no
+
+> /surface/plane-surface FM-35 three-points -0.021095 -0.040774 -0.080010 0.010047 0.020793 -0.080010 0.041166 0.020482 -0.080010 no
+
+> /surface/plane-surface FM-40 three-points -0.021095 -0.040774 -0.085010 0.010047 0.020793 -0.085010 0.041166 0.020482 -0.085010 no
+
+> /surface/plane-surface FM-45 three-points -0.021095 -0.040774 -0.090010 0.010047 0.020793 -0.090010 0.041166 0.020482 -0.090010 no
+
+> /surface/plane-surface FM-50 three-points -0.021095 -0.040774 -0.095010 0.010047 0.020793 -0.095010 0.041166 0.020482 -0.095010 no
+
+> /surface/zone-surface cord_s "cord" q 
+
+> /surface/zone-surface dura_s "dura" q 
+
+> /surface/zone-surface tonsils_s "tonsils" q 
+
+> /surface/group-surfaces cord_s dura_s tonsils_s () wall  q 
+
+> ;reports 
+/solve/report-definitions/add pilot volume-max field velocity-magnitude zone-names fluid () q 
+
+> /solve/report-files/add pilot_report frequency 1 name "pilot_report" report-defs flow-time () print? yes file-name "pilot_report" q 
+
+> /solve/report-plot/add pilot q 
+
+> /solve/report-plots delete-all yes 
+
+> /solve/report-files delete-all yes 
+
+> /solve/report-definitions delete-all yes 
+ Report Definition "delta-time" is not deletable
+ Report Definition "iters-per-timestep" is not deletable
+ Report Definition "flow-time" is not deletable
+
+> /solve/report-definitions/add u_max volume-max field velocity-magnitude zone-names fluid () q 
+
+> /solve/report-definitions/add q_bottom  surface-volumeflowrate surface-names bottom 
+Error: eval: unbound variable
+Error Object: bottom
+
+
+ERROR: Invalid surface.
+Error object: bottom
+
+[Hit ENTER key to proceed...]
+() q 
+
+Warning: Report definition "q_bottom" is not valid:
+	*  List of surfaces is blank
+[Hit ENTER key to proceed...]
+Error: An error occurred in the previous operation.
+       The details can be found in the text output.
+Error Object: #f
+
+Warning: An error or interrupt occurred while reading the journal file.
+Some commands may not have been completed.
+
+

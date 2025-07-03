@@ -1,6 +1,6 @@
 function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
 
-    n_cores = 12;
+    n_cores = 8;
 
     all_simulations = true; 
     geometry_exist = true;
@@ -34,7 +34,7 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
             case_i = geom(k) + "_dx" + mesh_size(ii);
             % check if case already exists or needs to be created
             if isfile(fullfile(cas.diransys_in, "case-files", case_i + ".cas.gz"))
-                fprintf('case file %s already exists! \n', case_i + ".cas.gz");
+                fprintf('case file %s already exists ... \n', case_i + ".cas.gz");
             else
                 all_simulations = false;
                 fprintf('case file %s needs to be created ...\n', case_i + ".cas.gz");
@@ -132,7 +132,7 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
 
                 fprintf(fileID,"(%%py-exec ""input('Journal paused - check quality volume mesh and press Enter to continue...')"")\n" );
 
-                filename_2 = fullfile(full_ansys_path, cas.subj, "inputs", "case-files", case_name);
+                filename_2 = fullfile(full_ansys_path, cas.subj, "inputs", "case-files", case_i);
                 % export case file 
                 fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*WriteSubMenu*Case..."") \n" );     
                 fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+strrep(strrep(filename_2, '\', '\\'), '/', '\\')+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n\n" );
@@ -146,25 +146,26 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
     fprintf(fileID,"o \n"); 
     fclose(fileID);
 
-    % Get cases  with first digit 3
-    cases_zones = case_name(cellfun(@(s) ~isempty(regexp(s, '\D*3', 'once')), case_name));
-
-    if ~isempty(cases_zones)   
-        zones_simulation = GUI_create_mesh_zones(cas, mesh_size, cases_zones);
-    end
-
     % run ansys meshing to run simulations
-    if all_simulations && zones_simulation
-        fprintf('all fluent cases already exist. Ready to run simulation!\n');
+    if all_simulations
+        fprintf('all fluent cases w/o anatomy exist... \n \ncheck anatomy cases ...\n');
     elseif geometry_exist
         visualize_console = 1;
         fluent_command = get_fluent_command(); 
-        fprintf('opening Fluent meshing to create simulation using GUI journal\n');
+        fprintf('opening Fluent meshing to create cases using GUI journal\n');
         fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
         if visualize_console == 0
             fluent_cmd = fluent_cmd + " > nul";
         end
         system(fluent_cmd); % Run with "> nul" to suppress terminal output
+        input('Press Enter when done with ANSYS to continue code execution...\n', 's');
+    end
+
+    % Get cases  with first digit 3
+    cases_zones = case_name(cellfun(@(s) ~isempty(regexp(s, '\D*3', 'once')), case_name));
+
+    if ~isempty(cases_zones)   
+        zones_simulation = GUI_create_mesh_zones(cas, mesh_size, cases_zones);
     end
 
 end

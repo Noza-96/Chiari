@@ -4,7 +4,7 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s101_aa"; 
+subject = "s101_a"; 
 
 % c: geometry bounded by 2 pcMRI planes. 
 % c0/c1 for zero pressure top and bottom flow rate/velocity
@@ -29,14 +29,13 @@ cases_ready = GUI_create_mesh(cas, mesh_size, case_name);
 % visualize output ANSYS console
 visualize_console = 1;
 
-if cases_ready == true
-    answer = questdlg('Run ANSYS simulation?', 'Confirmation', 'Yes', 'No', 'No');
-    if strcmp(answer, 'Yes')
-        disp('Running ANSYS simulation...');   
-        run_ANSYS_simulations (cas, dat_PC, DNS_cases, n_cores, visualize_console)
-    else
-    end
+answer = questdlg('Run ANSYS simulation?', 'Confirmation', 'Yes', 'No', 'No');
+if strcmp(answer, 'Yes')
+    disp('Running ANSYS simulation...');   
+    run_ANSYS_simulations (cas, dat_PC, DNS_cases, n_cores, visualize_console)
+else
 end
+
 
 
 %% Auxiliary functions 
