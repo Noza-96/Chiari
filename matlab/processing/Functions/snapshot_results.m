@@ -3,9 +3,25 @@ function snapshot_results(cas, case_name, mesh_size, selected_times)
     Ncases = length(case_name); 
     DNS_cases = cell (1,Ncases);
     st_DNS = cell (1,Ncases);
-    index_n = 0;
 
-    load(fullfile(cas.dirmat, "DNS_c0top_dx00002.mat"), 'DNS');
+
+
+    sstt = {"Peak rostral flow ", "Flow reversal ", "Peak caudal flow "};
+
+    load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
+    Ndat = length(pcmri.locations); % number of slices
+
+    if any(cellfun(@(s) ~isempty(regexp(s, '^cl|^cn', 'once')), case_name))
+        fig_ind = 4;
+        loc_plot = 2:Ndat-1;
+        k_aux = 2;
+    else
+        fig_ind = 3;
+        loc_plot = 1:Ndat;
+        k_aux = 1;
+    end
+
+    load(fullfile(cas.dirmat,"DNS-results", "DNS_c0top_dx00002.mat"), 'DNS');
     DNS_roi=DNS;
     % DNS_roi_n=DNS;
     % index_n = ii;
@@ -16,37 +32,28 @@ function snapshot_results(cas, case_name, mesh_size, selected_times)
         DNS_cases{ii} = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
         load(fullfile(cas.dirmat,"DNS-results", "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
         st_DNS{ii} = DNS;
-        % if t_sim==0
-        %     DNS_roi=DNS;
-        %     % DNS_roi_n=DNS;
-        %     % index_n = ii;
-        % end
     end
 
-    load(fullfile(cas.dirmat, "pcmri_vel.mat"), 'pcmri');
-    Ndat = length(pcmri.locations); % number of slices
-    
+
+    DNS.slices
     x_roi = DNS_roi.slices.x;
     y_roi = DNS_roi.slices.y;
-    % x_roi_n = DNS_roi_n.slices.x;
-    % y_roi_n = DNS_roi_n.slices.y;
+
     roi = cell(1, Ndat);
-    roi_n = cell(1, Ndat);
     for kk = 1:Ndat    
         roi{kk} = DNS_roi.slices.u_normal{kk}(:,1)==0;
-        % roi_n{kk} = DNS_roi_n.slices.u_normal{kk}(:,1)==0;
     end
 
     pcmri = apply_roi_pcmri(pcmri);
 
     for nt = 1:length(selected_times)
         n = selected_times(nt);
-        fig = figure('Position', [100, 100, 100*(Ncases+1), 100*(Ndat-2)]);
-        tt = tiledlayout(Ndat-2, Ncases + 1, "TileSpacing", "tight", "Padding", "loose");
+        fig = figure('Position', [100, 100, 100*(Ncases+2), 70*length(loc_plot)]);
+        tt = tiledlayout(length(loc_plot), Ncases + 2, "TileSpacing", "tight", "Padding", "loose");
 
-        for loc = 2:Ndat-1
+        for loc = loc_plot
             % PC-MRI data
-            create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1)*(loc-2), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
+            create_animation_ansys(pcmri, loc, Ndat, n, 1 + (Ncases+1+1)*(loc-k_aux), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
             bluetored(colo_lim(nt));
             colorbar off;
             for kk = 1:Ncases
@@ -56,19 +63,45 @@ function snapshot_results(cas, case_name, mesh_size, selected_times)
                 else
                     vel_data = st_DNS{kk}.slices;
                 end
-                create_animation_ansys(vel_data, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-2), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
+                create_animation_ansys(vel_data, loc, Ndat, n, 1 + 1 + kk + (Ncases+1+1)*(loc-k_aux), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
                 bluetored(colo_lim(nt));
                 colorbar off;
                 % end
             end
         end
 
-        title(tt, "$t/T = " +num2str(selected_times(nt)/100)+ "$", 'Interpreter', 'latex', 'fontsize', 18);
-        % Optional: plot flow rate indicator in corner
-        plot_flow_rate(pcmri.q{Ndat}, n);
+        
 
-        % Save figure
-        print(gcf, fullfile(cas.dirfig, "snap_"+n+"_fig_4"), '-depsc','-vector');
+        % title(tt, sstt{nt} + "$(t/T = " +num2str(selected_times(nt)/100)+ ")$", 'Interpreter', 'latex', 'fontsize', 18);
+        % Optional: plot flow rate indicator in corner
+        % plot_flow_rate(pcmri.q{Ndat}, n);
+
+
+        print(gcf, fullfile(cas.dirfig, "snap_"+n+"_fig_"+fig_ind), '-depsc','-vector');
+
+            figure('Position', [100, 100, 300, 70*length(loc_plot)]);
+            x_L = 0;
+    
+            for kk = 1:Ncases
+                RMSE_val = cellfun(@(x) x(n), st_DNS{kk}.RMSE);
+                plot(RMSE_val*1e2, 1:length(RMSE_val), '-o', 'MarkerSize',6,'LineWidth', 1.5)
+                hold on
+                x_L = max(x_L, max(RMSE_val*1e2));
+            end
+    
+            ylim([loc_plot(1)-0.5,loc_plot(end)+0.5])
+            xlim([0,ceil(x_L*10)/10])
+            xticks(0:0.2:(ceil(x_L*10)/10-0.1))
+            xticklabels([])
+            yticks(loc_plot(1):1:loc_plot(end))
+            yticklabels([]);
+            ax = gca;
+            ax.XGrid = 'off';
+            ax.YGrid = 'on';
+            set(gca, 'LineWidth', 1, 'TickLength', [0.01, 0.01]);
+            print(gcf, fullfile(cas.dirfig, "error_"+n+"_fig_"+fig_ind), '-depsc','-vector');
+            legend({"I", "II", "III", "IV", "V"})
+               
     end
 end
 
