@@ -12,6 +12,7 @@ function flow_rate(Q, n)
     fs = 12;
     % Create a time vector
     t = linspace(0, 1, length(Q));
+   
     % Plot the flow rate
     plot(t, Q, '-', 'LineWidth', 1.5, 'Color', 'k');
     hold on;
