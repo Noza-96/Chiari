@@ -1,6 +1,9 @@
 % Longitudinal evolution flow rate and stroke volume 
 clear; close all
-subjects = {"s101_b", "s101_a", "s101_aa"};
+addpath('Functions/');
+addpath('Functions/Others/')
+
+subjects = {"s101_b"};
 
 location_names = ["UPFM", "FM-C1", "C1-C2", "C2-C3", "C3-C4"];
 subject_ids = {"pre-op", "3-mo post", "10-mo post"};
@@ -14,7 +17,7 @@ blue  = [0.2, 0.4, 0.8];
 color_m = {red, blue, green};
 
 fs = 16;
-fan = 10;
+fan = 14;
 rows = 3;
 Ndata = 5; 
 
@@ -100,14 +103,17 @@ for s=1:length(subjects)
                
         % dimensional with *pcmri.T{k}
         nexttile(1+(loc-1)*rows, [1, 2]);
-        plot(t, Q, 'Color', color_m{s}, 'LineStyle','-', LineWidth=1.5)
+        % plot(t, Q, 'Color', color_m{s}, 'LineStyle','-', LineWidth=1.5)
         hold on
         % Call the flow rate function
-        % flow_rate(Q, 0);
+        flow_rate(Q, 0);
+        box on
+        hold on
         set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
     
         for j = 1:length(t_T)
-             % plot([t_T(j), t_T(j)], [-3,3], 'LineStyle', '--', 'Color', gray_c, 'LineWidth', 0.5);
+             plot([t_T(j), t_T(j)], [-3,3], 'LineStyle', '--', 'Color', gray_c, 'LineWidth', 0.5);
+             % plot(t_T(j), Q(t_T(j)*100), 'o', 'Color', gray_c, 'LineWidth', 0.5);
         end
         ylabel("$Q\left[{\rm ml/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
         yline(0,LineWidth=1,LineStyle=":")
@@ -127,7 +133,7 @@ for s=1:length(subjects)
 
         [max_vel, index] = max(abs(pcmri.u_normal{k}), [], 1);  % Find max of absolute values
         max_vel = 100*max_vel .* sign(pcmri.u_normal{k}(index + (0:size(pcmri.u_normal{k}, 2)-1) * size(pcmri.u_normal{k}, 1)));  % Preserve sign
-        xticks(0:0.1:1);    
+        xticks(0:0.2:1);    
 
         % Find max positive and negative velocities (cm/s)
         u = pcmri.u_normal{k};  % [space x time]
@@ -156,7 +162,7 @@ nexttile(rows,[Ndata, 1]);
 for s=1:length(subjects)
     plot(Vs{s}, Dz{s}/10, '-', 'LineWidth', 1.5, 'Color', color_m{s});
     hold on    
-    yticks(-5.5:0.5:0.5);          
+    yticks(-5:1:0.5);          
     
     ylim([-6, 1])
     
@@ -175,13 +181,14 @@ for s=1:length(subjects)
     set(gcf, 'Color', 'w')
 end
 
-for i = 1:length(anatomy.Dz) - 2
-             plot([0, 1], [-anatomy.Dz(i)/10,-anatomy.Dz(i)/10], 'LineStyle', '-', 'Color', gray_c, 'LineWidth', 0.5);
-end   
+yline(0,LineWidth=1,LineStyle=":")
+% for i = 1:length(anatomy.Dz) - 2
+%              plot([0, 1], [-anatomy.Dz(i)/10,-anatomy.Dz(i)/10], 'LineStyle', '-', 'Color', gray_c, 'LineWidth', 0.5);
+% end   
 
 marker = {'o','o','o'};
 for s=1:length(subjects)
-    plot(Vs{s}, Dz{s}/10, marker{s}, 'MarkerSize',7,'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'Color', color_m{s}, 'MarkerEdgeColor',color_m{s});
+    plot(Vs{s}, Dz{s}/10, marker{s}, 'MarkerSize',7,'LineWidth', 1, 'MarkerFaceColor', [1,1,1]*0.5, 'Color', color_m{s}, 'MarkerEdgeColor',color_m{s});
 end
 
 
