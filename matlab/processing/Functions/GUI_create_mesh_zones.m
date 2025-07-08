@@ -35,11 +35,14 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
                 fprintf(2, 'case file %s needs to be created ...\n', case_name + ".cas.gz");
                     
                 % Define to which boundaries apply local sizing
+                local_sizing = [continuity_condition, "dura", "tonsils"];
                 if contains(geom, 'n')
-                    local_sizing = [continuity_condition, "dura", "tonsils", "nerve_roots"];
-                else
-                    local_sizing = [continuity_condition, "dura", "tonsils"];
+                    local_sizing = [local_sizing, "nerve_roots"];
                 end
+                if contains(geom, 'l')
+                    local_sizing = [local_sizing, "ligaments"];
+                end
+                
                 sstt_sizing = sprintf("r'%s'", strjoin(local_sizing, "', r'"));            
                 geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom+ "_geometry_zones"+version+".scdoc");
     

@@ -4,7 +4,6 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
 
     all_simulations = true; 
     geometry_exist = true;
-    zones_simulation = true;
     count_sim = 1; 
 
     full_ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));

@@ -11,7 +11,7 @@ subject = "s101_b";
 % c2 for two inlet velocities; continuity: normal velocity tonsils 
 % c3 for two inlet velocities; continuity: multiple regions
 
-case_name = {"cl3_v2", "cl3_v4"};      % Array with the kind of simulations to do
+case_name = {"cn3_v1"};      % Array with the kind of simulations to do
 mesh_size = [0.0002];    % Array with the different mesh sizes to be simulated
 
 ts_cycle = 100;     % number of time steps per cycle
