@@ -3,9 +3,10 @@ clear; close all;
 addpath("../processing/Functions/")
 addpath('../processing/Functions/Others/')
 
-[cas, dat_PC, t0] = run_if_empty('s101_aa');  % Load data if not already
+[cas, dat_PC, t0] = run_if_empty('s101_b');  % Load data if not already
 visualization_plots = false;
 do_registration = false;
+modes = 30; 
 
 python_venv = "/Users/noza/Documents/chiari/git-chiari/venv/bin/python3.11";
 slicer_3D_path = "/Applications/Slicer.app/Contents/MacOS/Slicer";
@@ -129,7 +130,7 @@ if visualization_plots
     save_animation(movieVector, fullfile(cas.dirvid, "flow_measurements_"+cas.subj+".mp4"));
 end
 
-dat_PC = update_data(velocity, dat_PC);
+dat_PC = update_data(velocity, dat_PC, modes);
 
 dat_PC.dx = dx;
 dat_PC.dy = dy;
@@ -267,13 +268,19 @@ function plot_all_velocity_comparisons(tstep, velocity, dat_PC, cas)
     sgtitle(sprintf('ROI and Velocity Fields at t = %d', tstep), 'FontWeight', 'bold');
 end    
 
-function velocity = update_data(velocity, dat_PC)
+function velocity = update_data(velocity, dat_PC, modes)
     velocity.Ndat = dat_PC.Ndat;
     velocity.locz = dat_PC.locz;
     velocity.Nt   = dat_PC.Nt;
     velocity.T    = dat_PC.T;
     velocity.t    = dat_PC.t;
-    velocity = fourier_decompose_signal(velocity);
+    velocity.fou.M = modes;
+    for k = 1:dat_PC.Ndat
+        [~, a0, am, fm] = four_approx(dat_PC.Q_SAS{k}, modes, 0, 100);
+        velocity.fou.fm{k} = fm;
+        velocity.fou.am{k} = am;
+        velocity.fou.a0{k} = a0;
+    end
 end
 
 function roi_mask = read_ROI_nrrd(location, segmentation_dir)
@@ -329,80 +336,85 @@ function plot_flow_rates(velocity, cas)
     sgtitle("Flow Rates over Time", 'FontWeight', 'bold');
 end
 
-function dat = fourier_decompose_signal(dat)
-%FOURIER_DECOMPOSE_SIGNAL Decomposes input signals into Fourier series
-%
-% Inputs:
-%   dat   - struct containing fields:
-%             .Ndat      - number of datasets
-%             .T         - cell array of periods
-%             .t_ip      - cell array of time vectors
-%             .Q_SAS_ip  - cell array of signals
-%             .Nt_ip     - number of time steps
-%             .dt_ip     - time step
-%   M     - number of Fourier modes
-%   Nrep  - number of signal repetitions for better frequency resolution
-%
-% Output:
-%   dat.fou.fm - cell array of frequency components
-%   dat.fou.am - cell array of complex amplitudes
 
-    Ndat = dat.Ndat;
-    T    = dat.T;
-    t    = dat.t;
-    Q    = dat.Q_SAS;
-    N1   = dat.Nt{1};
-    Nrep = 4;
-    M    = 30;
-    
-    for idat = 1:Ndat
-        TT  = T{idat};
-        tt  = t{idat};
-        QQ  = Q{idat};
 
-        tt(end) = []; % Trim last point
-        QQ(end) = [];
 
-        if length(tt) ~= N1
-            warning("Length mismatch at dataset %d", idat);
-        end
 
-        % Repeat signal Nrep times
-        ttt = tt;
-        QQQ = QQ;
-        for irep = 1:Nrep-1
-            ttt = [ttt, tt + irep*TT];
-            QQQ = [QQQ, QQ];
-        end
-
-        % Compute FFT
-        L  = Nrep * N1;
-        Fs = N1 * 2*pi / TT;
-        f  = Fs * (0:(L/2)) / L;
-        Y  = fft(QQQ);
-        P2 = Y / L;
-        P  = P2(1:L/2+1);
-        a0 = P(1);
-
-        % Extract harmonics
-        fm = zeros(1, M);
-        am = zeros(1, M);
-        for m = 1:M
-            idx = m * Nrep + 1;
-            if idx <= length(f)
-                fm(m) = f(idx);
-                am(m) = P(idx);
-            else
-                warning("Index %d exceeds frequency array size", idx);
-                break;
-            end
-        end
-
-        dat.fou.fm{idat} = fm;
-        dat.fou.am{idat} = am;
-        dat.fou.a0{idat} = a0;
-    end
-
-    dat.fou.M = M;
-    
-end
+% 
+% function dat = fourier_decompose_signal(dat)
+% %FOURIER_DECOMPOSE_SIGNAL Decomposes input signals into Fourier series
+% %
+% % Inputs:
+% %   dat   - struct containing fields:
+% %             .Ndat      - number of datasets
+% %             .T         - cell array of periods
+% %             .t_ip      - cell array of time vectors
+% %             .Q_SAS_ip  - cell array of signals
+% %             .Nt_ip     - number of time steps
+% %             .dt_ip     - time step
+% %   M     - number of Fourier modes
+% %   Nrep  - number of signal repetitions for better frequency resolution
+% %
+% % Output:
+% %   dat.fou.fm - cell array of frequency components
+% %   dat.fou.am - cell array of complex amplitudes
+% 
+%     Ndat = dat.Ndat;
+%     T    = dat.T;
+%     t    = dat.t;
+%     Q    = dat.Q_SAS;
+%     N1   = dat.Nt{1};
+%     Nrep = 4;
+%     M    = 20; %30
+% 
+%     for idat = 1:Ndat
+%         TT  = T{idat};
+%         tt  = t{idat};
+%         QQ  = Q{idat};
+% 
+%         tt(end) = []; % Trim last point
+%         QQ(end) = [];
+% 
+%         if length(tt) ~= N1
+%             warning("Length mismatch at dataset %d", idat);
+%         end
+% 
+%         % Repeat signal Nrep times
+%         ttt = tt;
+%         QQQ = QQ;
+%         for irep = 1:Nrep-1
+%             ttt = [ttt, tt + irep*TT];
+%             QQQ = [QQQ, QQ];
+%         end
+% 
+%         % Compute FFT
+%         L  = Nrep * N1;
+%         Fs = N1 * 2*pi / TT;
+%         f  = Fs * (0:(L/2)) / L;
+%         Y  = fft(QQQ);
+%         P2 = Y / L;
+%         P  = P2(1:L/2+1);
+%         a0 = P(1);
+% 
+%         % Extract harmonics
+%         fm = zeros(1, M);
+%         am = zeros(1, M);
+%         for m = 1:M
+%             idx = m * Nrep + 1;
+%             if idx <= length(f)
+%                 fm(m) = f(idx);
+%                 am(m) = P(idx);
+%             else
+%                 warning("Index %d exceeds frequency array size", idx);
+%                 break;
+%             end
+%         end
+% 
+%         dat.fou.fm{idat} = fm;
+%         dat.fou.am{idat} = am;
+%         dat.fou.a0{idat} = a0;
+%     end
+% 
+%     dat.fou.M = M;
+% 
+% end

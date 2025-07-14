@@ -1,4 +1,4 @@
-function [ff, am, fm] = four_approx(f, N, visualization, Npoints)
+function [ff, a0, am, fm] = four_approx(f, N, visualization, Npoints)
     if f(1) == f(end)
         f(end) = [];
     end
@@ -22,9 +22,11 @@ function [ff, am, fm] = four_approx(f, N, visualization, Npoints)
     
     % Compute Fourier coefficients and frequencies (amplitudes and phases)
     yy = fft(f) / length(f);  % Normalized FFT
+    a0 = yy(1);
     am = yy(2:N+1);  % Amplitudes for modes 1 to N
     fm = 1i * 2 * pi * (1:N);  % Corresponding frequencies for modes 1 to N
     ff2 = yy(1) * ones(1,Npoints);  % Initialize Fourier series approximation with DC component
+    ff3 = ff2;
     t2 = (0:(Npoints-1))/Npoints;
     t = (0:(L-1))/L;  % Time axis normalized between 0 and 1
 
@@ -36,15 +38,16 @@ function [ff, am, fm] = four_approx(f, N, visualization, Npoints)
             ff2 = ff2 + 2 * real(am(m) * exp(fm(m) * t2));  % Add each mode's contribution
             % Other forms to obtain the Fourier Transform
             % ff2 = ff2 + am(m) * exp(fm(m) * t2) + conj(am(m)) * exp(-fm(m) * t2);
-            % ff2 = ff2 + (real(am(m)) * cos(m * 2 * pi * t2) - imag(am(m)) * sin(m * 2 * pi * t)) * 2;
+            ff3 = ff3 + (real(am(m)) * cos(m * 2 * pi * t2) - imag(am(m)) * sin(m * 2 * pi * t2)) * 2;
         end
         % Plot the original signal and the reconstructed versions
         figure;
         plot([t,1], [f',f(1)], '-k', 'LineWidth', 1);  % Original signal
         hold on;
         plot([t2,1], [ff2,ff2(1)], '-.r', 'LineWidth', 1);  % Fourier series approximation
+        plot([t2,1], [ff3,ff3(1)], 's');  % Fourier series approximation
         plot([t2,1], [ff,ff(1)], '--g', 'LineWidth', 1);   % Inverse FFT approximation
-        legend('Original Signal', 'Fourier Series Approximation', 'IFFT Approximation');
+        legend('Original Signal', 'Fourier Series Approximation', 'DNS', 'IFFT Approximation');
         hold off;
     end
 end

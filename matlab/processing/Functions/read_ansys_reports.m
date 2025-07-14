@@ -209,8 +209,8 @@ for case_name = cases
         DNS.out.t = data{2};         % Second column - flow-time
         DNS.out.u_max = data{3};     % Third column - dp
 
-        % DNS.out.q_bottom = data{4};  % Fourth column - q_bottom
-        % DNS.out.q_top = data{5};  
+        DNS.out.q_bottom = data{4};  % Fourth column - q_bottom
+        DNS.out.q_top = data{5};  
         % DNS.out.q_cont = data{6};
 
         for ii = 1:length(Dz)

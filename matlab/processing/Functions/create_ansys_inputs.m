@@ -4,8 +4,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
     % Initialization
     loc_ID = [1, dat_PC.Ndat];
     sstt = {"top", "bottom"};
-    modes = 20; % Fourier modes
-    t = linspace(0, 1, ts_cycle);  % Time vector
+    modes = dat_PC.fou.M; % # Fourier modes
+    t = (0:(ts_cycle-1))/(ts_cycle);  % Time vector
 
     load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
     T = dat_PC.T{end};
@@ -49,7 +49,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
         % Store output
         x{ii} = xx; y{ii} = yy; z{ii} = zz;
         u{ii} = uu; roi{ii} = ROI;
-        [q{ii}, ~, ~] = four_approx(Q, modes, 0, ts_cycle);
+        [q{ii}, ~, ~, ~] = four_approx(Q, modes, 1, ts_cycle);
         SV{ii} = 0.5 * simps(t*dat_PC.T{ii}, abs(q{ii}), 2);
 
         % Compute normal vector
@@ -78,17 +78,19 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
 
             % Normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes + 1);  % +1 to include a0
-            Q_recon = a0 * ones(1, ts_cycle);        % initialize with DC component
+            Q_recon = zeros(1,ts_cycle);        % initialize with DC component
             equation_terms(1) = sprintf("%.6f", a0/2); % add a0 as the first term
 
             for n = 1:modes
+
                 omega = n * 2 * pi / T;
                 real_part = real(An(n));
                 imag_part = imag(An(n));
                 equation_terms(n+1) = sprintf("+%.6f*cos(%.6f*t*1[s^-1]) - %.6f*sin(%.6f*t*1[s^-1])", ...
                                             real_part, omega, imag_part, omega);
-                Q_recon = Q_recon + 2 * (real_part * cos(omega * t) - imag_part * sin(omega * t));
+                Q_recon = Q_recon + 2 * (real_part * cos(omega * t * T) - imag_part * sin(omega * t * T));
             end
+            Q_recon = Q_recon + a0;
             eq_str = sprintf("(%s)*2E-6[m^3/s]", strjoin(equation_terms, ' '));
             eq_str = regexprep(eq_str, '\+-', '- ');
             eq_str = regexprep(eq_str, '-\s*-', '+ ');
@@ -122,7 +124,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             
             % Normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes + 1);  % +1 for a0
-            Q_recon = a0 * ones(1, ts_cycle);        % Start with DC component
+            Q_recon = zeros(1,ts_cycle);        % initialize with DC component
             equation_terms(1) = sprintf("%.6f", a0/2); % First term is a0
             
             for n = 1:modes
@@ -131,16 +133,29 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
                 imag_part = imag(An(n));
                 equation_terms(n+1) = sprintf("+%.6f*cos(%.6f*t*1[s^-1]) - %.6f*sin(%.6f*t*1[s^-1])", ...
                                               real_part, omega, imag_part, omega);
-                Q_recon = Q_recon + 2 * (real_part * cos(omega * t) - imag_part * sin(omega * t));
+                Q_recon = Q_recon + 2 * (real_part * cos(omega * t * T) - imag_part * sin(omega * t * T));
             end
-            
+            Q_recon = Q_recon + a0;
             eq_str = sprintf("(%s)*2E-6[m^3/s]", strjoin(equation_terms, ' '));
             eq_str = regexprep(eq_str, '\+-', '- ');
             eq_str = regexprep(eq_str, '-\s*-', '+ ');
             
             filename = fullfile(cas.diransys_in, "flow-rates", "Q_" + num2str(ii - 1) + ".txt");
             write_text_file(filename, eq_str);
+
+            %CHECK: TO BE DELETED
+            if ii == 2
+                figure 
+                plot(t,q{ii},'-','Color','r',LineWidth=1.2 )
+                hold on 
+                plot(t,Q_recon,'-','Color','b',LineWidth=1.2)
+                drawnow;
+            end
+            
         end
+
+
+        
 
 
     end

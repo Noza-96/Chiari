@@ -8,7 +8,7 @@ function fig_pressure(subject, case_name, mesh_size)
     else
         fig_ind = 3;
         conf = {"(II)", "(III)", "(IV)", "(V)"};
-        yL = [-8,14];
+        yL = [-4,8];
     end
 
     N0 = 200;
@@ -33,10 +33,9 @@ function fig_pressure(subject, case_name, mesh_size)
     Nloc = length(dp_locs);
     ref_loc = dp_locs{end};
     
-    j = floor((Nloc-1)/2);
-    j=1;
+    loc_t = 2; loc_b = 7;
     dp_vals = DNS.out.dp.val;
-    dp_diff_0 = dp_vals{j}(N0+1:N0+Nt) - dp_vals{end}(N0+1:N0+Nt);
+    dp_diff_0 = dp_vals{loc_t}(N0+1:N0+Nt) - dp_vals{loc_b}(N0+1:N0+Nt);
 
     
     % === Set up figure ===
@@ -63,7 +62,7 @@ function fig_pressure(subject, case_name, mesh_size)
 
         % Pressure difference with respect to last location
         dp_vals = DNS.out.dp.val;
-        dp_diff = dp_vals{j}(N0+1:N0+Nt) - dp_vals{end}(N0+1:N0+Nt);
+        dp_diff = dp_vals{loc_t}(N0+1:N0+Nt) - dp_vals{loc_b}(N0+1:N0+Nt);
         % [ZL,~] = longitudinal_impedance(dp_diff, DNS.out.q_bottom(end-Nt+1:end));
         nexttile(i-1)
         hold on;
@@ -77,7 +76,7 @@ function fig_pressure(subject, case_name, mesh_size)
 
     % Define label text based on subplot index
     if i == 2  % first subplot
-        label_str = ['$\max(\Delta p) = ' num2str(dp_max, '%.1f') '\ \mathrm{Pa}$'];
+        label_str = ['$\max(\mathrm{dP}) = ' num2str(dp_max, '%.1f') '\ \mathrm{Pa}$'];
 
         if fig_ind == 3
             plot(t_max_0, dp_max_0, 'ko', 'MarkerFaceColor', 'k', 'MarkerSize', 5)
@@ -108,7 +107,7 @@ function fig_pressure(subject, case_name, mesh_size)
         
         
         if i == 2
-        ylabel("$\Delta p_{-"+DNS.Dz(j)+"/-"+DNS.Dz(end)+"} \, [{\rm Pa}]$", 'Interpreter', 'latex', 'FontSize',fs)
+        ylabel("$\mathrm{dP} \, [{\rm Pa}]$", 'Interpreter', 'latex', 'FontSize',fs)
         % ylabel("$\langle \Delta p)\rangle \, [{\rm Pa}]$", 'Interpreter', 'latex', 'FontSize',fs);
         end
         title(conf{i-1}, 'Interpreter', 'latex', 'FontSize', fs);
