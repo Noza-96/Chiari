@@ -49,7 +49,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
         % Store output
         x{ii} = xx; y{ii} = yy; z{ii} = zz;
         u{ii} = uu; roi{ii} = ROI;
-        [q{ii}, ~, ~, ~] = four_approx(Q, modes, 1, ts_cycle);
+        [q{ii}, ~, ~, ~] = four_approx(Q, modes, 0, ts_cycle);
         SV{ii} = 0.5 * simps(t*dat_PC.T{ii}, abs(q{ii}), 2);
 
         % Compute normal vector
@@ -142,15 +142,15 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             
             filename = fullfile(cas.diransys_in, "flow-rates", "Q_" + num2str(ii - 1) + ".txt");
             write_text_file(filename, eq_str);
-
-            %CHECK: TO BE DELETED
-            if ii == 2
-                figure 
-                plot(t,q{ii},'-','Color','r',LineWidth=1.2 )
-                hold on 
-                plot(t,Q_recon,'-','Color','b',LineWidth=1.2)
-                drawnow;
-            end
+            % 
+            % %CHECK: TO BE DELETED
+            % if ii == 2
+            %     figure 
+            %     plot(t,q{ii},'-','Color','r',LineWidth=1.2 )
+            %     hold on 
+            %     plot(t,Q_recon,'-','Color','b',LineWidth=1.2)
+            %     drawnow;
+            % end
             
         end
 
