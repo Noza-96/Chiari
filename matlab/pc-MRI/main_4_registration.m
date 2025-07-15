@@ -6,7 +6,7 @@ addpath('../processing/Functions/Others/')
 [cas, dat_PC, t0] = run_if_empty('s101_b');  % Load data if not already
 visualization_plots = false;
 do_registration = false;
-modes = 30; 
+modes = 20; 
 
 python_venv = "/Users/noza/Documents/chiari/git-chiari/venv/bin/python3.11";
 slicer_3D_path = "/Applications/Slicer.app/Contents/MacOS/Slicer";
@@ -276,7 +276,7 @@ function velocity = update_data(velocity, dat_PC, modes)
     velocity.t    = dat_PC.t;
     velocity.fou.M = modes;
     for k = 1:dat_PC.Ndat
-        [~, a0, am, fm] = four_approx(dat_PC.Q_SAS{k}, modes, 0, 100);
+        [~, a0, am, fm] = four_approx(dat_PC.Q_SAS{k}, modes, 1, 100);
         velocity.fou.fm{k} = fm;
         velocity.fou.am{k} = am;
         velocity.fou.a0{k} = a0;

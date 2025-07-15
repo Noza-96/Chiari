@@ -142,15 +142,15 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             
             filename = fullfile(cas.diransys_in, "flow-rates", "Q_" + num2str(ii - 1) + ".txt");
             write_text_file(filename, eq_str);
-            % 
-            % %CHECK: TO BE DELETED
-            % if ii == 2
-            %     figure 
-            %     plot(t,q{ii},'-','Color','r',LineWidth=1.2 )
-            %     hold on 
-            %     plot(t,Q_recon,'-','Color','b',LineWidth=1.2)
-            %     drawnow;
-            % end
+
+            %CHECK: TO BE DELETED
+            if ii == 2
+                figure 
+                plot(t,q{ii},'-','Color','r',LineWidth=1.2 )
+                hold on 
+                plot(t,Q_recon,'-','Color','b',LineWidth=1.2)
+                drawnow;
+            end
             
         end
 
