@@ -58,15 +58,15 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     fprintf(fileID,'/solve/set p-v-coupling 24 q  \n');
 
     % import Q_b and Q_t
-        fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_bottom.txt"), 'r');  % Open the file for reading
-        sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
-        fclose(fid);
-        named_expression (fileID, "Q_b", sstt)
+    fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_bottom.txt"), 'r');  % Open the file for reading
+    sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
+    fclose(fid);
+    named_expression (fileID, "Q_b", sstt)
 
-        fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_top.txt"), 'r');  % Open the file for reading
-        sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
-        fclose(fid);
-        named_expression (fileID, "Q_t", sstt)
+    fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_top.txt"), 'r');  % Open the file for reading
+    sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
+    fclose(fid);
+    named_expression (fileID, "Q_t", sstt)
     
 
     % Create velocity inlet
