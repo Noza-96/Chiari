@@ -79,14 +79,14 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             % Normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes + 1);  % +1 to include a0
             Q_recon = zeros(1,ts_cycle);        % initialize with DC component
-            equation_terms(1) = sprintf("%.6f", a0/2); % add a0 as the first term
+            equation_terms(1) = sprintf("%.10f", a0/2); % add a0 as the first term
 
             for n = 1:modes
 
                 omega = n * 2 * pi / T;
                 real_part = real(An(n));
                 imag_part = imag(An(n));
-                equation_terms(n+1) = sprintf("+%.6f*cos(%.6f*t*1[s^-1]) - %.6f*sin(%.6f*t*1[s^-1])", ...
+                equation_terms(n+1) = sprintf("+%.10f*cos(%.10f*t*1[s^-1]) - %.10f*sin(%.10f*t*1[s^-1])", ...
                                             real_part, omega, imag_part, omega);
                 Q_recon = Q_recon + 2 * (real_part * cos(omega * t * T) - imag_part * sin(omega * t * T));
             end
@@ -125,13 +125,13 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             % Normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes + 1);  % +1 for a0
             Q_recon = zeros(1,ts_cycle);        % initialize with DC component
-            equation_terms(1) = sprintf("%.6f", a0/2); % First term is a0
+            equation_terms(1) = sprintf("%.10f", a0/2); % First term is a0
             
             for n = 1:modes
                 omega = n * 2 * pi / T;
                 real_part = real(An(n));
                 imag_part = imag(An(n));
-                equation_terms(n+1) = sprintf("+%.6f*cos(%.6f*t*1[s^-1]) - %.6f*sin(%.6f*t*1[s^-1])", ...
+                equation_terms(n+1) = sprintf("+%.10f*cos(%.10f*t*1[s^-1]) - %.10f*sin(%.10f*t*1[s^-1])", ...
                                               real_part, omega, imag_part, omega);
                 Q_recon = Q_recon + 2 * (real_part * cos(omega * t * T) - imag_part * sin(omega * t * T));
             end
