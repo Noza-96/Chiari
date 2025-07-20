@@ -3,7 +3,7 @@ function fig_pressure(subject, case_name, mesh_size)
 
     if any(cellfun(@(s) ~isempty(regexp(s, '^cl|^cn', 'once')), case_name))
         fig_ind = 4;
-        conf = {"(L1)", "(L2)", "(IV)", "(V)"};
+        conf = {"L", "N", "L+N"};
         yL = [-8,16];
     else
         fig_ind = 3;

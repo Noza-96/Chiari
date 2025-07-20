@@ -144,7 +144,6 @@ for case_name = cases
                 if nn(3) < 0
                     nn = -nn; % Flip the normal vector
                 end
-                
                 normal_v{k} = nn;        
                 % Store velocity and pressure for current time step
                 u_DNS{k, n} = U(index{k});
