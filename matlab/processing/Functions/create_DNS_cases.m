@@ -1,6 +1,5 @@
-function [DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle)
+function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle)
     DNS_cases = cell(length(case_name),length(mesh_size));
-    nerve_sim = false; lig_sim = false; zones_sim = false; nerve_lig_sim = false;
 
     for i = 1:length(case_name)     
         for j = 1:length(mesh_size)
@@ -35,22 +34,6 @@ function [DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_
                 DNS.Dz = 0:1:50;
             end
 
-            % check if any simulation contains ligaments
-            if DNS.geom == "cl"
-                lig_sim = true;
-            end
-            % check if any simulation contains nerves
-            if DNS.geom == "cn"
-                nerve_sim = true;
-            end
-
-            if DNS.geom == "cnl"
-                nerve_lig_sim = true;
-            end
-
-            if DNS.sim == 3
-                zones_sim = true;
-            end
             save(fullfile(cas.dirmat,"DNS_"+DNS.case+".mat"),'DNS')
             clear DNS
         end     
@@ -60,8 +43,6 @@ function [DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_
 end
 
 %% Auxiliary functions 
-
-
 
 function filepath = correct_path(filepath)
     filepath = strrep(filepath, '\', '/');

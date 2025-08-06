@@ -35,29 +35,29 @@ function snapshot_results(cas, subject, case_name, mesh_size, selected_times)
     end
 
     % Construct RMSE summary table [cm/s] with models as rows and locations as columns
-rmse_table = cell(Ncases, Ndat); % (I–V) x (UPFM to C3–C4)
-row_names = compose('(%s)', roman(1:Ncases));
-col_names = pcmri.locations;
-
-for kk = 1:Ncases
-    RMSE_case = st_DNS{kk}.RMSE; % cell array (Ndat x 1), each cell is Nt x 1
-    for loc = 1:Ndat
-        if isempty(RMSE_case{loc})
-            rmse_table{kk, loc} = '';
-        else
-            vals_selected = RMSE_case{loc}(selected_times); % correct indexing: select t/T = 0.4, 0.7, 0.8
-            rmse_cm = vals_selected(:)' * 1e2;               % convert to cm/s
-            rmse_table{kk, loc} = sprintf('[%.2f, %.2f, %.2f]', rmse_cm);
+    rmse_table = cell(Ncases, Ndat); % (I–V) x (UPFM to C3–C4)
+    row_names = compose('(%s)', roman(1:Ncases));
+    col_names = pcmri.locations;
+    
+    for kk = 1:Ncases
+        RMSE_case = st_DNS{kk}.RMSE; % cell array (Ndat x 1), each cell is Nt x 1
+        for loc = 1:Ndat
+            if isempty(RMSE_case{loc})
+                rmse_table{kk, loc} = '';
+            else
+                vals_selected = RMSE_case{loc}(selected_times); % correct indexing: select t/T = 0.4, 0.7, 0.8
+                rmse_cm = vals_selected(:)' * 1e2;               % convert to cm/s
+                rmse_table{kk, loc} = sprintf('[%.2f, %.2f, %.2f]', rmse_cm);
+            end
         end
     end
-end
 
-% Convert to table
-T_rmse = cell2table(rmse_table, 'RowNames', row_names, 'VariableNames', col_names);
-
-% Display and optionally export
-disp('RMSE summary table [cm/s] for t/T = [0.4, 0.7, 0.8]:')
-disp(T_rmse)
+    % Convert to table
+    T_rmse = cell2table(rmse_table, 'RowNames', row_names, 'VariableNames', col_names);
+    
+    % Display and optionally export
+    disp('RMSE summary table [cm/s] for t/T = [0.4, 0.7, 0.8]:')
+    disp(T_rmse)
     x_roi = DNS_roi.slices.x;
     y_roi = DNS_roi.slices.y;
 
@@ -94,31 +94,34 @@ disp(T_rmse)
 
         print(gcf, fullfile(cas.dirfig, "snap_"+n+"_fig_"+fig_ind), '-depsc','-vector');
 
-            figure('Position', [100, 100, 300, 70*length(loc_plot)]);
-            x_L = 0;
-    
-            for kk = 1:Ncases
-                RMSE_val = cellfun(@(x) x(n), st_DNS{kk}.RMSE)*1e2;
-                plot(RMSE_val, 1:length(RMSE_val), '-o', 'MarkerSize',6,'LineWidth', 1.5)
-                hold on
-                x_L = max(x_L, max(RMSE_val));
+        figure('Position', [100, 100, 300, 70*length(loc_plot)]);
+        x_L = 0;
 
+        for kk = 1:Ncases
+            RMSE_val = cellfun(@(x) x(n), st_DNS{kk}.RMSE)*1e2;
+            plot(RMSE_val(loc_plot), loc_plot, '-o', 'MarkerSize',6,'LineWidth', 1.5)
+            if kk == 1 
+                plot(RMSE_val(loc_plot), loc_plot, ':ok', 'MarkerSize',6,'LineWidth', 2)
             end
-    
-            ylim([loc_plot(1)-0.5,loc_plot(end)+0.5])
-            xlim([0,ceil(x_L*10)/10])
-            xticks(0:0.2:(ceil(x_L*10)/10-0.1))
-            xticklabels([])
-            yticks(loc_plot(1):1:loc_plot(end))
-            yticklabels([]);
-            ax = gca;
-            ax.XGrid = 'off';
-            ax.YGrid = 'on';
-            set(gca, 'LineWidth', 1, 'TickLength', [0.01, 0.01]);
-            print(gcf, fullfile(cas.dirfig, "error_"+n+"_fig_"+fig_ind), '-depsc','-vector');
+            hold on
+            x_L = max(x_L, max(RMSE_val));
+
+        end
+
+        ylim([loc_plot(1)-0.5,loc_plot(end)+0.5])
+        xlim([0,ceil(x_L*10)/10])
+        xticks(0:0.2:(ceil(x_L*10)/10-0.1))
+        xticklabels([])
+        yticks(loc_plot(1):1:loc_plot(end))
+        yticklabels([]);
+        ax = gca;
+        ax.XGrid = 'off';
+        ax.YGrid = 'on';
+        set(gca, 'LineWidth', 1, 'TickLength', [0.01, 0.01]);
+        print(gcf, fullfile(cas.dirfig, "error_"+n+"_fig_"+fig_ind), '-depsc','-vector');
 
 
-            legend({"I", "II", "III", "IV", "V"})      
+        legend({"I", "II", "III", "IV", "V"})      
             
     end
    

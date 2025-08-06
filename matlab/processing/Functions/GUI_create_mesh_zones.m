@@ -13,11 +13,8 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
 
     fileID = fopen(GUI_journal_path, 'w');
        
-    % for type 2 simulation, which boundary has continuity condition
+    % continuity condition distributed in cord between slices
     continuity_condition = compose("cord_%d", 1:(cas.Ncas-1));
-
-    
-    % prox_limit = [0.0002, 0.0008];
     
     for k = 1: length(cases_zones)
 
@@ -73,9 +70,6 @@ function all_simulations = GUI_create_mesh_zones(cas, mesh_size, cases_zones)
                     % wall_sizing
                     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['wall_sizing'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 1,r'BOIControlName': r'wall_sizing',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Face Size',r'BOIFaceLabelList': ["+sstt_sizing+"],r'BOIGrowthRate': 1.1,r'BOISize': "+mesh_size(ii)+",r'BOIZoneorLabel': r'label',r'CompleteFaceLabelList': ["+sstt_sizing+"],r'DrawSizeControl': True,})"")\n" );
                     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['wall_sizing'].Execute()"")\n" );
-                    % proximity
-                    % fprintf(fileID,"(%%py-exec ""workflow.TaskObject['proximity'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 10,r'BOIControlName': r'proximity',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Proximity',r'BOIFaceLabelList': [r'cord', r'dura'],r'BOIGrowthRate': 1.1,r'BOIMaxSize': "+prox_limit(2)+",r'BOIMinSize': "+prox_limit(1)+",r'BOIZoneorLabel': r'label',})"")\n" );
-                    % fprintf(fileID,"(%%py-exec ""workflow.TaskObject['proximity'].Execute()"")\n" );
                 end    
                 % Generate surface mesh
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Generate the Surface Mesh'].Arguments.set_state({r'CFDSurfaceMeshControls': {r'MaxSize': "+4*mesh_size(ii)+",r'MinSize': "+mesh_size(ii)+",},})"")\n" );

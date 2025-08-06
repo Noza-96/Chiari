@@ -11,7 +11,7 @@ subject = "s101_b";
 % c2 for two inlet velocities; continuity: normal velocity tonsils 
 % c3 for two inlet velocities; continuity: multiple regions
 
-case_name = {"cl3_v1"};      % Array with the kind of simulations to do
+case_name = {"cn3_v1","cnl3_v1"};      % Array with the kind of simulations to do
 mesh_size = [0.0002];    % Array with the different mesh sizes to be simulated
 
 ts_cycle = 100;     % number of time steps per cycle
@@ -21,7 +21,7 @@ n_cores = 14;       % number of processors simulation
 
 [cas, dat_PC] = check_subject_initialization(subject, ts_cycle);
 
-[DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle);
+DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle);
 
 % run fluent-meshing to create meshes and corresponding .cas files
 cases_ready = GUI_create_mesh(cas, mesh_size, case_name);
