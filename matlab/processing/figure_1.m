@@ -48,7 +48,7 @@ Y_l = zeros(1,Ndata);
 for s=1:length(subjects)
     subject = subjects{s};
 
-    file_location = fullfile("../../../computations", "pc-mri", subject, "mat","03-apply_roi_compute_Q.mat"); 
+    file_location = fullfile("../../../computations", "pc-mri", subject, "mat","04-registration.mat"); 
     if exist(file_location)==0
         continue
     else

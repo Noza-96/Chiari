@@ -9,7 +9,7 @@ subject = "s101_b";
 
 % c1 for bottom inlet velocity and top zero pressure, c2 for two inlet velocities and permeable cord
 % case_name = { "c2", "c1t", "c1b","c0t"}; 
-case_name = {"c1b"};
+case_name = {"c0t", "c3", "cl3_v1"};
 mesh_size = [0.0002];
 
 % read ansys reports and save solution in .mat file
@@ -112,7 +112,7 @@ warning('on', 'all');
 %% pressure - anatomy
 close all; clear;
 subject = "s101_b";
-case_name ={"c3", "cn3_v1", "cl3_v1",  "cnl3_v1"};
+% case_name ={"c3", "cn3_v1", "cl3_v1",  "cnl3_v1"};
 mesh_size = [0.0002];
 [ZL,LI] = fig_pressure(subject, case_name, mesh_size);
 

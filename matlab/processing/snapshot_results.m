@@ -148,7 +148,7 @@ function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw,
 
     % Plot in the specified tile
     nexttile(ii);
-    scatter(x, y, 7, w, 'filled', 'd');
+    scatter(x, y, 10, w, 'filled','s');
     % contourf(Xq, Yq, Wq, 40, 'LineColor', 'none');
     colorbar;
     % bluetored(colo_lim(loc-1));

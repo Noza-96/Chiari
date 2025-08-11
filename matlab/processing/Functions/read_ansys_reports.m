@@ -257,6 +257,7 @@ function [RMSE, RMSE_ave, RMSE_space, q] = compute_RMSE(DNS, pcmri, pixel_size)
         Xd = DNS.slices.x{iloc};
         Yd = DNS.slices.y{iloc};
         ud = DNS.slices.u_normal{iloc};  % [Npts_d × Nt]
+        pd = DNS.slices.p{iloc};  % [Npts_d × Nt]
 
         rmse_vec = zeros(1, pcmri.Nt);    % RMSE(t)
         zero_error = 1;
@@ -298,6 +299,7 @@ function [RMSE, RMSE_ave, RMSE_space, q] = compute_RMSE(DNS, pcmri, pixel_size)
         % Preallocate error matrix
         sq_err_all = zeros(Nv, Nt);
         u_ave_time = zeros(Nv, Nt);
+        p_ave_time = zeros(Nv, Nt);
     
         % Recompute interpolated values at all time points and fill matrix
         for it = 1:Nt
@@ -311,15 +313,18 @@ function [RMSE, RMSE_ave, RMSE_space, q] = compute_RMSE(DNS, pcmri, pixel_size)
             % Loop through each PCMRI point and compute local average
 
             u_avg = NaN(size(Xp));
+            p_avg = NaN(size(Xp));
             for i = 1:length(Xp)
                 in_square = abs(Xd - Xp(i)) <= dx/2 & abs(Yd - Yp(i)) <= dy/2;
                 if any(in_square)
                     u_avg(i) = mean(ud(in_square, it), 'omitnan');
+                    p_avg(i) = mean(pd(in_square, it), 'omitnan');
                 end
             end
             diff_t = u_avg(valid) - up(valid, it);
             sq_err_all(:, it) = diff_t.^2;
             u_ave_time(:, it) = u_avg(valid);
+            p_ave_time(:, it) = p_avg(valid);
         end
 
         % Compute RMSE(t)
@@ -334,6 +339,7 @@ function [RMSE, RMSE_ave, RMSE_space, q] = compute_RMSE(DNS, pcmri, pixel_size)
         RMSE_space.x{iloc} = Xp(valid);
         RMSE_space.y{iloc} = Yp(valid);
         RMSE_space.u_normal{iloc} = u_ave_time;  
+        RMSE_space.p{iloc} = p_ave_time;  
         q{iloc} = sum(u_ave_time*(dx*dy)*1e6,1);         
     end
 end
