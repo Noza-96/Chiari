@@ -15,6 +15,7 @@ for kk = 1:n_slices
     roi{kk} = DNS_roi.slices.u_normal{kk}(:,1)==0;
 end
 
+DY_fig = 400;
 
 mesh_size = 0.0002;
 
@@ -28,223 +29,126 @@ blue  = [0.2, 0.4, 0.8];
 
 sli = 3;
 
-ntimes = [40,70,80];
+ntimes = [70];
 
-% Localize anterior and posterior pixels
-[t_geom, t_sim, b_inlet, version] = get_type_simulation("cl3_v1");
-DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
-
-data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
-load(data_path, 'DNS');
+case_name = ["c3", "cl3_v1"];
 
 anterior_idx = cell(size(DNS.RMSE_space.x));
 
 figure
-tiledlayout(n_slices-1,length(ntimes), "TileSpacing", "loose", "Padding", "tight");
-set(gcf, 'Position',[100,100,500,400])
-c_lim = [2,0.3,0.8];
+tiledlayout(n_slices-1,2, "TileSpacing", "loose", "Padding", "tight");
+set(gcf, 'Position',[100,100,500,DY_fig])
+c_lim = {[-6.5,-3.5],[-8.2, -6.5],[-14.2,-12]};
+% c_lim = {[-2.5,2.5],[-0.5,0.5],[-1.5,-1.5]};
 
-for k = 2:n_slices
-    for nt = ntimes 
-        nexttile
-        plot_pressure(DNS.RMSE_space, k, k, nt, true,'PlotType', 'contour', 'Mask', roi{k}, 'MaskXY', {x_roi{k}, y_roi{k}});
-        caxis([-c_lim(k-1) c_lim(k-1)]);
+for n_case = 1:length(case_name)
 
-        % Define ticks based on limit
-        cb_ticks = linspace(-c_lim(k-1), c_lim(k-1), 5);  % 5 evenly spaced ticks
-        cb = colorbar;
-        cb.Ticks = cb_ticks;
-        cb.TickDirection = 'out';  % optional
-        cb.FontSize = fan;          % match font size
-        if nt ==40
-            ylabel('y [cm]', 'Interpreter','latex', FontSize=fs);
+    % Localize anterior and posterior pixels
+    [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name(n_case));
+    DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
+    
+    data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
+    load(data_path, 'DNS');
+
+    for k = 2:n_slices
+        for nt = ntimes 
+            nexttile(2*(k-1)-2+n_case)
+            plot_pressure(DNS.RMSE_space, k, 1, nt, true,'PlotType', 'contour', 'Mask', roi{k}, 'MaskXY', {x_roi{k}, y_roi{k}});
+            caxis(c_lim{k-1});
+    
+            % Define ticks based on limit
+            % cb_ticks = linspace(-c_lim(k-1), c_lim(k-1), 5);  % 5 evenly spaced ticks
+            % cb = colorbar;
+            % cb.Ticks = cb_ticks;
+            % cb.TickDirection = 'out';  % optional
+            % cb.FontSize = fan;          % match font size
+            if n_case == 1
+                ylabel('y [cm]', 'Interpreter','latex', FontSize=fs);
+                % colorbar off
+            end
+            if k == n_slices
+                xlabel('x [cm]', 'Interpreter','latex', FontSize=fs);
+            end
         end
-        if nt ~=80
-            colorbar off
-        end
-        if k == n_slices
-            xlabel('x [cm]', 'Interpreter','latex', FontSize=fs);
+        if n_case == 2
+            anterior_idx{k} = plot_pressure(DNS.RMSE_space, k, k, 30, false);
         end
     end
-    anterior_idx{k} = plot_pressure(DNS.RMSE_space, k, k, 30, false);
-
 end
 drawnow;
 
-case_name = ["c3", "cl3_v1"];
+figure
+scatter(DNS.RMSE_space.x{3}, DNS.RMSE_space.y{3}, 5, anterior_idx{3})
 
-dx = dat_PC.dx/1000; % [m]
-dy = dat_PC.dy/1000; % [m]
-dA = dx*dy;
+print(gcf, fullfile(pwd,'Figures', 'fig_10_pressure_lig'), '-depsc','-vector');
 
 line_s = [':', '-'];
 
 figure
-tiledlayout(n_slices-1, 2, "TileSpacing", "compact", "Padding", "compact")
-set(gcf, 'Position',[100,100,400,400])
+tiledlayout(n_slices-1, 1, "TileSpacing", "compact", "Padding", "compact")
+set(gcf, 'Position',[100,100,300,DY_fig])
 
+% ant_c  = [1.00, 0.88, 0.40];  % warm yellow
+% post_c = [0.55, 0.75, 0.88];  % soft blue
 color_m = {blue, red};
+
 tt = (0:(100-1))/(100);
-
-Error_ant_i = zeros(1,n_slices-1);
-Error_post_i = zeros(1,n_slices-1);
-
-Error_ant = cell(1,length(case_name));
-Error_post = cell(1,length(case_name));
+line_sty = ["-.", "-"];
 
 for n_case = 1:length(case_name)
     
-    
     for k = 2:n_slices
-        u = pcmri.u_normal{k};
-        Nt = size(u,2);
-        Q_ant_pc = zeros(Nt, 1);
-        Q_post_pc = zeros(Nt, 1);
-        nexttile (k-1)
-        for nt = 1:size(u,2)
-            Q_ant_pc(nt) = sum(u(:,nt).*anterior_idx{k}*dA);
-            Q_post_pc(nt) = sum(u(:,nt).*(~anterior_idx{k})*dA);
-        end
-        if n_case == 1
-            nexttile (2*(k-1)-1)
-            flow_rate_trans(Q_ant_pc*1e6)
-            % plot(0:0.01:1,[Q_ant_pc;Q_ant_pc(1)]*1e6, 'Color','k', 'LineStyle','-', LineWidth=1.5)
-            hold on 
-            if k < n_slices
-                xticklabels([])
-                xlabel([])
-            end
-            set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
-            ylabel('$Q(t)$', 'Interpreter', 'latex', 'FontSize', fs);
-    
-            Vs = simps(tt*1.14,0.5*abs(Q_ant_pc*1e6));
-            A = sum(anterior_idx{k})*dA * 1e4; %cm^2
-    
-            % Add annotation (place in upper-left corner of current axes)
-            xPos = 0.05; % relative to x-axis
-            yPos = -1.1;  % relative to y    -axis
-            Dy = 0.35;
-            if k == 2
-                text(xPos, yPos, "$V_s = " + round(Vs,2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-                text(xPos, yPos+Dy, "$A = " + round(A,2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-            else
-                text(xPos, yPos, "$ " + round(Vs,2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-                text(xPos, yPos+Dy, "$" + round(A,2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-            end
-    
-            nexttile (2*(k-1))
-            % plot(0:0.01:1,[Q_post_pc;Q_post_pc(1)]*1e6, 'Color','k', 'LineStyle','-', LineWidth=1.5)
-            flow_rate_trans(Q_post_pc*1e6)
-            hold on
-            if k < n_slices
-                xticklabels([])
-                xlabel([])
-            end
-            yticklabels([])
-            set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
-    
-            Vs = simps(((0:(100-1))/(100))*1.14,0.5*abs(Q_post_pc*1e6));
-            A = sum(~anterior_idx{k})*dA * 1e4; %cm^2
-    
-            % Add annotation (place in upper-left corner of current axes)
-            if k == 2
-                text(xPos, yPos, "$V_s = " + round(Vs,2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-                text(xPos, yPos+Dy, "$A = " + round(A,2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');  
-            else
-                text(xPos, yPos, "$ " + round(Vs,2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-                text(xPos, yPos+Dy, "$" + round(A,2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-            end        
-        end
-
         [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name{n_case});
         DNS_case = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
         data_path = fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_case + ".mat");
         load(data_path, 'DNS');
-        
-        u = DNS.RMSE_space.u_normal{k};
-        Nt = size(u,2);
-        Q_ant = zeros(Nt, 1);
-        Q_post = zeros(Nt, 1);
-        for nt = 1:size(u,2)
-            Q_ant(nt) = sum(u(:,nt).*anterior_idx{k}*dA);
-            Q_post(nt) = sum(u(:,nt).*(~anterior_idx{k})*dA);
+
+        pp = DNS.RMSE_space.p{k};
+        p0 = DNS.RMSE_space.p{1};
+
+        Nt = size(p0,2);
+        Dp_ant = zeros(Nt, 1);
+        Dp_post = zeros(Nt, 1);
+
+        for n = 1:Nt
+            Dp_ant(n) = sum((pp(:, n) - mean(p0(:, n))).*anterior_idx{k})/sum(anterior_idx{k});
+            Dp_post(n) = sum((pp(:, n) - mean(p0(:, n))).*(~anterior_idx{k}))/sum(~anterior_idx{k});
         end
-        nexttile (2*(k-1)-1)
-        plot(0:0.01:1,[Q_ant;Q_ant(1)]*1e6, 'Color',color_m{n_case}, 'LineStyle','-.', LineWidth=2)
+
+        nexttile (k-1)
+        DP = Dp_ant-Dp_post;
+        plot(0:0.01:1,[DP;DP(1)], 'Color',color_m{n_case}, 'LineStyle','-', LineWidth=1.5)
+        % DP_ave = simps(0:0.01:0.99,DP);
+        % mean(DP)
         hold on 
-        ylim([-1.4,1.4])
-            box on
-    
-    
-        nexttile (2*(k-1))
-        plot(0:0.01:1,[Q_post;Q_post(1)]*1e6, 'Color',color_m{n_case}, 'LineStyle','-.', LineWidth=2)
-        hold on
-        ylim([-1.4,1.4])
-            box on
+        % plot([0,1],[DP_ave, DP_ave], 'Color',color_m{n_case}, 'LineStyle',':', LineWidth=1.5)
+        % plot(0:0.01:1,[Dp_post;Dp_post(1)], 'Color',post_c, 'LineStyle',line_sty(n_case), LineWidth=1.5)
+        set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
+        ylim([-1.5,2.5])
+        xticks(0:0.2:1)
+        box on
 
-        Error_ant_i(k-1) = simps(tt, abs(Q_ant-Q_ant_pc))/simps(tt, abs(Q_ant_pc));
-        Error_post_i(k-1) = simps(tt, abs(Q_post-Q_post_pc))/simps(tt, abs(Q_post_pc));
+        if k < n_slices
+            xticklabels([])
+        else
+            xlabel('$t/T$', 'Interpreter', 'latex', 'FontSize', fs);
+        end
+
+        if n_case == 1
+            ylabel("$\Delta p^{({\rm a})}- \Delta p^{({\rm p})}$", 'Interpreter', 'latex', 'FontSize', fs);
+        end
+
+        yline(0, 'k:')
+        xline(0.69, 'k--')
+        box on
     end
-    Error_ant{n_case} = Error_ant_i;
-    Error_post{n_case} = Error_post_i;
+    loc = cas.locations{k};
+
         
 end
 
-yline(0, 'k:')
 
-print(gcf, fullfile(pwd,'Figures', 'fig_9'), '-depsc','-vector');
-
-
-%% 
-
-
-figure('Color','w');
-tiledlayout(n_slices-1, 1, 'TileSpacing','compact', 'Padding','compact');
-set(gcf, 'Position', [100, 100, 200, 400]); % height scales with slices
-
-cols = {blue, red};  % Your colors
-names = {'(w/o)', "(L)"};
-
-for k = 1:(n_slices-1)
-    nexttile
-    hold on
-
-    % Gather anterior errors for this slice across cases
-    vals = nan(1, numel(case_name));
-    for i = 1:numel(case_name)
-        if k <= numel(Error_ant{i})
-            vals(i) = Error_ant{i}(k);
-        end
-    end
-
-    % Create horizontal bar plot
-    b = barh(vals, 'FaceColor', 'flat');
-    for i = 1:numel(case_name)
-        b.CData(i, :) = cols{i}; % Assign colors
-    end
-
-    % Adjust axes
-    % xlim([0, max(vals)*1.2])
-    ylim([0.5, numel(case_name)+0.5])
-    set(gca, 'YTick', 1:numel(case_name), 'YTickLabel', names)
-    % title(sprintf('Slice %d', k+1)) % since k=1 is slice 2
-    box on
-    xticks(0:0.2:1)
-    xlim([0,0.5])
-    if k == (n_slices-1)
-        xlabel('$\int_0^T |\hat{Q} - Q|\,{\rm d}t \, / \, \int_0^T |Q|\,{\rm d}t$', 'Interpreter', 'latex', 'FontSize', fs)
-    else
-        xticklabels([])
-    end
-    ax = gca;
-    ax.XGrid = 'on';
-    ax.YGrid = 'off';
-    set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
-    set(gca, 'YDir', 'reverse')
-
-end
-
-print(gcf, fullfile(pwd,'Figures', 'fig_9_b'), '-depsc','-vector');
+print(gcf, fullfile(pwd,'Figures', 'fig_10_p_t'), '-depsc','-vector');
 
 
 function flow_rate_trans(Q, n)
@@ -358,9 +262,18 @@ function [anterior_idx, X, Y, P] = plot_pressure(data, sli, ref, nt, do_plot, va
         else
             xs = x; ys = y; Ps = Dp;
         end
-        F = scatteredInterpolant(xs, ys, Ps, 'linear', 'none');
-        xlin = linspace(min(x), max(x), gridsz(1));
-        ylin = linspace(min(y), max(y), gridsz(2));
+        F = scatteredInterpolant(xs, ys, Ps, 'linear', 'nearest');  % or 'linear'
+       
+        % Define margins as 5% of data range
+        x_margin = 0.3 * (max(x) - min(x));
+        y_margin = 0.3 * (max(y) - min(y));
+        
+        % Extended grid limits
+        xlin = linspace(min(x) - x_margin, max(x) + x_margin, gridsz(1));
+        ylin = linspace(min(y) - y_margin, max(y) + y_margin, gridsz(2));  
+        
+        % xlin = linspace(min(x), max(x), gridsz(1));
+        % ylin = linspace(min(y), max(y), gridsz(2));
         [X, Y] = meshgrid(xlin, ylin);
         P = F(X, Y);
     end
