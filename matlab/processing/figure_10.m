@@ -36,8 +36,8 @@ case_name = ["c3", "cl3_v1"];
 anterior_idx = cell(size(DNS.RMSE_space.x));
 
 figure
-tiledlayout(n_slices-1,2, "TileSpacing", "loose", "Padding", "tight");
-set(gcf, 'Position',[100,100,500,DY_fig])
+tiledlayout(n_slices-1,2, "TileSpacing", "loose", "Padding", "compact");
+set(gcf, 'Position',[100,100,400,DY_fig])
 c_lim = {[-6.5,-3.5],[-8.2, -6.5],[-14.2,-12]};
 % c_lim = {[-2.5,2.5],[-0.5,0.5],[-1.5,-1.5]};
 
@@ -55,19 +55,26 @@ for n_case = 1:length(case_name)
             nexttile(2*(k-1)-2+n_case)
             plot_pressure(DNS.RMSE_space, k, 1, nt, true,'PlotType', 'contour', 'Mask', roi{k}, 'MaskXY', {x_roi{k}, y_roi{k}});
             caxis(c_lim{k-1});
-    
+            % caxis([-1000,1000]);
+  
             % Define ticks based on limit
             % cb_ticks = linspace(-c_lim(k-1), c_lim(k-1), 5);  % 5 evenly spaced ticks
             % cb = colorbar;
             % cb.Ticks = cb_ticks;
             % cb.TickDirection = 'out';  % optional
             % cb.FontSize = fan;          % match font size
+            yticks([])
+            xticks([])
+            yticklabels([])
+            xticklabels([])
             if n_case == 1
-                ylabel('y [cm]', 'Interpreter','latex', FontSize=fs);
-                % colorbar off
+                % ylabel('$y$ [cm]', 'Interpreter','latex', FontSize=fs);
+                colorbar off
+            else
+                yticklabels([])
             end
             if k == n_slices
-                xlabel('x [cm]', 'Interpreter','latex', FontSize=fs);
+                % xlabel('$x$ [cm]', 'Interpreter','latex', FontSize=fs);
             end
         end
         if n_case == 2
@@ -77,8 +84,8 @@ for n_case = 1:length(case_name)
 end
 drawnow;
 
-figure
-scatter(DNS.RMSE_space.x{3}, DNS.RMSE_space.y{3}, 5, anterior_idx{3})
+% figure
+% scatter(DNS.RMSE_space.x{3}, DNS.RMSE_space.y{3}, 5, anterior_idx{3})
 
 print(gcf, fullfile(pwd,'Figures', 'fig_10_pressure_lig'), '-depsc','-vector');
 
@@ -90,7 +97,13 @@ set(gcf, 'Position',[100,100,300,DY_fig])
 
 % ant_c  = [1.00, 0.88, 0.40];  % warm yellow
 % post_c = [0.55, 0.75, 0.88];  % soft blue
-color_m = {blue, red};
+% color_m = {blue, red};
+
+orange = [230, 159,   0] / 255;   % #E69F00
+teal   = [  0, 158, 115] / 255;   % #009E73
+
+color_m = {orange, teal};
+
 
 tt = (0:(100-1))/(100);
 line_sty = ["-.", "-"];
@@ -117,7 +130,17 @@ for n_case = 1:length(case_name)
 
         nexttile (k-1)
         DP = Dp_ant-Dp_post;
-        plot(0:0.01:1,[DP;DP(1)], 'Color',color_m{n_case}, 'LineStyle','-', LineWidth=1.5)
+        DP = [DP;DP(1)];
+
+
+        t = linspace(0, 1, numel(DP));      % original x points
+        tq = linspace(0, 1, 200);           % query points for smooth curve
+        
+        DPq = interp1(t, DP, tq, 'spline'); % spline interpolation
+        
+        plot(tq, DPq, 'Color', color_m{n_case}, 'LineStyle', '-', 'LineWidth', 1.5)
+
+        % plot(0:0.01:1,[DP;DP(1)], 'Color',color_m{n_case}, 'LineStyle','-', LineWidth=1.5)
         % DP_ave = simps(0:0.01:0.99,DP);
         % mean(DP)
         hold on 
@@ -132,10 +155,11 @@ for n_case = 1:length(case_name)
             xticklabels([])
         else
             xlabel('$t/T$', 'Interpreter', 'latex', 'FontSize', fs);
+            % xlabel('$p - \overline{p_{\rm UPFM}}$', 'Interpreter', 'latex', 'FontSize', fs);
         end
 
         if n_case == 1
-            ylabel("$\Delta p^{({\rm a})}- \Delta p^{({\rm p})}$", 'Interpreter', 'latex', 'FontSize', fs);
+            ylabel("$\overline{p_{{\rm ant}}}- \overline{p_{{\rm post}}}$", 'Interpreter', 'latex', 'FontSize', fs);
         end
 
         yline(0, 'k:')
@@ -150,56 +174,6 @@ end
 
 print(gcf, fullfile(pwd,'Figures', 'fig_10_p_t'), '-depsc','-vector');
 
-
-function flow_rate_trans(Q, n)
-    if Q(1) ~= Q(end)
-        Q = [Q(:); Q(1)]';
-    end
-    if nargin == 1
-        n = 0;
-    end
-
-    % Define color schemes
-    blue = [116, 124, 187] / 255;  
-    red  = [241, 126, 126] / 255;
-    fs = 16;
-
-    % Create a time vector
-    t = linspace(0, 1, length(Q));
-   
-    % Plot the flow rate outline (black line)
-    plot(t, Q, '-', 'LineWidth', 1.5, 'Color', [1,1,1]*0.7);
-    % h.FaceAlpha = 0.1; % 30% opaque
-    hold on;
-
-    % Separate positive and negative flow rates for shading
-    Q_neg = Q .* (Q < 0);
-
-    % Area shading with transparency
-    h1 = area(t, Q, 'FaceColor', red, 'EdgeColor', 'none');
-    h1.FaceAlpha = 0.1; % 30% opaque
-
-    h2 = area(t, Q_neg, 'FaceColor', blue, 'EdgeColor', 'none');
-    h2.FaceAlpha = 0.1; % 30% opaque
-
-    % Set axis properties
-    set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', 10);
-
-    % Highlight the specific point if n is greater than 0
-    if n > 0
-        xline(t(n+1), 'LineWidth', 1);
-    end
-
-    % Plot a horizontal line at y=0
-    % plot(t, 0*t, '-', 'LineWidth', 1, 'Color', 'k');
-    
-    % Add labels if needed (optional)
-    xlabel('$t/T$', 'Interpreter', 'latex', 'FontSize', fs);
-    % ylabel('$Q\left[{\rm ml/s}\right]$', 'Interpreter', 'latex', 'FontSize', fs);
-    ylim([-ceil(max(abs(Q))), ceil(max(abs(Q)))])
-
-    hold off
-end
 
 function [anterior_idx, X, Y, P] = plot_pressure(data, sli, ref, nt, do_plot, varargin)
 % Optional name-value:
@@ -287,7 +261,14 @@ function [anterior_idx, X, Y, P] = plot_pressure(data, sli, ref, nt, do_plot, va
                 scatter(x*1e2, y*1e2, 40, Dp, 'filled', 's');
         end
 
-        colormap('jet'); colorbar; box on;
+        N = 256;
+        cmap_jet = parula(N);
+        soft_factor = 0.8;  % 0 = white, 1 = original jet
+        cmap_softjet = (1-soft_factor) * 1 + soft_factor * cmap_jet;
+        colormap(cmap_softjet)
+
+        % colormap('parula'); 
+        colorbar; box on;
 
         % ==== ROI overlay (choose ONE of the two approaches below) ====
 
@@ -318,7 +299,7 @@ function [anterior_idx, X, Y, P] = plot_pressure(data, sli, ref, nt, do_plot, va
         Dy = max(y*1e2) - min(y*1e2);
         xlim([min(x*1e2) - 0.1 * Dx, max(x*1e2) + 0.1 * Dx]);
         ylim([min(y*1e2) - 0.1 * Dy, max(y*1e2) + 0.1 * Dy]);
-        set(gca, 'XDir', 'reverse', 'YDir', 'reverse', 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
+        set(gca, 'XDir', 'reverse', 'YDir', 'reverse', 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
         box on;
 
 

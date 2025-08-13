@@ -7,6 +7,8 @@ pcmri = apply_roi_pcmri(pcmri);
 
 mesh_size = 0.0002;
 
+modes = 20; 
+
 fs = 16;
 fan = 14;
 ft = 12;
@@ -14,6 +16,10 @@ ft = 12;
 red   = [0.8, 0.2, 0.2];
 green = [0.2, 0.6, 0.2];
 blue  = [0.2, 0.4, 0.8];
+
+orange = [230, 159,   0] / 255;   % #E69F00
+teal   = [  0, 158, 115] / 255;   % #009E73
+
 
 nt = 80;
 sli = 3;
@@ -50,7 +56,9 @@ figure
 tiledlayout(n_slices-1, 2, "TileSpacing", "compact", "Padding", "compact")
 set(gcf, 'Position',[100,100,400,400])
 
-color_m = {blue, red};
+color_m = {orange, teal};
+
+% color_m = {blue, red};
 tt = (0:(100-1))/(100);
 
 Error_ant_i = zeros(1,n_slices-1);
@@ -72,6 +80,10 @@ for n_case = 1:length(case_name)
             Q_ant_pc(nt) = sum(u(:,nt).*anterior_idx{k}*dA);
             Q_post_pc(nt) = sum(u(:,nt).*(~anterior_idx{k})*dA);
         end
+
+        [Q_ant_pc, ~, ~, ~] = four_approx(Q_ant_pc, modes, 0, 100);
+        [Q_post_pc, ~, ~, ~] = four_approx(Q_post_pc, modes, 0, 100);
+
         if n_case == 1
             nexttile (2*(k-1)-1)
             flow_rate_trans(Q_ant_pc*1e6)
@@ -81,7 +93,7 @@ for n_case = 1:length(case_name)
                 xticklabels([])
                 xlabel([])
             end
-            set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
+            set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
             ylabel('$Q(t)$', 'Interpreter', 'latex', 'FontSize', fs);
     
             Vs = simps(tt*1.14,0.5*abs(Q_ant_pc*1e6));
@@ -108,7 +120,7 @@ for n_case = 1:length(case_name)
                 xlabel([])
             end
             yticklabels([])
-            set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
+            set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
     
             Vs = simps(((0:(100-1))/(100))*1.14,0.5*abs(Q_post_pc*1e6));
             A = sum(~anterior_idx{k})*dA * 1e4; %cm^2
@@ -136,17 +148,23 @@ for n_case = 1:length(case_name)
             Q_ant(nt) = sum(u(:,nt).*anterior_idx{k}*dA);
             Q_post(nt) = sum(u(:,nt).*(~anterior_idx{k})*dA);
         end
+
+        [Q_post, ~, ~, ~] = four_approx(Q_post, modes, 0, 100);
+        [Q_ant, ~, ~, ~] = four_approx(Q_ant, modes, 0, 100);
+
         nexttile (2*(k-1)-1)
-        plot(0:0.01:1,[Q_ant;Q_ant(1)]*1e6, 'Color',color_m{n_case}, 'LineStyle','-.', LineWidth=2)
+        plot(linspace(0,1,101),[Q_ant,Q_ant(1)]*1e6, 'Color',color_m{n_case}, 'LineStyle','-.', LineWidth=1.5)
         hold on 
         ylim([-1.4,1.4])
+        yticks([-1,0,1])
             box on
     
     
         nexttile (2*(k-1))
-        plot(0:0.01:1,[Q_post;Q_post(1)]*1e6, 'Color',color_m{n_case}, 'LineStyle','-.', LineWidth=2)
+        plot(linspace(0,1,101),[Q_post,Q_post(1)]*1e6, 'Color',color_m{n_case}, 'LineStyle','-.', LineWidth=1.5)
         hold on
         ylim([-1.4,1.4])
+        yticks([-1,0,1])
             box on
 
         Error_ant_i(k-1) = simps(tt, abs(Q_ant-Q_ant_pc))/simps(tt, abs(Q_ant_pc));
@@ -166,10 +184,10 @@ print(gcf, fullfile(pwd,'Figures', 'fig_9'), '-depsc','-vector');
 
 
 figure('Color','w');
-tiledlayout(n_slices-1, 1, 'TileSpacing','compact', 'Padding','compact');
-set(gcf, 'Position', [100, 100, 200, 400]); % height scales with slices
+tiledlayout(n_slices-1, 1, 'TileSpacing','compact', 'Padding','loose');
+set(gcf, 'Position', [100, 100, 180, 400]); % height scales with slices
 
-cols = {blue, red};  % Your colors
+cols = {orange, teal};  % Your colors
 names = {'(w/o)', "(L)"};
 
 for k = 1:(n_slices-1)
@@ -185,15 +203,17 @@ for k = 1:(n_slices-1)
     end
 
     % Create horizontal bar plot
-    b = barh(vals, 'FaceColor', 'flat');
+    b = barh(vals, 'FaceColor', 'flat', 'BarWidth', 0.5, 'LineWidth', 1.);
     for i = 1:numel(case_name)
         b.CData(i, :) = cols{i}; % Assign colors
     end
 
+    yticklabels([])
+    yticks([])
     % Adjust axes
     % xlim([0, max(vals)*1.2])
     ylim([0.5, numel(case_name)+0.5])
-    set(gca, 'YTick', 1:numel(case_name), 'YTickLabel', names)
+    % set(gca, 'YTick', 1:numel(case_name), 'YTickLabel', names)
     % title(sprintf('Slice %d', k+1)) % since k=1 is slice 2
     box on
     xticks(0:0.2:1)
@@ -204,9 +224,9 @@ for k = 1:(n_slices-1)
         xticklabels([])
     end
     ax = gca;
-    ax.XGrid = 'on';
+    ax.XGrid = 'off';
     ax.YGrid = 'off';
-    set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
+    set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
     set(gca, 'YDir', 'reverse')
 
 end

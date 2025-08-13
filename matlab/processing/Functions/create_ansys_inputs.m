@@ -41,6 +41,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             [uu(k,:), ~, ~] = four_approx(U(k,:), modes, 0, ts_cycle);
         end
 
+        %TODO recalculate flow rate now.
+
         % Define points in millimeters
         x_coords = [xx(1), xx(floor(end/2)), xx(end)] * 1e3;
         y_coords = [yy(1), yy(floor(end/2)), yy(end)] * 1e3;
