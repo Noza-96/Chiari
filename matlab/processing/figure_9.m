@@ -67,6 +67,12 @@ Error_post_i = zeros(1,n_slices-1);
 Error_ant = cell(1,length(case_name));
 Error_post = cell(1,length(case_name));
 
+Vs_post = zeros(n_slices, 1);
+Vs_ant = zeros(n_slices, 1);
+Vs_tot = zeros(n_slices, 1);
+A_post = zeros(n_slices, 1);
+A_ant = zeros(n_slices, 1);
+
 for n_case = 1:length(case_name)
     
     
@@ -75,12 +81,23 @@ for n_case = 1:length(case_name)
         Nt = size(u,2);
         Q_ant_pc = zeros(Nt, 1);
         Q_post_pc = zeros(Nt, 1);
+        Q_tot_pc = zeros(Nt, 1);
+
         nexttile (k-1)
         for nt = 1:size(u,2)
             Q_ant_pc(nt) = sum(u(:,nt).*anterior_idx{k}*dA);
             Q_post_pc(nt) = sum(u(:,nt).*(~anterior_idx{k})*dA);
+            Q_tot_pc(nt) = sum(u(:,nt)*dA);
         end
 
+
+
+        Vs_tot(k)  = 0.5*simps(tt*dat_PC.T{k}, abs(Q_tot_pc ))*1e6;
+        Vs_ant(k)  = 0.5*simps(tt*dat_PC.T{k}, abs(Q_ant_pc ))*1e6;
+        Vs_post(k) = 0.5*simps(tt*dat_PC.T{k}, abs(Q_post_pc))*1e6;
+
+
+        [Q_tot_pc, ~, ~, ~] = four_approx(Q_tot_pc, modes, 0, 100);
         [Q_ant_pc, ~, ~, ~] = four_approx(Q_ant_pc, modes, 0, 100);
         [Q_post_pc, ~, ~, ~] = four_approx(Q_post_pc, modes, 0, 100);
 
@@ -96,23 +113,24 @@ for n_case = 1:length(case_name)
             set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
             ylabel('$Q(t)$', 'Interpreter', 'latex', 'FontSize', fs);
     
-            Vs = simps(tt*1.14,0.5*abs(Q_ant_pc*1e6));
-            A = sum(anterior_idx{k})*dA * 1e4; %cm^2
+
+
+            A_post(k) = sum(~anterior_idx{k})*dA * 1e4; %cm^2
+            A_ant(k) = sum(anterior_idx{k})*dA * 1e4; %cm^2
     
             % Add annotation (place in upper-left corner of current axes)
             xPos = 0.05; % relative to x-axis
             yPos = -1.1;  % relative to y    -axis
             Dy = 0.35;
             if k == 2
-                text(xPos, yPos, "$V_s = " + round(Vs,2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-                text(xPos, yPos+Dy, "$A = " + round(A,2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
+                text(xPos, yPos, "$V_s = " + round(Vs_ant(k),2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
+                text(xPos, yPos+Dy, "$A = " + round(A_ant(k),2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
             else
-                text(xPos, yPos, "$ " + round(Vs,2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-                text(xPos, yPos+Dy, "$" + round(A,2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
+                text(xPos, yPos, "$ " + round(Vs_ant(k),2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
+                text(xPos, yPos+Dy, "$" + round(A_ant(k),2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
             end
     
             nexttile (2*(k-1))
-            % plot(0:0.01:1,[Q_post_pc;Q_post_pc(1)]*1e6, 'Color','k', 'LineStyle','-', LineWidth=1.5)
             flow_rate_trans(Q_post_pc*1e6)
             hold on
             if k < n_slices
@@ -122,16 +140,15 @@ for n_case = 1:length(case_name)
             yticklabels([])
             set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
     
-            Vs = simps(((0:(100-1))/(100))*1.14,0.5*abs(Q_post_pc*1e6));
-            A = sum(~anterior_idx{k})*dA * 1e4; %cm^2
+
     
             % Add annotation (place in upper-left corner of current axes)
             if k == 2
-                text(xPos, yPos, "$V_s = " + round(Vs,2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-                text(xPos, yPos+Dy, "$A = " + round(A,2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');  
+                text(xPos, yPos, "$V_s = " + round(Vs_post(k),2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
+                text(xPos, yPos+Dy, "$A = " + round(A_post(k),2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');  
             else
-                text(xPos, yPos, "$ " + round(Vs,2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
-                text(xPos, yPos+Dy, "$" + round(A,2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
+                text(xPos, yPos, "$ " + round(Vs_post(k),2) +" \,{\rm ml}$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
+                text(xPos, yPos+Dy, "$" + round(A_post(k),2) +" \,{\rm cm}^2$", 'Interpreter', 'latex','Color', [1,1,1]*0.3 ,'FontSize', ft, 'FontWeight', 'bold','BackgroundColor', 'none', 'HorizontalAlignment', 'left');
             end        
         end
 
@@ -148,7 +165,6 @@ for n_case = 1:length(case_name)
             Q_ant(nt) = sum(u(:,nt).*anterior_idx{k}*dA);
             Q_post(nt) = sum(u(:,nt).*(~anterior_idx{k})*dA);
         end
-
         [Q_post, ~, ~, ~] = four_approx(Q_post, modes, 0, 100);
         [Q_ant, ~, ~, ~] = four_approx(Q_ant, modes, 0, 100);
 
@@ -175,6 +191,8 @@ for n_case = 1:length(case_name)
         
 end
 
+Vs_tot
+Vs_ant+Vs_post
 yline(0, 'k:')
 
 print(gcf, fullfile(pwd,'Figures', 'fig_9'), '-depsc','-vector');
