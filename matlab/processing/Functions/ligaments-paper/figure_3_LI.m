@@ -94,19 +94,5 @@ for s = 1:length(subject)
     yticklabels([]);
     xlim([0,3.5])
 
-    % nexttile(3)
-    % plot(vol, y_vals, '-o', 'LineWidth', 1.5, 'MarkerSize', 2, 'Color', color_m{s});
-    % title('Cumulative volume', 'FontSize', fs, 'FontWeight', 'normal');
-    % xlabel("$\left[{\rm cm}^3\right]$", 'Interpreter', 'latex', 'FontSize', fs);
-    % hold on
-    % ax = gca;
-    % ax.XGrid = 'off';
-    % ax.YGrid = 'on';
-    % set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
-    % yticklabels([]);
-    % xlim([0,10])
-
-
-    % cumsimps(x,y,dim)
 end
     print(gcf, fullfile(pwd,'Figures', 'fig_4_LI'), '-depsc','-vector');
