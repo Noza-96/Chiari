@@ -55,7 +55,7 @@ function comparison_results(cas, case_name, mesh_size)
             end
         end
 
-        plot_flow_rate (pcmri.q{Ndat},n)
+        % plot_flow_rate (pcmri.q{Ndat},n)
         
         % Capture the frame
         movieVector(n) = getframe(fig);

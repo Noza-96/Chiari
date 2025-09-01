@@ -4,7 +4,7 @@ addpath("../processing/Functions/")
 addpath('../processing/Functions/Others/')
 
 [cas, dat_PC, t0] = run_if_empty('s101_b');  % Load data if not already
-visualization_plots = false;
+visualization_plots = true;
 do_registration = false;
 modes = 20; 
 
@@ -216,52 +216,54 @@ function plot_all_velocity_comparisons(tstep, velocity, dat_PC, cas)
 
     N = length(cas.locations);  % number of locations
 
-    figure('Units', 'normalized', 'Position', [0.05 0.2 0.95 0.75]);
-    tiledlayout(3, N, 'TileSpacing', 'compact', 'Padding', 'compact');
+    figure('Units', 'normalized', 'Position', [0.05 0.2 0.5 0.4]);
+    tiledlayout(2, N, 'TileSpacing', 'compact', 'Padding', 'compact');
 
     for i = 1:N
         location = cas.locations{i};
 
         % === Unregistered ===
         U2 = dat_PC.U_SAS{i}(:, :, tstep);
+        ROI = dat_PC.ROI_SAS{i};
         XYZ2 = dat_PC.pixel_coord{i};
         x2 = XYZ2(:,:,1); y2 = XYZ2(:,:,2); z2 = XYZ2(:,:,3);
-        x2 = x2(:); y2 = y2(:); z2 = z2(:); u2 = U2(:);
+        x2 = x2(:); y2 = y2(:); z2 = z2(:); u2 = U2(:); roi = ROI(:);
 
         nexttile(i)
-        scatter3(x2, y2, z2, 10, u2, 'filled');
-        title(sprintf('%s (Unreg)', location));
+        scatter3(x2, y2, z2, 10, roi, 'filled');
+        % title(sprintf('%s (Unreg)', location));
         axis equal tight
+        colormap(gca, gray)
         view(2)
-        colorbar
+        % colorbar
         set(gca, 'XTick', [], 'YTick', []);
 
-        % === Registered ===
-        U1 = velocity.U_SAS{i}(:, :, tstep);
-        XYZ1 = velocity.pixel_coord{i};
-        x1 = XYZ1(:,:,1); y1 = XYZ1(:,:,2); z1 = XYZ1(:,:,3);
-        x1 = x1(:); y1 = y1(:); z1 = z1(:); u1 = U1(:);
-
+        % % === Registered ===
+        % U1 = velocity.U_SAS{i}(:, :, tstep);
+        % XYZ1 = velocity.pixel_coord{i};
+        % x1 = XYZ1(:,:,1); y1 = XYZ1(:,:,2); z1 = XYZ1(:,:,3);
+        % x1 = x1(:); y1 = y1(:); z1 = z1(:); u1 = U1(:);
+        % 
         nexttile(N + i)
-        scatter3(x1, y1, z1, 10, u1, 'filled');
-        title(sprintf('%s (Reg)', location));
-        axis equal tight
-        view(2)
-        colorbar
-        set(gca, 'XTick', [], 'YTick', []);
+        % scatter3(x1, y1, z1, 10, u1, 'filled');
+        % title(sprintf('%s (Reg)', location));
+        % axis equal tight
+        % view(2)
+        % colorbar
+        % set(gca, 'XTick', [], 'YTick', []);
 
         % === ROI mask ===
         ROI = velocity.ROI_SAS{i};
         [ny, nx] = size(ROI);
         [X, Y] = meshgrid(1:nx, 1:ny);
 
-        nexttile(2*N + i)
+        % nexttile(2*N + i)
         scatter(X(:), Y(:), 10, double(ROI(:)), 'filled');
-        title(sprintf('%s (ROI)', location));
+        % title(sprintf('%s (ROI)', location));
         axis equal tight
         view(2)
         colormap(gca, gray)  % apply gray only to this tile
-        colorbar
+        % colorbar
         set(gca, 'XTick', [], 'YTick', []);
     end
 

@@ -132,6 +132,8 @@ for n_case = 1:length(case_name)
         DP = Dp_ant-Dp_post;
         DP = [DP;DP(1)];
 
+        fprintf('n_case = %d, k = %d, max(DP) = %.4f, min(DP) = %.4f\n', ...
+        n_case, k, max(DP(:)), min(DP(:)));
 
         t = linspace(0, 1, numel(DP));      % original x points
         tq = linspace(0, 1, 200);           % query points for smooth curve
@@ -159,7 +161,7 @@ for n_case = 1:length(case_name)
         end
 
         if n_case == 1
-            ylabel("$\overline{p_{{\rm ant}}}- \overline{p_{{\rm post}}}$", 'Interpreter', 'latex', 'FontSize', fs);
+            ylabel("$\overline{p}_{{\rm ant}}- \overline{p}_{{\rm post}}$", 'Interpreter', 'latex', 'FontSize', fs);
         end
 
         yline(0, 'k:')

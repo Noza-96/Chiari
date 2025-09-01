@@ -194,6 +194,7 @@ function dat  = read_dicoms_PC(cas, resettimevector)
             if strcmp(cas.model, 'GE')
                 Vscale{idat}(jj) = pi * vencscale{idat}(jj) / venc{idat};
                 U_tot{idat}(:, :, jj) = (phase{idat}(:, :, jj) ./ max(magni{idat}(:, :, jj), 1)) / Vscale{idat}(jj);
+                
             elseif strcmp(cas.model, 'SIEMENS')
                 U_tot{idat}(:, :, jj) = - venc{idat} .* ( (phase{idat}(:, :, jj) - 2048) ./ 2048 );
             end

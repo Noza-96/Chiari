@@ -74,7 +74,7 @@ print(gcf, fullfile(cas.dirfig,'flowrate_DNS_pcmri'), '-depsc','-vector');
 close all; clear;
 subject = "s101_b";
 load(fullfile("../../../computations", "pc-mri", subject, "mat", "04-registration.mat"), 'cas', 'dat_PC');
-case_name ={ "c3", "cl3_v2","cl3_v3","cl3_v4"};
+case_name ={"c3"};
 mesh_size = [0.0002];
 warning('off', 'all');
 comparison_results(cas, case_name, mesh_size)

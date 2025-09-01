@@ -21,6 +21,8 @@ function snapshot_results(cas, subject, case_name, mesh_size, selected_times)
         k_aux = 1;
     end
 
+    colors = lines(Ncases);
+
     load(fullfile(cas.dirmat,"DNS-results", "DNS_c0top_dx00002.mat"), 'DNS');
     DNS_roi=DNS;
     % DNS_roi_n=DNS;
@@ -99,7 +101,7 @@ function snapshot_results(cas, subject, case_name, mesh_size, selected_times)
 
         for kk = 1:Ncases
             RMSE_val = cellfun(@(x) x(n), st_DNS{kk}.RMSE)*1e2;
-            plot(RMSE_val(loc_plot), loc_plot, '-o', 'MarkerSize',6,'LineWidth', 1.5)
+            plot(RMSE_val(loc_plot), loc_plot, '-o', 'Color', colors(kk,:),'MarkerSize',6,'LineWidth', 1.5)
             if kk == 1 
                 plot(RMSE_val(loc_plot), loc_plot, ':ok', 'MarkerSize',6,'LineWidth', 2)
             end
@@ -118,9 +120,10 @@ function snapshot_results(cas, subject, case_name, mesh_size, selected_times)
         ax.XGrid = 'off';
         ax.YGrid = 'on';
         set(gca, 'LineWidth', 1, 'TickLength', [0.01, 0.01]);
+        ax.YDir = 'reverse';
         print(gcf, fullfile(cas.dirfig, "error_"+n+"_fig_"+fig_ind), '-depsc','-vector');
 
-
+        
         legend({"I", "II", "III", "IV", "V"})      
             
     end
@@ -128,8 +131,6 @@ function snapshot_results(cas, subject, case_name, mesh_size, selected_times)
 end
 
 % create_animation_ansys(st_DNS{kk}.slices, loc, Ndat, n, 1 + kk + (Ncases+1)*(loc-2), Ncases, roi{loc}, x_roi{loc}, y_roi{loc});
-
-
 
 %% auxiliary functions
 function create_animation_ansys(data, loc, Ndat, n, ii, Ncases, roi_mask, x_raw, y_raw)
