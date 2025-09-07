@@ -1,15 +1,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear; close all; 
+% clear; close all; 
 
-[aux, cas, dat_PC, single_reading] = run_if_empty('s101_b', 'SIEMENS');  % if skipping previous steps
+[aux, cas, dat_PC, single_reading] = run_if_empty('s4', 'GE');  % if skipping previous steps
 
 disp("Applying ROIs and computing Q ..." + newline)
 
+visualization_plots = true;
 
-correct_aliasing = true; % wrap in time - aliasing correction
-unwrap_periodic = true; % allow for periodic wraping
-smooth_spatial_outliers = true;  % Flag to apply spatial outlier smoothing
-gauss_filter = true; % apply gauss filter
+correct_aliasing = false; % wrap in time - aliasing correction
+unwrap_periodic = false; % allow for periodic wraping
+smooth_spatial_outliers = false;  % Flag to apply spatial outlier smoothing
+gauss_filter = false; % apply gauss filter
 
 dat_PC = apply_ROI_compute_Q(dat_PC, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter);
 
@@ -40,10 +41,41 @@ save(fullfile(cas.dirmat, "03-"+sstt_name+"apply_roi_compute_Q.mat"), 'aux', 'ca
 
 disp( "Done!" + newline)
 
+if visualization_plots
+    
+    % plot_flow_rates(dat_PC, cas);  
+
+    ts_cycle = 40; 
+    movieVector = create_animation(dat_PC, cas, ts_cycle);
+    
+    % save_animation(movieVector, fullfile(cas.dirvid, "flow_measurements_"+cas.subj+".mp4"));
+end
+
+
 function [aux, cas, dat_PC, single_reading] = run_if_empty(subject, model)
         cas.subj = subject;
         cas.model = model; % GE (Utah) or SIEMENS (Granada)
         single_reading = {};
         cas = scan_folders_set_cas(cas, single_reading);
         load([cas.dirmat, '/02-crop_set_roi.mat'], 'aux', 'cas', 'dat_PC');
+end
+
+
+function plot_flow_rates(velocity, cas)
+    N = length(cas.locations);  % number of slices
+    figure('Units', 'normalized', 'Position', [0.1 0.2 0.1 0.6]);
+    tiledlayout(ceil(N), 1, 'TileSpacing', 'compact', 'Padding', 'compact');
+
+    for i = 1:N
+        nexttile
+        Q = - velocity.Q_SAS{i};       % flow rate
+        flow_rate(Q)
+        ylim([-2,2])
+        xlabel('Time [s]')
+        ylabel('Flow rate [mm^3/s]')
+        title(cas.locations{i}, 'Interpreter', 'none')
+        grid on
+    end
+
+    sgtitle("Flow Rates over Time", 'FontWeight', 'bold');
 end

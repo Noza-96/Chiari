@@ -1,9 +1,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear; close all;
 
-cas.subj = 's101_b';
+cas.subj = 's4';
 
-cas.model = 'SIEMENS'; % GE (Utah) or SIEMENS (Granada)
+cas.model = 'GE'; % GE (Utah) or SIEMENS (Granada)
 
 % allow to filter folders. If single_reading = {} all cases
 single_reading = {}; 
@@ -18,6 +18,8 @@ aux.fig_opts = set_plotting_style;
 disp([newline + "Setting up folders ..." + newline])
 
 cas = scan_folders_set_cas(cas, single_reading);
+
+
 
 if cas.Ncas_PC > 0
     disp(["Reading PC DICOMS ..." + newline])

@@ -3,7 +3,7 @@ function cas = scan_folders_set_cas(cas, single_reading)
 % Computations folder
 cas.dircloud = fullfile('..', '..', '..','computations');
 % DICOM folder
-cas.dirdcm = fullfile('..', '..', '..','patient-data',cas.subj,'flow');
+cas.dirdcm = fullfile('..', '..', '..','patient-data',cas.subj);
 
 % Save data folder
 cas.dirdat = fullfile(cas.dircloud,'pc-mri');

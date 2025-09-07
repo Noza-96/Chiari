@@ -4,7 +4,7 @@ function movieVector = create_animation(dat_PC, cas, ts_cycle)
 addpath("../processing/Functions/")
 addpath('../processing/Functions/Others/')
 
-load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
+% load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
 
     
     fs = 12;
@@ -12,7 +12,8 @@ load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
     locations = cellfun(@(x) strrep(x, '0', ''), cas.locations, 'UniformOutput', false);
     % z-position compared to C3C4
     locz_vals = cell2mat(dat_PC.locz);
-    Dz_loc = -(anatomy.FM-(-locz_vals*10));
+    % Dz_loc = -(anatomy.FM-(-locz_vals*10));
+    Dz_loc = -(0-(-locz_vals*10));
     % labels = cellfun(@(loc, dz) sprintf('%s (%d mm)', loc, dz), locations, num2cell(Dz_loc), 'UniformOutput', false)
 
     % Preallocate movie vector
@@ -135,10 +136,10 @@ pcmri.q = q;
 
             yticks(-200:5:100);
 
-            for i = 1:length(anatomy.Dz) - 2
-                yline(-anatomy.Dz(i), '--', anatomy.location{i}, ...
-                    'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs);
-            end             
+            % for i = 1:length(anatomy.Dz) - 2
+            %     yline(-anatomy.Dz(i), '--', anatomy.location{i}, ...
+            %         'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs);
+            % end             
             % ylim([floor(min(Dz_loc(:))/10)*10, ceil(max(Dz_loc(:))/10)*10])
 
             ylim([-60, 10])

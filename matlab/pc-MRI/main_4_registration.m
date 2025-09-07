@@ -3,7 +3,7 @@ clear; close all;
 addpath("../processing/Functions/")
 addpath('../processing/Functions/Others/')
 
-[cas, dat_PC, t0] = run_if_empty('s101_b');  % Load data if not already
+[cas, dat_PC, t0] = run_if_empty('s4');
 visualization_plots = true;
 do_registration = false;
 modes = 20; 
@@ -122,7 +122,7 @@ end
 if visualization_plots
     plot_all_velocity_comparisons(30, velocity, dat_PC, cas);
     
-    plot_flow_rates(velocity, cas);  % <-- add this line
+    plot_flow_rates(velocity, cas);  
 
     ts_cycle = 40; 
     movieVector = create_animation(dat_PC, cas, ts_cycle);
@@ -338,85 +338,3 @@ function plot_flow_rates(velocity, cas)
     sgtitle("Flow Rates over Time", 'FontWeight', 'bold');
 end
 
-
-
-
-
-% 
-% function dat = fourier_decompose_signal(dat)
-% %FOURIER_DECOMPOSE_SIGNAL Decomposes input signals into Fourier series
-% %
-% % Inputs:
-% %   dat   - struct containing fields:
-% %             .Ndat      - number of datasets
-% %             .T         - cell array of periods
-% %             .t_ip      - cell array of time vectors
-% %             .Q_SAS_ip  - cell array of signals
-% %             .Nt_ip     - number of time steps
-% %             .dt_ip     - time step
-% %   M     - number of Fourier modes
-% %   Nrep  - number of signal repetitions for better frequency resolution
-% %
-% % Output:
-% %   dat.fou.fm - cell array of frequency components
-% %   dat.fou.am - cell array of complex amplitudes
-% 
-%     Ndat = dat.Ndat;
-%     T    = dat.T;
-%     t    = dat.t;
-%     Q    = dat.Q_SAS;
-%     N1   = dat.Nt{1};
-%     Nrep = 4;
-%     M    = 20; %30
-% 
-%     for idat = 1:Ndat
-%         TT  = T{idat};
-%         tt  = t{idat};
-%         QQ  = Q{idat};
-% 
-%         tt(end) = []; % Trim last point
-%         QQ(end) = [];
-% 
-%         if length(tt) ~= N1
-%             warning("Length mismatch at dataset %d", idat);
-%         end
-% 
-%         % Repeat signal Nrep times
-%         ttt = tt;
-%         QQQ = QQ;
-%         for irep = 1:Nrep-1
-%             ttt = [ttt, tt + irep*TT];
-%             QQQ = [QQQ, QQ];
-%         end
-% 
-%         % Compute FFT
-%         L  = Nrep * N1;
-%         Fs = N1 * 2*pi / TT;
-%         f  = Fs * (0:(L/2)) / L;
-%         Y  = fft(QQQ);
-%         P2 = Y / L;
-%         P  = P2(1:L/2+1);
-%         a0 = P(1);
-% 
-%         % Extract harmonics
-%         fm = zeros(1, M);
-%         am = zeros(1, M);
-%         for m = 1:M
-%             idx = m * Nrep + 1;
-%             if idx <= length(f)
-%                 fm(m) = f(idx);
-%                 am(m) = P(idx);
-%             else
-%                 warning("Index %d exceeds frequency array size", idx);
-%                 break;
-%             end
-%         end
-% 
-%         dat.fou.fm{idat} = fm;
-%         dat.fou.am{idat} = am;
-%         dat.fou.a0{idat} = a0;
-%     end
-% 
-%     dat.fou.M = M;
-% 
-% end
