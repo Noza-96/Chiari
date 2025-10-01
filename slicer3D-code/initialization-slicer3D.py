@@ -90,16 +90,6 @@ def get_patient_id():
         return result
     raise ValueError("No valid Patient ID entered.")
 
-# Function to get the local path to the Chiari folder based on the hostname
-# def get_local_chiari_path():
-    hostname = platform.node()
-    if hostname == 'Guillermos-MacBook-Pro.local' or hostname == 'Guillermos-MBP':
-        chiari_path = '/Users/noza/Documents/chiari'
-    elif hostname == 'Lenovo':
-        chiari_path = r'C:\Users\guill\Documents\chiari'
-
-    return chiari_path
-
 # Function to adjust the slice views
 def adjust_slice_views():
     layout_manager = slicer.app.layoutManager()
@@ -136,6 +126,37 @@ def display_segmentation_3D(segmentation_node, opacity2D=0.4):
     segmentation_display_node.SetOpacity3D(0.6)
     segmentation_display_node.SetOpacity2DFill(opacity2D)
     segmentation_display_node.SetOpacity2DOutline(opacity2D)
+
+def save_segmentation_work(auto_seg_node, manual_seg_node, volume_node, scene_dir, scene_filename="segmentation.mrml"):
+    os.makedirs(scene_dir, exist_ok=True)
+
+    if auto_seg_node:
+        if not auto_seg_node.GetStorageNode():
+            auto_seg_node.CreateDefaultStorageNode()
+        slicer.util.saveNode(auto_seg_node, os.path.join(scene_dir, "automatic_segmentation.seg.nrrd"))
+
+    if manual_seg_node:
+        if volume_node:
+            manual_seg_node.SetReferenceImageGeometryParameterFromVolumeNode(volume_node)
+        if not manual_seg_node.GetStorageNode():
+            manual_seg_node.CreateDefaultStorageNode()
+        slicer.util.saveNode(manual_seg_node, os.path.join(scene_dir, "manual_segmentation.seg.nrrd"))
+
+    if volume_node:
+        if not volume_node.GetStorageNode():
+            volume_node.CreateDefaultStorageNode()
+        slicer.util.saveNode(volume_node, os.path.join(scene_dir, "anatomy.nii.gz"))
+
+    scene_path = os.path.join(scene_dir, scene_filename)
+    slicer.mrmlScene.SetURL(scene_path)
+    slicer.mrmlScene.Commit(scene_path)
+
+def prompt_yes_with_fallback(prompt, default):
+    try:
+        ans = input(prompt).strip().lower()
+    except EOFError:
+        ans = default  # no stdin → treat like pressing Enter
+    return ans 
 
 # Save plane points to a text file
 def save_plane_points(segmentation_path):
@@ -176,39 +197,6 @@ def save_plane_points(segmentation_path):
     # Output the results
     print("plane data saved to .txt files")
 
-pid = sys.argv[1]
-nii_filename = sys.argv[2]
-chiari_path = sys.argv[3]
-
-segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
-pcMRI_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
-
-# Load the segmentation file and visualize it in 3D
-segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_canal_seg.nii.gz"))
-segmentation = segmentation_node.GetSegmentation()
-segmentation_node.SetName("automatic_segmentation")
-segmentation.GetSegment(segmentation.GetNthSegmentID(0)).SetName("canal")
-
-segmentation_node_2 = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_seg.nii.gz"))
-segmentation_2 = segmentation_node_2.GetSegmentation()
-segment_id_2 = segmentation_2.GetNthSegmentID(0)  # Get the ID of the segment to move
-segmentation_2.GetSegment(segment_id_2).SetName("cord")
-
-# # Copy the segment from segmentation_node_2 to segmentation_node
-# segment_to_move = segmentation_2.GetSegment(segment_id_2)  # Get the segment object
-# segmentation.CopySegmentFromSegmentation(segmentation_2, segment_id_2)  # Copy segment
-
-# # Remove the second segmentation node from the scene
-# slicer.mrmlScene.RemoveNode(segmentation_node_2)
-
-display_segmentation_3D(segmentation_node)
-
-# Get the segmentation object inside the node
-
-
-volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, f"{nii_filename}.nii.gz"))
-
-
 def import_and_load_dicom(pcMRI_path):
     # Open the DICOM module to initialize the database
     slicer.util.selectModule('DICOM')
@@ -222,87 +210,140 @@ def import_and_load_dicom(pcMRI_path):
     DICOMUtils.importDicom(pcMRI_path, slicer.dicomDatabase)
     slicer.app.processEvents()
 
-    # Load only if the dataset hasn't been loaded before
-    # patientUIDs = slicer.dicomDatabase.patients()
-    # DICOMUtils.loadPatientByUID(patientUIDs[0])
-
     print(f"Successfully imported all DICOM files from: {pcMRI_path}")
 
 
-import_and_load_dicom(pcMRI_path)
+# Main script execution starts here    
+pid = sys.argv[1]
+chiari_path = sys.argv[2]
+
+
+segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
+pcMRI_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
+
+scene_path = os.path.join(segmentation_path, "scene")
+seg_scene_file = os.path.join(scene_path, "segmentation.mrml")
+nii_filename = "auto_segmentation"
+
+user_input = "no"  # default to "no"
+
+
+# === Step 0: Check for seg_scene_file ===
+if os.path.exists(seg_scene_file):
+    # user_input = input(f"A segmentation scene file was found at:\n  {seg_scene_file}\n\n"
+    #                    "Do you want to load it instead of creating a new segmentation? ([yes]/no): ").strip().lower()
+    
+    user_input = prompt_yes_with_fallback(f"A segmentation scene file was found at:\n  {seg_scene_file}\n\n" 
+                                          "Do you want to load it instead of creating a new segmentation? ([yes]/no): ", default="yes")
+
+    if user_input in ("", "yes"):
+        slicer.util.loadScene(seg_scene_file)
+
+if user_input not in ("", "yes"):
+    segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_canal_seg.nii.gz"))
+    segmentation = segmentation_node.GetSegmentation()
+    segmentation_node.SetName("automatic_segmentation")
+    segmentation.GetSegment(segmentation.GetNthSegmentID(0)).SetName("canal_a")
+
+    segmentation_node_2 = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_seg.nii.gz"))
+    segmentation_2 = segmentation_node_2.GetSegmentation()
+    segment_id_2 = segmentation_2.GetNthSegmentID(0)  # Get the ID of the segment to move
+    segmentation_2.GetSegment(segment_id_2).SetName("cord_a")
+
+    display_segmentation_3D(segmentation_node)
+
+    # Get the segmentation object inside the node
+    volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, f"{nii_filename}.nii.gz"))
+    volume_node.SetName("anatomy")
+
+    import_and_load_dicom(pcMRI_path)
+
+    slicer.util.selectModule('Data')
+
+    print("\n=== Next steps in Slicer ===\n")
+    print("1) Subtract cord from canal segmentation:")
+    print("   • Module 'Data': move 'cord_a' into node 'automatic_segmentation'")
+    print("   • Module 'Segment Editor':")
+    print("       - Select 'canal_a'")
+    print("       - Logical Operators → Operation: Subtract → 'cord_a'")
+    print("       - Apply\n")
+
+    repeat = True
+
+    while repeat:
+        user_input = prompt_yes_with_fallback("Type ok or press [enter] when done: ", default="ok")
+        user_input = input("Type 'ok' when done: ").strip().lower()
+
+        if user_input == "ok":
+            repeat = False   # exit loop
+        else:
+            print("⚠️ Try again.")
+
+    # Remove the second segmentation node from the scene
+    slicer.mrmlScene.RemoveNode(segmentation_node_2)
+
+    # Remove the cord_a segment from the first segmentation node
+    segment_id = segmentation.GetSegmentIdBySegmentName("cord_a")
+    segmentation.RemoveSegment(segment_id)
+    # Create a new segmentation node
+    manual_segmentation_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode", "manual_segmentation")
+
+    # open it in Segment Editor as the active node
+    slicer.modules.segmenteditor.widgetRepresentation().self().editor.setSegmentationNode(manual_segmentation_node)
+
+    # Set the anatomy volume as the active master volume
+    slicer.modules.segmenteditor.widgetRepresentation().self().editor.setSourceVolumeNode(volume_node)
+
+    canal_id = manual_segmentation_node.GetSegmentation().AddEmptySegment("csf")
+    bg_id    = manual_segmentation_node.GetSegmentation().AddEmptySegment("background")
+    
+    # Rename segments
+    manual_segmentation_node.GetSegmentation().GetSegment(canal_id).SetName("csf")
+    manual_segmentation_node.GetSegmentation().GetSegment(bg_id).SetName("background")
+
+    # Set colors (RGB in 0–1). Blue and Brown.
+    manual_segmentation_node.GetSegmentation().GetSegment(canal_id).SetColor(0.4, 0.6, 1.0)   # blue
+    manual_segmentation_node.GetSegmentation().GetSegment(bg_id).SetColor(0.55, 0.35, 0.10)    # brown
+else:
+    # segmentation_node = slicer.util.getNode("automatic_segmentation")
+    # manual_segmentation_node = slicer.util.getNode("manual_segmentation")
+    # volume_node = slicer.util.loadVolume(os.path.join(scene_path, f"{nii_filename}.nii.gz"))
+    print("TODO: load nodes from scene")
+print("2) Create manual segmentation of remaining CSF space.")
+print("   • Module 'Segment Editor':")
+
+if user_input != "yes":    
+    print("       - With 'Paint tool; add seed regions to 'csf' and 'background' segments")
+    print("       - to fill the segments: 'Grow from seeds' → 'Initialize'")
+    print("       - If you like the result, click 'Apply'")
+    print("       - Otherwise, click 'Cancel' and refine the painted seeds, then repeat.")
+else:
+    slicer.util.selectModule('Data')
+
+print("       - Manually edit 'canal' and 'background' with Paint and Erase tools")
+
+repeat = True
+
+while repeat:
+    user_input = prompt_yes_with_fallback("Type '[save]' to save, type 'done' to finish:", default="save")
+    
+    if user_input == "save":
+        save_segmentation_work(segmentation_node, manual_segmentation_node, volume_node, scene_path, "segmentation.mrml")
+
+        print(f"scene saved to: {scene_path}\n")
+        print("       - Manually edit 'canal' and 'background' with Paint and Erase tools")
+
+    elif user_input == "done":
+        save_segmentation_work(segmentation_node, manual_segmentation_node, volume_node, scene_path, "segmentation.mrml")
+        print(f"scene saved to: {scene_path}\n")
+        repeat = False   # exit loop  
+    else:
+        print("⚠️ Type 'save' or 'done'. Try again.")
+
+print("3. Merge and close.") 
+
 
 # Save the MRML scene
-slicer.mrmlScene.Commit(os.path.join(segmentation_path, "segmentation_scene.mrml"))
 
-
-# Get all .nrrd files in the directory pcMRI and load them as Sequence
-# files = os.listdir(pcMRI_path)
-# nrrd_files = [file for file in files if file != '.DS_Store' and file.lower().endswith('.nrrd')]
-# for file_name in nrrd_files:
-#     file_path = os.path.join(pcMRI_path, file_name)
-#     slicer.util.loadSequence(file_path)
-
-# Assign each view to the corresponding segment based on the relative z-location
-# volume_with_max_z, volume_with_min_z, volume_with_mid_z = get_volumes_with_extreme_and_mid_z()
-# assign_to_slices(volume_with_max_z, volume_with_min_z, volume_with_mid_z)
-
-# Adjust the slice views
-# adjust_slice_views()
-
-# Save the plane points to a text file -- FAILS TO GIVE CORRECT POINTS
-# save_plane_points(segmentation_path)
-
-
-# Apply a linear transformation to the segmentation to align it with the sequence segmentation
-# 1. Load existing transformed segmentation, if it exists
-# transformed_geometry_path = os.path.join(segmentation_path, 'stl', 'segmentation.stl')
-# if os.path.exists(transformed_geometry_path):
-#     response = QMessageBox.question(None, 'Load Existing Transformation', 'Do you want to load the existing transformed segmentation?', QMessageBox.Yes | QMessageBox.No)
-#     if response == QMessageBox.Yes:
-#         slicer.mrmlScene.RemoveNode(segmentation_node)
-#         segmentation_node = slicer.util.loadSegmentation(transformed_geometry_path)
-#         segmentation_node.SetName("segmentation")
-#         display_segmentation_3D(segmentation_node)
-# # 2. Manually adjust the transformation if desired
-# response = QMessageBox.question(None, 'Manual Linear Transformation', 'Do you want to adjust the transformation manually?', QMessageBox.Yes | QMessageBox.No)
-# if response == QMessageBox.Yes:
-#     # Open the GUI Module Transforms on Slicer3D
-#     slicer.util.selectModule('Transforms')
-#     # Create a new transform node
-#     transform_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ManualTransform")
-#     # Create a vtkTransform object
-#     vtk_transform = vtk.vtkTransform()
-#     # TODO: set the Active Transform to the new transform node
-#     # Apply the transform to the segmentation node
-#     segmentation_node = slicer.util.getNode('segmentation')
-#     segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
-#     segmentation_display_node = segmentation_node.GetDisplayNode()
-#     display_segmentation_3D(segmentation_node, opacity2D=0.2)
-#     while True:
-#         user_input = input('Type "ok" when you have finished the manual transformation: ')
-#         if user_input.lower() == 'ok':
-#             # Export the transformed segmentation as an STL file
-#             response = QMessageBox.question(None, 'Export STL', 'Do you want to export the transformed segmentation as STL?', QMessageBox.Yes | QMessageBox.No)
-#             if response == QMessageBox.Yes:
-#                 export_folder = os.path.join(segmentation_path, 'stl')
-#                 if not os.path.exists(export_folder):
-#                     os.makedirs(export_folder)
-
-#                 exporter = slicer.vtkSlicerSegmentationsModuleLogic()
-#                 exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(export_folder, segmentation_node, None, "STL")
-
-#                 # Rename the exported file
-#                 old_filename = os.path.join(export_folder, "segmentation_Segment_1.stl")
-#                 new_filename = os.path.join(export_folder, "segmentation.stl")
-#                 if os.path.exists(old_filename):
-#                     os.replace(old_filename, new_filename)
-#                 else:
-#                     raise FileNotFoundError(f"File not found: {old_filename}")
-                
-#                 # Output the results
-#                 print("segmentation.stl saved in stl folder")
-#             break
-
-    
 
 

@@ -4,7 +4,7 @@ addpath('Functions/');
 addpath('Functions/Others/')
 
 % Choose subject
-subject = "s1";
+subject = "s5";
 
 dir_chiari = full_path(fullfile(pwd, '..', '..', '..'));
 dicom_path = full_path(fullfile(dir_chiari,'patient-data', subject));
@@ -139,14 +139,16 @@ segmentation_path = full_path(fullfile(dir_chiari, 'computations','segmentation'
 
 createDirIfNotExists(segmentation_path);
 
-nii_file = fullfile(segmentation_path, "segmentation.nii.gz");
+auto_seg_name = "auto_segmentation";
+
+nii_file = fullfile(segmentation_path, auto_seg_name + ".nii.gz");
 
 sct = '/Users/you/miniforge3/envs/sct/bin/sct_deepseg';
 
 % Check if the file exists
 if ~isfile(nii_file)
     % Run conversion if the file does not exist
-    status = system("dcm2niix -o " + segmentation_path + " -f " + "segmentation" + " -z y " + anatomy_dicom);
+    status = system("dcm2niix -o " + segmentation_path + " -f " + auto_seg_name + " -z y " + anatomy_dicom);
 
     % Check if conversion was successful
     if status == 0
@@ -161,7 +163,7 @@ end
 %% Automated segmentation
 
 % Check if the file exists
-if ~isfile(fullfile(segmentation_path, "segmentation_seg.nii.gz"))
+if ~isfile(fullfile(segmentation_path, auto_seg_name + "_seg.nii.gz"))
 
     % segmentation spinal cord
     system( "sct_deepseg -task seg_sc_contrast_agnostic -i " + nii_file);
@@ -170,15 +172,18 @@ if ~isfile(fullfile(segmentation_path, "segmentation_seg.nii.gz"))
     system( "sct_deepseg -task canal_t2w -i " + nii_file);
 
     % segmentation rootlets
-    system( "sct_deepseg -task seg_spinal_rootlets_t2w -i " + nii_file) 
+    system( "sct_deepseg -task seg_spinal_rootlets_t2w -i " + nii_file); 
 else
     disp("Segmentation already exists. Skipping automated segmentation.");
 end   
 
 python_script = full_path(fullfile(pwd, '..', '..', 'slicer3D-code','initialization-slicer3D.py'));
 
-system ("slicer3D  --python-script """ + python_script + """ """ + subject + """ """ + anatomy_dicom + """ """ + dir_chiari + """");
+system ("slicer3D  --python-script """ + python_script + """ """ + subject + """ """ + dir_chiari + """");
 
+
+
+%% Auxiliary functions 
 
 function createDirIfNotExists(dirPath)
     if ~isfolder(dirPath)
