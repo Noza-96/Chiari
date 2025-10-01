@@ -309,15 +309,6 @@ function roi_mask = read_ROI_nrrd(location, segmentation_dir)
     roi_mask = roi_raw > 0;
 end
 
-function save_animation(movieVector, fileName)
-    % Save the animation as a video
-    writer = VideoWriter(fileName, 'MPEG-4');
-    writer.FrameRate = 5;
-    open(writer);
-    writeVideo(writer, movieVector);
-    close(writer);
-end
-
 function plot_flow_rates(velocity, cas)
     N = length(cas.locations);  % number of slices
     figure('Units', 'normalized', 'Position', [0.1 0.2 0.1 0.6]);

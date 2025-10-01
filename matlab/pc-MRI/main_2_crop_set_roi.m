@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % clear; close all; 
 % 
-[aux, cas, dat_PC, single_reading] = run_if_empty('s4', 'GE');  % if skipping previous steps
+% [aux, cas, dat_PC, single_reading] = run_if_empty('s4', 'GE');  % if skipping previous steps
 
 reference_location = 'C3C4'; 
 % (set to 'zero' to set location to 0.0)
@@ -20,7 +20,7 @@ dat_PC = adjust_vertical_location_PC(cas, dat_PC, reference_location);
 
 disp("Cropping data ..." + newline)
 
-dat_PC = crop_data(cas, dat_PC, crop_size, single_reading);
+dat_PC = crop_data(cas, dat_PC, crop_size);
 
 disp("Setting up ROIs ..." + newline)
 
@@ -28,16 +28,7 @@ dat_PC = define_ROI_video(cas, dat_PC);
 
 disp("Saving everything in a .mat file ..." + newline)
 
-if isempty(single_reading) 
-    sstt_name = "";
-else
-    sstt_name = strjoin(cellstr(string(single_reading)), '-');
-    if ~endsWith(sstt_name, '-')
-    sstt_name = sstt_name + "-";
-    end
-end
-
-save(fullfile(cas.dirmat, "02-"+sstt_name+"crop_set_roi.mat"), 'aux', 'cas', 'dat_PC');
+save(fullfile(cas.dirmat, "02-crop_set_roi.mat"), 'aux', 'cas', 'dat_PC');
 disp("Done!" + newline)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

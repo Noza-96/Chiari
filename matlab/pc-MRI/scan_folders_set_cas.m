@@ -1,9 +1,9 @@
-function cas = scan_folders_set_cas(cas, single_reading)
+function cas = scan_folders_set_cas(cas)
 
 % Computations folder
 cas.dircloud = fullfile('..', '..', '..','computations');
 % DICOM folder
-cas.dirdcm = fullfile('..', '..', '..','patient-data',cas.subj);
+cas.dirdcm = fullfile('..', '..', '..','patient-data',cas.subj,'flow');
 
 % Save data folder
 cas.dirdat = fullfile(cas.dircloud,'pc-mri');
@@ -68,14 +68,6 @@ end
     strfolders_PC_MAG = fileread('./aux_PC/folders_MAG.txt');
     folders_PC_MAG = regexp(strfolders_PC_MAG, '\r\n|\r|\n', 'split');
     folders_PC_MAG(end) = [];
-
-    % fileter folders to those containing single reading
-    if ~isempty(single_reading)
-        folders_PC = filter_folders_by_keywords(folders_PC, single_reading);
-        folders_PC_ = filter_folders_by_keywords(folders_PC_, single_reading);
-        folders_PC_P = filter_folders_by_keywords(folders_PC_P, single_reading);
-        folders_PC_MAG = filter_folders_by_keywords(folders_PC_MAG, single_reading);
-    end
 
     strfolders_RT = fileread('./aux_RT/folders.txt');
     folders_RT = regexp(strfolders_RT, '\r\n|\r|\n', 'split');

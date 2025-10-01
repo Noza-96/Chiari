@@ -1,108 +1,74 @@
 % Create figure with segmentation together with MRI locations
-function movieVector = create_animation(dat_PC, cas, ts_cycle)
+function movieVector = create_animation(dat_PC, cas)
 
-addpath("../processing/Functions/")
-addpath('../processing/Functions/Others/')
-
-% load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
-
+    addpath("../processing/Functions/")
+    addpath('../processing/Functions/Others/')
     
-    fs = 12;
-    fan = 8;
+    % load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
+
+    fs = 20;
+    fan = 14;
     locations = cellfun(@(x) strrep(x, '0', ''), cas.locations, 'UniformOutput', false);
     % z-position compared to C3C4
     locz_vals = cell2mat(dat_PC.locz);
-    % Dz_loc = -(anatomy.FM-(-locz_vals*10));
-    Dz_loc = -(0-(-locz_vals*10));
-    % labels = cellfun(@(loc, dz) sprintf('%s (%d mm)', loc, dz), locations, num2cell(Dz_loc), 'UniformOutput', false)
+    Dz_loc = (locz_vals(1)-locz_vals)*10;
 
     % Preallocate movie vector
     Ndata = dat_PC.Ndat;
-    movieVector(ts_cycle) = struct('cdata', [], 'colormap', []);
-
-    for ii = 1:dat_PC.Ndat
-
-        % pcMRI velocity    
-        U = -dat_PC.U_SAS{ii}*1e-2; % m/s
-        xyz = dat_PC.pixel_coord{ii}*1e-3; %m
-        Q = -dat_PC.Q_SAS{ii};  % Get flow data
-    
-        % Identify rows and columns where all elements are zero
-        zeroRows = all(U(:,:,1) == 0, 2); % Logical vector for rows
-        zeroCols = all(U(:,:,1) == 0, 1); % Logical vector for columns
-        
-        % Find the indices of the rows and columns to retain
-        rowsToKeep = find(~zeroRows); 
-        colsToKeep = find(~zeroCols);
-        band = 1; 
-	    rowsToKeep = (rowsToKeep(1)-band):1:(rowsToKeep(end)+band);
-	    colsToKeep = (colsToKeep(1)-band):1:(colsToKeep(end)+band);
-
-        % Extract the submatrix and update vectors
-        U = U(rowsToKeep, colsToKeep,:);
-        xyz = xyz(rowsToKeep, colsToKeep,:);
-        % 
-        U = reshape(U,[size(U,1)*size(U,2),size(U,3)]);
-    
-        %xyz coordinates
-        xx = reshape(xyz(:,:,1),[],1);
-        yy = reshape(xyz(:,:,2),[],1);
-        zz = reshape(xyz(:,:,3),[],1);
-        uu = zeros(size(U,1),ts_cycle);
-        % We use the fourier approximation to go from 40 data points to 100
-        for k=1:size(U,1)
-            [uu(k,:), ~, ~] = four_approx(U(k,:), 20, 0, ts_cycle);
-        end
-    
-        x{ii} = xx; y{ii} = yy; z{ii} = zz;
-        u{ii} = uu;
-
-        [q{ii}, ~, ~] = four_approx(Q, 20, 0, ts_cycle); 
-
-    end
-% Create the structure
-pcmri.x = x;
-pcmri.y = y;
-pcmri.z = z;
-pcmri.u_normal = u;
-pcmri.q = q;
-
+    movieVector(dat_PC.Nt{1}) = struct('cdata', [], 'colormap', []);
 
     rows = 8;
     % Set up figure properties
     figure;
-    set(gcf, 'Position', [200, 200, 600, Ndata*150]);
+    set(gcf, 'Position', [200, 200, 1000, Ndata*240]);
     tt = tiledlayout(Ndata, rows, "TileSpacing", "tight", "Padding", "tight");
     
 
     % Initialize variables
-    Vs = zeros(1, length(dat_PC.Q_SAS));
-
-    for n = 1:ts_cycle
+    Vs_SAS = zeros(1, length(dat_PC.Q_SAS));
+    Vs_TONS = zeros(1, length(dat_PC.Q_TONS));
+    for n = 1:dat_PC.Nt{1}
     
         % Loop through each flow data set
         for k = 1:Ndata
             nexttile(1+(k-1)*rows, [1, 3]);
           
-            create_animation_ansys(pcmri,length(dat_PC.U_SAS{ii}(:,1,1)), k, n, fan);
-            ylabel('$y \,[{\rm mm}]$', 'Interpreter', 'latex', 'FontSize', fs);
-            if k == Ndata
-                xlabel('$x \,[{\rm mm}]$', 'Interpreter', 'latex', 'FontSize', fs);
-            end
+            create_animation_ansys(dat_PC, k, n);
 
-            Q = pcmri.q{k};  % Get flow data
+            Q_SAS = -dat_PC.Q_SAS{k};  % Get flow data
+            Q_TONS = -dat_PC.Q_TONS{k};  % Get flow data
+
             Nt = dat_PC.Nt{k};     % Get number of time points
-            t = linspace(0, 1, ts_cycle)*dat_PC.T{k};  % Create time vector
+            t = linspace(0, 1, dat_PC.Nt{k})*dat_PC.T{k};  % Create time vector
+            t_T = linspace(0, 1, dat_PC.Nt{k});
             if k == 1
                 title("$u\left[{\rm cm/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
             end
     
             % Create a new tile for the flow rate
             nexttile(4+(k-1)*rows, [1, 3]);
-            Vs(k) = 0.5 * simps(t, abs(Q), 2);  % Compute the volume
-    
+            Vs_SAS(k) = 0.5 * simps(t, abs(Q_SAS), 2);  
+            Vs_TONS(k) = 0.5 * simps(t, abs(Q_TONS), 2); 
+  
             % Call the flow rate function
-            flow_rate(Q, 0);
+            plot(t_T, Q_SAS, Color='k', LineWidth=1.5)
+            yline(simps(t_T, Q_SAS, 2), '--', ...
+                'Color', 'k', 'LineWidth', 1, ...
+                'Label', '$\langle \cdot \rangle$', ...
+                'Interpreter', 'latex','FontSize', 14, ...
+                'LabelHorizontalAlignment', 'right', ...
+                'LabelVerticalAlignment', 'bottom', 'HandleVisibility','off');            
+            hold on 
+            if ~all(Q_TONS == 0)
+                plot(t_T, Q_TONS, Color='r', LineWidth=1.5)
+                yline(simps(t_T, Q_TONS, 2),'--', 'Color', 'r', 'LineWidth', 1, 'HandleVisibility','off')
+            end
+            if k == 1
+                legend("$Q_{\rm CSF}$", "$Q_{\rm tons}$", 'interpreter', 'latex','fontsize',14)
+            end
+            yline(0,':', 'LineWidth', 1,'HandleVisibility','off')
+            xline (t_T(n), '-', 'LineWidth', 1, 'HandleVisibility','off')
+            hold off
             set(gca, 'LineWidth', 1, 'TickLength', [0.01 0.01], 'FontSize', fan);
             % Set x-tick labels conditionally
             if k < length(dat_PC.Q_SAS)
@@ -116,23 +82,27 @@ pcmri.q = q;
                 title("$Q\left[{\rm ml/s}\right]$", 'Interpreter', 'latex', 'FontSize', fs);
             end
     
+            ymin = floor(min([Q_SAS(:); Q_TONS(:)]));
+            ymax = ceil(max([Q_SAS(:); Q_TONS(:)]));
+        
             % Set y-labels
-            ylim([-2, 2]);
+            ylim([ymin, ymax]);
             ax = gca; % Get current axes
-            % ax.XAxis.TickLabelRotation = 90; % Rotate y-axis tick labels to vertical
-            % title(locations{k}, 'Interpreter', 'latex', 'FontSize', fs);
-
-                    % Add title to the entire layout
-
         end
 
 
         if n == 1
             % Plot volumes in the last tile
             nexttile(7,[Ndata, 2]);
-            plot(Vs, Dz_loc, '-', 'LineWidth', 1.5);
+            plot(Vs_SAS, Dz_loc, '-k', 'LineWidth', 1.5);
             hold on
-            plot(Vs, Dz_loc, 'o', 'LineWidth', 1.5, 'MarkerFaceColor', 'w');
+            plot(Vs_SAS, Dz_loc, 'ok', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'HandleVisibility','off');
+
+            if ~all(Vs_TONS == 0)
+                plot(Vs_TONS, Dz_loc, '-r', 'LineWidth', 1.5);
+                plot(Vs_TONS, Dz_loc, 'or', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'HandleVisibility','off');
+            end
+            legend("$V_{s, \rm CSF}$", "$V_{s, \rm tons}$", 'interpreter', 'latex', 'Location','northwest', 'fontsize',14)
 
             yticks(-200:5:100);
 
@@ -142,20 +112,20 @@ pcmri.q = q;
             % end             
             % ylim([floor(min(Dz_loc(:))/10)*10, ceil(max(Dz_loc(:))/10)*10])
 
-            ylim([-60, 10])
+            % ylim([-60, 5])
         
             % Customize the appearance of the plot
             set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
             xlabel("$V_s \,{\rm [ml]}$", 'Interpreter', 'latex', 'FontSize', fs);
             ylabel("$z \,{\rm [mm]}$", 'Interpreter', 'latex', 'FontSize', fs);
-            % xlim([floor(min(Vs(:)) * 10) / 10, ceil(max(Vs(:)) * 10) / 10]);'\
-            xlim([0,0.7]);
+            % xlim([floor(min(Vs_SAS(:)) * 10) / 10, ceil(max(Vs_SAS(:)) * 10) / 10]);'\
+            % xlim([0,0.7]);
             ax = gca; % Get current axes
             % ax.XAxis.TickLabelRotation = 90; % Rotate y-axis tick labels to vertical
             set(gcf, 'Color', 'w');  % Set background color to white for figures
             grid off;
         end
-        % title(tt, sprintf('$t/T = %.2f$', n / ts_cycle), ...
+        % title(tt, sprintf('$t/T = %.2f$', n / dat_PC.Nt{ii}), ...
         %         'Interpreter', 'latex', 'FontSize', fs);
         set(gcf, 'Color', 'w')
         movieVector(n) = getframe(gcf);
@@ -167,23 +137,37 @@ pcmri.q = q;
 
 end
 
-function create_animation_ansys(data, N_pixels, loc, n, fan)
-    % Extract data and rescale
-    x = data.x{loc} * 1e3; % [mm]
-    y = data.y{loc} * 1e3; % [mm]
-    w = data.u_normal{loc}(:, n) * 1e2; % [cm/s]
-
-    % Plot in the specified tile
-    scatter(x, y, 8, w, 'filled', 'd');
-    % contourf(Xq, Yq, Wq, 40, 'LineColor', 'none');
+function create_animation_ansys(dat_PC, loc, n)
+    orange = [1, 0.5, 0];
+    w_SAS  = -dat_PC.U_SAS{loc}(:,:,n);   % [cm/s]
+    w_TONS = -dat_PC.U_TONS{loc}(:,:,n);  % [cm/s]
+    
+    pcolor(w_SAS + w_TONS);
+    shading flat
+    axis equal tight ij
+    hold on
+    box on
     colorbar;
-    bluetored(6);
-
-    % Set axis limits and properties
-    Dx = max(x) - min(x);
-    Dy = max(y) - min(y);
-    xlim([min(x) - 0.1 * Dx, max(x) + 0.1 * Dx]);
-    ylim([min(y) - 0.1 * Dy, max(y) + 0.1 * Dy]);
-    set(gca, 'XDir', 'reverse', 'YDir', 'reverse', 'LineWidth', 1, 'TickLength', [0.01, 0.01], 'FontSize', fan);
-    box on;
+    bluetored(dat_PC.venc{loc});
+    xticklabels([]); yticklabels([]);
+    
+    % outlines
+    contour(dat_PC.ROI_SAS{loc},  [0.5 0.5], 'k',      'LineWidth', 1.5);
+    contour(dat_PC.ROI_TONS{loc}, [0.5 0.5], 'Color', orange, 'LineWidth', 1.5);
+    
+    % filled COR region (semi-transparent red)
+    cor_mask  = dat_PC.ROI_COR{loc};
+    alphaFill = 0.35;
+    cor_color = [0.9 0.85 0.7];
+    B = bwboundaries(cor_mask,'noholes');
+    for k = 1:numel(B)
+        b = B{k};  % [row, col]
+        patch('XData', b(:,2), 'YData', b(:,1), ...
+              'FaceColor', cor_color, 'FaceAlpha', alphaFill, ...
+              'EdgeColor', 'k', 'HitTest','off','PickableParts','none');
+    end
+    
+    xlim([0.5 size(w_SAS,2)+0.5])
+    ylim([0.5 size(w_SAS,1)+0.5])
+    hold off
 end
