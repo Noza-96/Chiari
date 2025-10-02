@@ -1,186 +1,154 @@
-% Perform automated segmentation
-clear; close all; clc;
-addpath('Functions/');
-addpath('Functions/Others/')
+function organize_DICOMS(subject)
+% ORGANIZE_FLOW_ANATOMY
+% - Lists DICOMs
+% - Picks/organizes anatomy (T2) into patient-data/<subject>/anatomy/<series_desc>
+% - Organizes flow series into patient-data/<subject>/flow/zK-<level>/01PC/<series_desc>_{00,MAG_01,P_02}
 
-% Choose subject
-subject = "s5";
-
-dir_chiari = full_path(fullfile(pwd, '..', '..', '..'));
-dicom_path = full_path(fullfile(dir_chiari,'patient-data', subject));
-
-% List DICOM series
-
-fprintf('Image data Patient %s: \n', subject);
-
-T = list_dicom_series(dicom_path);
-
-anatomy_root = full_path(fullfile(dir_chiari,'patient-data', subject, 'anatomy'));
-createDirIfNotExists(anatomy_root);
-
-% Find an existing subfolder inside 'anatomy' (if any)
-existing = dir(anatomy_root);
-existing = existing([existing.isdir] & ~ismember({existing.name},{'.','..'}));
-
-fprintf('Segmentation data .... \n\n');
-
-useExisting = false;
-if ~isempty(existing)
-    existing_path = fullfile(anatomy_root, existing(1).name);
-    fprintf('Existing content in "anatomy":\n%s\n', existing(1).name);
-    if askYN('Do you want to use it? (y/n): ')
-        % Keep existing anatomy; skip T2 selection
-        useExisting = true;
-        anatomy_dicom = existing_path;
-        dest_folder   = existing_path;
-        series_desc   = existing(1).name;
-        idx = [];
-        T2T = table();  % empty placeholder
-        fprintf('Keeping existing data; skipping new selection.\n\n');
-    else
-        rmdir(existing_path, 's');
-    end
-end
-
-% Select T2 series to construct segmentation only if replacing or none exists
-if ~useExisting
-    % pass 'true' to skip internal "existing anatomy" prompt inside picker
-    [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(dicom_path, dir_chiari, subject, T, true);
-    copyfile(anatomy_dicom, dest_folder);
-end
-
-fprintf('\nVelocity data .... \n\n');
-
-
-flow_root = full_path(fullfile(dir_chiari,'patient-data', subject, 'flow'));
-createDirIfNotExists(flow_root);
-
-% Show existing content (if any)
-items = dir(flow_root);
-items = items([items.isdir]);
-items = items(~ismember({items.name},{'.','..'}));
-if ~isempty(items)
-    fprintf('Existing content in "flow":\n');
-    for k = 1:numel(items)
-        fprintf('%s\n', items(k).name);
-    end
-    if ~askYN('Do you want to use it? (y/n):')
-        delete_folder_contents(flow_root);  % wipe but keep root folder
-        fprintf('Existing flow content removed.\n');
-    else
-        fprintf('Keeping existing data; skipping new selection.\n\n');
-        gotoSkipFlow = true; 
-    end
-end
-% If we didn't choose to skip, allow selecting multiple "flow/PC" series.
-if ~exist('gotoSkipFlow','var')
-    % Filter to "flow" or "PC"
-    flowMask = ~cellfun(@isempty, regexpi(T.SeriesDescription, '(flow|PC)', 'once'));
-    TF = T(flowMask, :);
-
-    if isempty(TF)
-        warning('No DICOM series with "flow" or "PC" found under: %s', dicom_path);
-    else
-        % Build menu
-        choices = strings(height(TF),1);
-        paths   = strings(height(TF),1);
-        for i = 1:height(TF)
-            choices(i) = sprintf('%2d) %s / %s / %s : Ser%03d  %s', ...
-                i, TF.PAT{i}, TF.ST{i}, TF.SE{i}, TF.SeriesNumber(i), TF.SeriesDescription{i});
-            pth = fullfile(dicom_path, TF.PAT{i}, TF.ST{i}, TF.SE{i});
-            if ~isfolder(pth)
-                pth = fullfile(dicom_path, TF.ST{i}, TF.SE{i});
-                if ~isfolder(pth)
-                    pth = fullfile(dicom_path, TF.SE{i});
-                end
-            end
-            paths(i) = pth;
-        end
-
-        % Interactive loop: z0, z1, ...
-        z = 0;
-        while true
-            fprintf('\nFlow/PC series found:\n');
-            for i = 1:numel(choices)
-                fprintf('%s\n', choices(i));
-            end
-            sel = askIndexOrQuit(sprintf('Pick a series [1..%d], or q to stop: ', numel(choices)), numel(choices));
-            if sel == 0
-                fprintf('Done selecting velocity series.\n\n');
-                break;
-            end
-
-            src_path   = char(paths(sel));
-            series_desc = sanitize_series_desc(TF.SeriesDescription{sel});
-
-            % decide label based on series description
-            sstt = detect_level(TF.SeriesDescription{sel});
-
-            % flow/zK-label/01PC/<series_desc>
-            z_folder   = fullfile(flow_root, sprintf('z%d-%s', z, sstt));
-            dest_path  = fullfile(z_folder, '01PC', series_desc);
-            createDirIfNotExists(dest_path);
-
-            % Base container: flow/zK-<sstt>/01PC/
-            base_container = fullfile(z_folder, '01PC');
-            createDirIfNotExists(base_container);
-            
-            % Organize into description_00, description_MAG_01, description_P_02
-            split_flow_series(src_path, base_container, series_desc);
-            
-            z = z + 1;  % next slice level
-        end
-    end
-end
-
-%% Convert DICOMS to  NIfTI 
-
-segmentation_path = full_path(fullfile(dir_chiari, 'computations','segmentation',subject));
-
-createDirIfNotExists(segmentation_path);
-
-auto_seg_name = "auto_segmentation";
-
-nii_file = fullfile(segmentation_path, auto_seg_name + ".nii.gz");
-
-sct = '/Users/you/miniforge3/envs/sct/bin/sct_deepseg';
-
-% Check if the file exists
-if ~isfile(nii_file)
-    % Run conversion if the file does not exist
-    status = system("dcm2niix -o " + segmentation_path + " -f " + auto_seg_name + " -z y " + anatomy_dicom);
-
-    % Check if conversion was successful
-    if status == 0
-        disp("Conversion DICOM to NIfTI has been done successfully.");
-    else
-        disp("Error: Conversion failed.");
-    end
-else
-    disp("NIfTI file already exists. Skipping conversion.");
-end
-
-%% Automated segmentation
-
-% Check if the file exists
-if ~isfile(fullfile(segmentation_path, auto_seg_name + "_seg.nii.gz"))
-
-    % segmentation spinal cord
-    system( "sct_deepseg -task seg_sc_contrast_agnostic -i " + nii_file);
+    %% Setup
+    fprintf('\n--- Processing subject: %s ---\n\n', subject);
+    fprintf('1) Organize DICOM data...\n')
     
-    % segmentation canal
-    system( "sct_deepseg -task canal_t2w -i " + nii_file);
+    dir_chiari = full_path(fullfile(pwd, '..', '..'));
+    dicom_path     = full_path(fullfile(dir_chiari,'patient-data', subject));
 
-    % segmentation rootlets
-    system( "sct_deepseg -task seg_spinal_rootlets_t2w -i " + nii_file); 
-else
-    disp("Segmentation already exists. Skipping automated segmentation.");
-end   
+    anatomy_root = full_path(fullfile(dicom_path, 'anatomy'));
+    flow_root = full_path(fullfile(dicom_path, 'flow'));
 
-python_script = full_path(fullfile(pwd, '..', '..', 'slicer3D-code','segmentation-slicer3D.py'));
 
-system ("slicer3D  --python-script """ + python_script + """ """ + subject + """ """ + dir_chiari + """");
+    anatomy_has_content = hasContent(anatomy_root);
+    flow_has_content    = hasContent(flow_root);
 
+    if anatomy_has_content && flow_has_content
+        if askYN('-DICOMs are already organized. Skip? ([y]/n): ')
+            return;
+        end
+    end
+        
+    % List DICOM series
+    
+    fprintf('Image data Patient %s: \n', subject);
+    
+    T = list_dicom_series(dicom_path);
+    
+    anatomy_root = full_path(fullfile(dir_chiari,'patient-data', subject, 'anatomy'));
+    createDirIfNotExists(anatomy_root);
+    
+    % Find an existing subfolder inside 'anatomy' (if any)
+    existing = dir(anatomy_root);
+    existing = existing([existing.isdir] & ~ismember({existing.name},{'.','..'}));
+    
+    fprintf('Segmentation data .... \n\n');
+    
+    useExisting = false;
+    if ~isempty(existing)
+        existing_path = fullfile(anatomy_root, existing(1).name);
+        fprintf('Existing content in "anatomy":\n%s\n', existing(1).name);
+        if askYN('Do you want to use it? (y/n): ')
+            % Keep existing anatomy; skip T2 selection
+            useExisting = true;
+            anatomy_dicom = existing_path;
+            dest_folder   = existing_path;
+            series_desc   = existing(1).name;
+            idx = [];
+            T2T = table();  % empty placeholder
+            fprintf('Keeping existing data; skipping new selection.\n\n');
+        else
+            rmdir(existing_path, 's');
+        end
+    end
+    
+    % Select T2 series to construct segmentation only if replacing or none exists
+    if ~useExisting
+        % pass 'true' to skip internal "existing anatomy" prompt inside picker
+        [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(dicom_path, dir_chiari, subject, T, true);
+        copyfile(anatomy_dicom, dest_folder);
+    end
+    
+    fprintf('\nVelocity data .... \n\n');
+    
+    
+    flow_root = full_path(fullfile(dir_chiari,'patient-data', subject, 'flow'));
+    createDirIfNotExists(flow_root);
+    
+    % Show existing content (if any)
+    items = dir(flow_root);
+    items = items([items.isdir]);
+    items = items(~ismember({items.name},{'.','..'}));
+    if ~isempty(items)
+        fprintf('Existing content in "flow":\n');
+        for k = 1:numel(items)
+            fprintf('%s\n', items(k).name);
+        end
+        if ~askYN('Do you want to use it? (y/n):')
+            delete_folder_contents(flow_root);  % wipe but keep root folder
+            fprintf('Existing flow content removed.\n');
+        else
+            fprintf('Keeping existing data; skipping new selection.\n\n');
+            gotoSkipFlow = true; 
+        end
+    end
+    % If we didn't choose to skip, allow selecting multiple "flow/PC" series.
+    if ~exist('gotoSkipFlow','var')
+        % Filter to "flow" or "PC"
+        flowMask = ~cellfun(@isempty, regexpi(T.SeriesDescription, '(flow|PC)', 'once'));
+        TF = T(flowMask, :);
+    
+        if isempty(TF)
+            warning('No DICOM series with "flow" or "PC" found under: %s', dicom_path);
+        else
+            % Build menu
+            choices = strings(height(TF),1);
+            paths   = strings(height(TF),1);
+            for i = 1:height(TF)
+                choices(i) = sprintf('%2d) %s / %s / %s : Ser%03d  %s', ...
+                    i, TF.PAT{i}, TF.ST{i}, TF.SE{i}, TF.SeriesNumber(i), TF.SeriesDescription{i});
+                pth = fullfile(dicom_path, TF.PAT{i}, TF.ST{i}, TF.SE{i});
+                if ~isfolder(pth)
+                    pth = fullfile(dicom_path, TF.ST{i}, TF.SE{i});
+                    if ~isfolder(pth)
+                        pth = fullfile(dicom_path, TF.SE{i});
+                    end
+                end
+                paths(i) = pth;
+            end
+    
+            % Interactive loop: z0, z1, ...
+            z = 0;
+            while true
+                fprintf('\nFlow/PC series found:\n');
+                for i = 1:numel(choices)
+                    fprintf('%s\n', choices(i));
+                end
+                sel = askIndexOrQuit(sprintf('Pick a series [1..%d], or q to stop: ', numel(choices)), numel(choices));
+                if sel == 0
+                    fprintf('Done selecting velocity series.\n\n');
+                    break;
+                end
+    
+                src_path   = char(paths(sel));
+                series_desc = sanitize_series_desc(TF.SeriesDescription{sel});
+    
+                % decide label based on series description
+                sstt = detect_level(TF.SeriesDescription{sel});
+    
+                % flow/zK-label/01PC/<series_desc>
+                z_folder   = fullfile(flow_root, sprintf('z%d-%s', z, sstt));
+                dest_path  = fullfile(z_folder, '01PC', series_desc);
+                createDirIfNotExists(dest_path);
+    
+                % Base container: flow/zK-<sstt>/01PC/
+                base_container = fullfile(z_folder, '01PC');
+                createDirIfNotExists(base_container);
+                
+                % Organize into description_00, description_MAG_01, description_P_02
+                split_flow_series(src_path, base_container, series_desc);
+                
+                z = z + 1;  % next slice level
+            end
+        end
+    end
+
+end
 
 
 %% Auxiliary functions 
@@ -453,14 +421,17 @@ function sstt = detect_level(desc)
 % Detect anatomical level keyword from SeriesDescription (case-insensitive)
     d = lower(desc);
 
-    if contains(d,'foramen') || contains(d,'magnum') || contains(d,'fm')
+    if contains(d,'foramen') || contains(d,'foreman') || contains(d,'magnum') || contains(d,'fm')
         if contains(d,' 5 ')
             sstt = 'FM-5';
         elseif contains(d,' 10 ')
             sstt = 'FM-10';
         elseif contains(d,' 15 ')
             sstt = 'FM-15';
-        end     
+        else
+            sstt = 'FM';
+        end
+
     elseif contains(d,'c1') && contains(d,'c2')
         sstt = 'C1C2';
     elseif contains(d,'c2') && contains(d,'c3')
@@ -562,4 +533,10 @@ function split_flow_series(src_path, dest_base, base_name)
     rmdir(fullfile(dest_base, [base_name]), 's');
 
     fprintf('Organized into:\n  %s\n  %s\n  %s\n', dest00, destMAG, destP02);
+end
+
+function tf = hasContent(folder)
+% Return true if folder exists and has anything inside (ignores . and ..)
+
+    tf = isfolder(folder) && numel(dir(fullfile(folder,'*'))) > 2;
 end

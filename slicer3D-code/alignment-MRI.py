@@ -70,6 +70,8 @@ def get_volumes_sorted_by_z():
 
 # Assign the volume nodes to specific slice views
 def assign_to_slices(sorted_volumes, slice_views):
+
+
     layout_manager = slicer.app.layoutManager()
     num_pairs = min(len(sorted_volumes), len(slice_views))
 
@@ -90,6 +92,21 @@ def assign_to_slices(sorted_volumes, slice_views):
     composite_node = layout_manager.sliceWidget(last_view).sliceLogic().GetSliceCompositeNode()
     composite_node.SetBackgroundVolumeID(anatomy_node.GetID())
 
+def import_and_load_dicom(pcMRI_path):
+    # Open the DICOM module to initialize the database
+    slicer.util.selectModule('DICOM')
+
+    # Ensure the DICOM database is open
+    if not slicer.dicomDatabase.isOpen:
+        dicomDatabaseDir = slicer.app.temporaryPath + "/DICOM"
+        slicer.dicomDatabase.openDatabase(dicomDatabaseDir)
+
+    # Import the DICOM files using the existing database (without using TemporaryDICOMDatabase)
+    DICOMUtils.importDicom(pcMRI_path, slicer.dicomDatabase)
+    slicer.app.processEvents()
+
+    print(f"Successfully imported all DICOM files from: {pcMRI_path}")
+
 def maximize_slice_view(view_name):
     layout_node = slicer.app.applicationLogic().GetLayoutNode()
 
@@ -103,27 +120,6 @@ def maximize_slice_view(view_name):
         layout_node.SetViewArrangement(layout_map[view_name])
     else:
         print(f"Slice view '{view_name}' cannot be maximized (not supported).")
-
-# Function to get the Patient ID using a dialog box
-def get_patient_id():
-    result = QInputDialog.getText(None, "Patient ID", "Enter the Patient ID:")
-    if isinstance(result, tuple):  # Expected behavior
-        patient_id, ok = result
-        if ok and patient_id:
-            return patient_id
-    elif isinstance(result, str):  # If it only returns the ID as a string
-        return result
-    raise ValueError("No valid Patient ID entered.")
-
-# Function to get the local path to the Chiari folder based on the hostname
-def get_local_chiari_path():
-    hostname = platform.node()
-    if hostname == 'Guillermos-MacBook-Pro.local' or hostname == 'Guillermos-MBP' or hostname == 'guillermos-macbook-pro.local.dynamic.ucsd.edu': 
-        chiari_path = '/Users/noza/Documents/chiari'
-    elif hostname == 'Lenovo':
-        chiari_path = r'C:\Users\guill\Documents\chiari' 
-
-    return chiari_path
 
 # Function to adjust the slice views
 def adjust_slice_views(slice_views):
@@ -158,6 +154,19 @@ def display_segmentation_3D(segmentation_node, opacity2D=0.4):
     segmentation_display_node.SetOpacity2DFill(opacity2D)
     segmentation_display_node.SetOpacity2DOutline(opacity2D)
 
+def get_slice_labels(flow_path):
+    """
+    Return list of slice labels ['FM','C1C2',...] from subfolders named 'z#-LABEL'.
+    """
+    import os, re
+    labels = []
+    for name in os.listdir(flow_path):
+        if os.path.isdir(os.path.join(flow_path, name)):
+            m = re.match(r"^z\d+-(.+)$", name, re.IGNORECASE)
+            if m:
+                labels.append(m.group(1))
+    return labels
+
 def save_transformation_matrix(transform_node, save_path):
     if not transform_node:
         print("Error: No transform node found.")
@@ -176,90 +185,39 @@ def save_transformation_matrix(transform_node, save_path):
         for row in range(4):
             f.write(" ".join(f"{inverse_matrix.GetElement(row, col):.2f}" for col in range(4)) + "\n")
 
-# Save plane points to a text file
-def save_plane_points(segmentation_path):
-    for color, plane_name in zip(['Red', 'Yellow'], ['top_plane', 'bottom_plane']):
-        # Get the red slice node (for FM view) and yellow slice node (for c3-c4 view)
-        sliceNode = slicer.mrmlScene.GetNodeByID(f"vtkMRMLSliceNode{color}")
-
-        # Get the SliceToRAS transform matrix (mapping slice coordinates to RAS coordinates)
-        sliceToRAS = sliceNode.GetSliceToRAS()
-
-        # Get the origin (position) of the slice (translation part of the transformation matrix)
-        origin = sliceToRAS.GetElement(0, 3), sliceToRAS.GetElement(1, 3), sliceToRAS.GetElement(2, 3)
-
-        # Get the basis vectors of the slice coordinate system
-        xAxis = sliceToRAS.MultiplyPoint((1, 0, 0, 0))[:3]  # X direction in RAS coordinates
-        yAxis = sliceToRAS.MultiplyPoint((0, 1, 0, 0))[:3]  # Y direction in RAS coordinates
-
-        # Generate three points on the plane
-        # 1. Origin (already computed)
-        point1 = origin
-        # 2. A point along the X-axis direction from the origin
-        point2 = tuple(origin[i] + 5*xAxis[i] for i in range(3))
-        # 3. A point along the Y-axis direction from the origin
-        point3 = tuple(origin[i] + 5*yAxis[i] for i in range(3))
-
-        # Optionally, save the plane parameters to a text file for later use
-        export_folder = os.path.join(segmentation_path, 'planes')
-        if not os.path.exists(export_folder):
-            os.makedirs(export_folder)
-
-        output_filename = os.path.join(export_folder, f"{plane_name}.txt")
-        with open(output_filename, "w") as f:
-            f.write("3d=True\n")
-            f.write("polyline=False\n\n")
-            f.write(f"{point1[2]} {point1[0]} {point1[1]}\n")
-            f.write(f"{point2[2]} {point2[0]} {point2[1]}\n")
-            f.write(f"{point3[2]} {point3[0]} {point3[1]}\n")
-    # Output the results
-    print("plane data saved to .txt files")
-
-def clear_stl_folde(stl_folder):
-    """Deletes files inside the stl folder"""
-    if os.path.exists(stl_folder):
-        [os.remove(os.path.join(stl_folder, f)) for f in os.listdir(stl_folder) if os.path.isfile(os.path.join(stl_folder, f))]
-
-# Function to remove all .stl files in the export folder
-def clear_stl_files(stl_folder):
-    if os.path.exists(export_folder):
-        for file in os.listdir(export_folder):
-            if file.endswith(".stl"):
-                os.remove(os.path.join(export_folder, file))
-# Get Patient ID from the user
-pid = get_patient_id()
-if not pid:
-    print("Operation canceled due to missing Patient ID.")
-    exit()
-
-# Get the local path to the Chiari folder
-chiari_path = get_local_chiari_path()
-segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
-pcMRI_path = os.path.join(segmentation_path, "pcMRI")
-transformation_path = os.path.join(segmentation_path, 'transformation')
-stl_path = os.path.join(segmentation_path, 'stl')
 
 
-# load transformed anatomy or anatomy
+# INPUTS 
+pid = sys.argv[1]
+chiari_path = sys.argv[2]
 
-if os.path.exists(os.path.join(transformation_path, 'transformed_anatomy.nrrd')):
-    volume_node = slicer.util.loadVolume(os.path.join(transformation_path, 'transformed_anatomy.nrrd'))
-    print("loaded transformed anatomy ...")
-else:
-    volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, "anatomy.nrrd"))
-    print("loaded raw anatomy ...")
 
-# Load the segmentation file and visualize it in 3D
+main_path =  os.path.join(chiari_path, f'computations/segmentation/{pid}')
+segmentation_path = os.path.join(main_path, 'stl')
+pcMRI_path = os.path.join(main_path, "pcMRI")
+transformation_path = os.path.join(main_path, 'transformation')
+
+flow_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
+
+
+# load anatomy
+volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, "anatomy.nrrd"))
 volume_node.SetName("anatomy")
 
 # Convert stl as model and transform it to segmentation node
-model_node = slicer.util.loadModel(os.path.join(stl_path, 'segmentation.stl'))
+model_node = slicer.util.loadModel(os.path.join(segmentation_path, 'segmentation.stl'))
 model_node.SetName("segmentation")
 segmentation_node = slicer.mrmlScene.AddNewNodeByClass('vtkMRMLSegmentationNode', 'segmentation')
 slicer.modules.segmentations.logic().ImportModelToSegmentationNode(model_node, segmentation_node)
 display_segmentation_3D(segmentation_node)
 slicer.mrmlScene.RemoveNode(model_node)
 segmentation_node.CreateDefaultDisplayNodes()
+
+import_and_load_dicom(flow_path)
+
+# --- Extract slice labels from z#-LABEL folder names ---
+id_slices = get_slice_labels(flow_path)
+print("id_slices:", id_slices)
 
 
 # Get all .nrrd files in the directory pcMRI and load them as Sequence
@@ -268,20 +226,15 @@ nrrd_files = [file for file in files if file != '.DS_Store' and file.lower().end
 for file_name in nrrd_files:
     file_path = os.path.join(pcMRI_path, file_name)
     slicer.util.loadSequence(file_path)
-
+    
 # Adjust setup slicer 3D to 3x2
-slicer.app.layoutManager().setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutThreeOverThreeView)
-slice_views = ["Red",  "Green", "Yellow", "Red+", "Green+", "Yellow+"]
+slicer.app.layoutManager().setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutFourUpView)
+slice_views = ["Red",  "Green", "Yellow", "Slice4"]
 
 # Sort the volumes by z-coordinate
 sorted_volumes = get_volumes_sorted_by_z()
 
-if len(sorted_volumes) == 5:
-    id_slices = ['UPFM', 'FM', 'C1C2', 'C2C3', 'C3C4']
-elif len(sorted_volumes) == 4:
-    id_slices = ['FM', 'C1C2', 'C2C3', 'C3C4'] 
-
-
+    
 # Assign the sorted volumes to the slice views
 assign_to_slices(sorted_volumes, slice_views)
 
@@ -351,24 +304,22 @@ for k in range(len(sorted_volumes)):
                 user_input = input('Type "ok" when you have finished the manual transformation: ')
                 if user_input.lower() == 'ok':
 
-                    # Export the transformed segmentation as an STL file
                     response = QMessageBox.question(None, 'Export pcmri', 'Do you want to save results?', QMessageBox.No | QMessageBox.Yes, QMessageBox.Yes)
                     if response == QMessageBox.Yes:
                         if not os.path.exists(transformation_path):
                             os.makedirs(transformation_path)
 
                         # Save transformation matrix
-                        save_transformation_matrix(transform_node, pcmri_transformation)
+                        save_transformation_matrix(transform_node, transformation_path)
                         slicer.mrmlScene.RemoveNode(transform_node)
 
                         # Output the results
-                        print("transformation_matrix.txt, segmentation.stl and transformed_anatomy.nrrd saved in stl folder")
+                        print("transformation matrix saved to: " + transformation_path)
                     break
     if not os.path.exists(segmentation_2D_path):
 
         segmentation_2D_slices(segmentation_node, pcmri_node, segmentation_2D_path)
         # slicer.mrmlScene.RemoveNode(segmentation_node)
-        
         
 
     
