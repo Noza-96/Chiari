@@ -9,7 +9,7 @@ disp([newline + "Setting up folders ..." + newline])
 
 if cas.Ncas_PC > 0
     disp(["Reading PC DICOMS ..." + newline])
-    dat_PC = read_dicoms_PC_OLD(cas, resettimevector);
+    dat_PC = read_dicoms_PC(cas, resettimevector);
 end
 
 if cas.Ncas_RT > 0

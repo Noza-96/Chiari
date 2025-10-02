@@ -454,7 +454,13 @@ function sstt = detect_level(desc)
     d = lower(desc);
 
     if contains(d,'foramen') || contains(d,'magnum') || contains(d,'fm')
-        sstt = 'FM';
+        if contains(d,' 5 ')
+            sstt = 'FM-5';
+        elseif contains(d,' 10 ')
+            sstt = 'FM-10';
+        elseif contains(d,' 15 ')
+            sstt = 'FM-15';
+        end     
     elseif contains(d,'c1') && contains(d,'c2')
         sstt = 'C1C2';
     elseif contains(d,'c2') && contains(d,'c3')

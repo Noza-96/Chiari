@@ -1,7 +1,7 @@
 close all; clear; clc;
 redo_reading = false;
 
-cas.subj = 's4';
+cas.subj = 's5';
 
 cas.model = 'GE'; % GE (Utah) or SIEMENS (Granada)
 
@@ -26,7 +26,7 @@ correct_aliasing = false; % wrap in time - aliasing correction
 unwrap_periodic = false; % allow for periodic wraping
 smooth_spatial_outliers = false;  % Flag to apply spatial outlier smoothing
 gauss_filter = false; % apply gauss filter
-offset_vel = true;
+offset_vel = false;
 
 main_3_apply_roi_compute_Q;
 
@@ -36,9 +36,10 @@ dat_PC.U_COR_off
 
 %% 
 
-% correct_aliasing = true; % wrap in time - aliasing correction
-% unwrap_periodic = true; % allow for periodic wraping
-% smooth_spatial_outliers = true;  % Flag to apply spatial outlier smoothing
-% gauss_filter = true; % apply gauss filter
+correct_aliasing = true; % wrap in time - aliasing correction
+unwrap_periodic = true; % allow for periodic wraping
+smooth_spatial_outliers = true;  % Flag to apply spatial outlier smoothing
+gauss_filter = true; % apply gauss filter
+offset_vel = true;
 % 
-% main_3_apply_roi_compute_Q;
+main_3_apply_roi_compute_Q;

@@ -27,6 +27,8 @@ function movieVector = create_animation(dat_PC, cas)
     % Initialize variables
     Vs_SAS = zeros(1, length(dat_PC.Q_SAS));
     Vs_TONS = zeros(1, length(dat_PC.Q_TONS));
+    Vs_COR = zeros(1, length(dat_PC.Q_TONS));
+
     for n = 1:dat_PC.Nt{1}
     
         % Loop through each flow data set
@@ -37,6 +39,7 @@ function movieVector = create_animation(dat_PC, cas)
 
             Q_SAS = -dat_PC.Q_SAS{k};  % Get flow data
             Q_TONS = -dat_PC.Q_TONS{k};  % Get flow data
+            Q_COR = -dat_PC.Q_COR{k};  % Get flow data
 
             Nt = dat_PC.Nt{k};     % Get number of time points
             t = linspace(0, 1, dat_PC.Nt{k})*dat_PC.T{k};  % Create time vector
@@ -49,16 +52,14 @@ function movieVector = create_animation(dat_PC, cas)
             nexttile(4+(k-1)*rows, [1, 3]);
             Vs_SAS(k) = 0.5 * simps(t, abs(Q_SAS), 2);  
             Vs_TONS(k) = 0.5 * simps(t, abs(Q_TONS), 2); 
-  
+            Vs_COR(k) = 0.5 * simps(t, abs(Q_COR), 2); 
+
             % Call the flow rate function
             plot(t_T, Q_SAS, Color='k', LineWidth=1.5)
-            yline(simps(t_T, Q_SAS, 2), '--', ...
-                'Color', 'k', 'LineWidth', 1, ...
-                'Label', '$\langle \cdot \rangle$', ...
-                'Interpreter', 'latex','FontSize', 14, ...
-                'LabelHorizontalAlignment', 'right', ...
-                'LabelVerticalAlignment', 'bottom', 'HandleVisibility','off');            
+            yline(simps(t_T, Q_SAS, 2), '--','Color', 'k', 'LineWidth', 1, 'HandleVisibility','off');            
             hold on 
+            plot(t_T, Q_COR, Color='b', LineWidth=1.5)
+            yline(simps(t_T, Q_COR, 2), '--','Color', 'b', 'LineWidth', 1, 'HandleVisibility','off');  
             if ~all(Q_TONS == 0)
                 plot(t_T, Q_TONS, Color='r', LineWidth=1.5)
                 yline(simps(t_T, Q_TONS, 2),'--', 'Color', 'r', 'LineWidth', 1, 'HandleVisibility','off')
@@ -97,22 +98,17 @@ function movieVector = create_animation(dat_PC, cas)
             plot(Vs_SAS, Dz_loc, '-k', 'LineWidth', 1.5);
             hold on
             plot(Vs_SAS, Dz_loc, 'ok', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'HandleVisibility','off');
+            plot(Vs_COR, Dz_loc, '-b', 'LineWidth', 1.5);
+            plot(Vs_COR, Dz_loc, 'ob', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'HandleVisibility','off');
+
 
             if ~all(Vs_TONS == 0)
                 plot(Vs_TONS, Dz_loc, '-r', 'LineWidth', 1.5);
                 plot(Vs_TONS, Dz_loc, 'or', 'LineWidth', 1.5, 'MarkerFaceColor', 'w', 'HandleVisibility','off');
             end
-            legend("$V_{s, \rm CSF}$", "$V_{s, \rm tons}$", 'interpreter', 'latex', 'Location','northwest', 'fontsize',14)
+            legend("$V_{s, \rm CSF}$", "$V_{s, \rm tons}$", "$V_{s, \rm cord}$", 'interpreter', 'latex', 'Location','northwest', 'fontsize',14)
 
             yticks(-200:5:100);
-
-            % for i = 1:length(anatomy.Dz) - 2
-            %     yline(-anatomy.Dz(i), '--', anatomy.location{i}, ...
-            %         'LineWidth', 1.5, 'LabelHorizontalAlignment', 'left', 'FontSize', fs);
-            % end             
-            % ylim([floor(min(Dz_loc(:))/10)*10, ceil(max(Dz_loc(:))/10)*10])
-
-            % ylim([-60, 5])
         
             % Customize the appearance of the plot
             set(gca, 'LineWidth', 1, 'TickLength', [0.005 0.005], 'FontSize', fan);
@@ -141,8 +137,9 @@ function create_animation_ansys(dat_PC, loc, n)
     orange = [1, 0.5, 0];
     w_SAS  = -dat_PC.U_SAS{loc}(:,:,n);   % [cm/s]
     w_TONS = -dat_PC.U_TONS{loc}(:,:,n);  % [cm/s]
+    w_COR = -dat_PC.U_COR{loc}(:,:,n);  % [cm/s]
     
-    pcolor(w_SAS + w_TONS);
+    pcolor(w_SAS + w_TONS + w_COR);
     shading flat
     axis equal tight ij
     hold on
@@ -154,18 +151,19 @@ function create_animation_ansys(dat_PC, loc, n)
     % outlines
     contour(dat_PC.ROI_SAS{loc},  [0.5 0.5], 'k',      'LineWidth', 1.5);
     contour(dat_PC.ROI_TONS{loc}, [0.5 0.5], 'Color', orange, 'LineWidth', 1.5);
-    
+    contour(dat_PC.ROI_COR{loc}, [0.5 0.5], 'Color', 'b', 'LineWidth', 1.5);
+
     % filled COR region (semi-transparent red)
-    cor_mask  = dat_PC.ROI_COR{loc};
-    alphaFill = 0.35;
-    cor_color = [0.9 0.85 0.7];
-    B = bwboundaries(cor_mask,'noholes');
-    for k = 1:numel(B)
-        b = B{k};  % [row, col]
-        patch('XData', b(:,2), 'YData', b(:,1), ...
-              'FaceColor', cor_color, 'FaceAlpha', alphaFill, ...
-              'EdgeColor', 'k', 'HitTest','off','PickableParts','none');
-    end
+    % cor_mask  = dat_PC.ROI_COR{loc};
+    % alphaFill = 0.35;
+    % cor_color = [0.9 0.85 0.7];
+    % B = bwboundaries(cor_mask,'noholes');
+    % for k = 1:numel(B)
+    %     b = B{k};  % [row, col]
+    %     patch('XData', b(:,2), 'YData', b(:,1), ...
+    %           'FaceColor', cor_color, 'FaceAlpha', alphaFill, ...
+    %           'EdgeColor', 'k', 'HitTest','off','PickableParts','none');
+    % end
     
     xlim([0.5 size(w_SAS,2)+0.5])
     ylim([0.5 size(w_SAS,1)+0.5])
