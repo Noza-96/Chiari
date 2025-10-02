@@ -177,7 +177,7 @@ else
     disp("Segmentation already exists. Skipping automated segmentation.");
 end   
 
-python_script = full_path(fullfile(pwd, '..', '..', 'slicer3D-code','initialization-slicer3D.py'));
+python_script = full_path(fullfile(pwd, '..', '..', 'slicer3D-code','segmentation-slicer3D.py'));
 
 system ("slicer3D  --python-script """ + python_script + """ """ + subject + """ """ + dir_chiari + """");
 

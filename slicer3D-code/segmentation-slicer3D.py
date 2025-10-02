@@ -5,8 +5,7 @@ import slicer
 import vtk
 import DICOMLib
 from DICOMLib import DICOMUtils
-
-# Suppress VTK warnings and errors
+import tempfile 
 vtk.vtkObject.GlobalWarningDisplayOff()
 
 # Clear the MRML scene to delete all loaded data
@@ -147,9 +146,9 @@ def save_segmentation_work(auto_seg_node, manual_seg_node, volume_node, scene_di
             volume_node.CreateDefaultStorageNode()
         slicer.util.saveNode(volume_node, os.path.join(scene_dir, "anatomy.nii.gz"))
 
-    scene_path = os.path.join(scene_dir, scene_filename)
-    slicer.mrmlScene.SetURL(scene_path)
-    slicer.mrmlScene.Commit(scene_path)
+    scene_temp_path = os.path.join(scene_dir, scene_filename)
+    slicer.mrmlScene.SetURL(scene_temp_path)
+    slicer.mrmlScene.Commit(scene_temp_path)
 
 def prompt_yes_with_fallback(prompt, default):
     try:
@@ -197,20 +196,25 @@ def save_plane_points(segmentation_path):
     # Output the results
     print("plane data saved to .txt files")
 
-def import_and_load_dicom(pcMRI_path):
-    # Open the DICOM module to initialize the database
-    slicer.util.selectModule('DICOM')
+def clear_folder(folder):
+    """Deletes files inside the stl folder"""
+    if os.path.exists(folder):
+        [os.remove(os.path.join(folder, f)) for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
 
-    # Ensure the DICOM database is open
-    if not slicer.dicomDatabase.isOpen:
-        dicomDatabaseDir = slicer.app.temporaryPath + "/DICOM"
-        slicer.dicomDatabase.openDatabase(dicomDatabaseDir)
+# def import_and_load_dicom(pcMRI_path):
+#     # Open the DICOM module to initialize the database
+#     slicer.util.selectModule('DICOM')
 
-    # Import the DICOM files using the existing database (without using TemporaryDICOMDatabase)
-    DICOMUtils.importDicom(pcMRI_path, slicer.dicomDatabase)
-    slicer.app.processEvents()
+#     # Ensure the DICOM database is open
+#     if not slicer.dicomDatabase.isOpen:
+#         dicomDatabaseDir = slicer.app.temporaryPath + "/DICOM"
+#         slicer.dicomDatabase.openDatabase(dicomDatabaseDir)
 
-    print(f"Successfully imported all DICOM files from: {pcMRI_path}")
+#     # Import the DICOM files using the existing database (without using TemporaryDICOMDatabase)
+#     DICOMUtils.importDicom(pcMRI_path, slicer.dicomDatabase)
+#     slicer.app.processEvents()
+
+#     print(f"Successfully imported all DICOM files from: {pcMRI_path}")
 
 
 # Main script execution starts here    
@@ -219,27 +223,46 @@ chiari_path = sys.argv[2]
 
 
 segmentation_path = os.path.join(chiari_path, f'computations/segmentation/{pid}')
-pcMRI_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
 
-scene_path = os.path.join(segmentation_path, "scene")
-seg_scene_file = os.path.join(scene_path, "segmentation.mrml")
+# pcMRI_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
+
+scene_temp_path  = os.path.join(tempfile.gettempdir(), "chiari", "segmentation", pid)
+scene_final_path = os.path.join(chiari_path, f'computations/segmentation/{pid}/scene')
+
+seg_temp_file  = os.path.join(scene_temp_path,  "segmentation.mrml")
+seg_final_file = os.path.join(scene_final_path, "segmentation.mrml")
+
 nii_filename = "auto_segmentation"
 
 user_input = "no"  # default to "no"
 
-
-# === Step 0: Check for seg_scene_file ===
-if os.path.exists(seg_scene_file):
-    # user_input = input(f"A segmentation scene file was found at:\n  {seg_scene_file}\n\n"
-    #                    "Do you want to load it instead of creating a new segmentation? ([yes]/no): ").strip().lower()
-    
-    user_input = prompt_yes_with_fallback(f"A segmentation scene file was found at:\n  {seg_scene_file}\n\n" 
-                                          "Do you want to load it instead of creating a new segmentation? ([yes]/no): ", default="yes")
+if os.path.exists(seg_final_file):
+    user_input = prompt_yes_with_fallback(f"\nA final segmentation was found at:\n  {seg_final_file}\n\n" 
+                                          "Do you want to load it? ([yes]/no): ", default="yes")
+if user_input in ("", "yes"):
+    seg_scene_file = seg_final_file
+else:
+    # === Step 0: Check for seg_temp_file ===
+    if os.path.exists(seg_temp_file):
+        
+        user_input = prompt_yes_with_fallback(f"\nA temporary segmentation was found at:\n  {seg_temp_file}\n\n" 
+                                            "Do you want to load it? ([yes]/no): ", default="yes")
 
     if user_input in ("", "yes"):
-        slicer.util.loadScene(seg_scene_file)
+        seg_scene_file = seg_temp_file
 
-if user_input not in ("", "yes"):
+if user_input in ("", "yes"):
+    # load the corresponding scene with manual segmentation in progress
+    print(f"\nLoading scene from: {seg_scene_file}...\n")
+    print("\n=== Manual steps in Slicer ===\n")
+    slicer.util.loadScene(seg_temp_file)
+    segmentation_node = slicer.util.getNode("automatic_segmentation") if slicer.util.getNode("automatic_segmentation", False) else None
+    manual_segmentation_node = slicer.util.getNode("manual_segmentation") if slicer.util.getNode("manual_segmentation", False) else None
+    volume_node = slicer.util.getNode("anatomy") if slicer.util.getNode("anatomy", False) else None
+else: 
+    # load automatic segmentations and anatomy volume
+    print(f"\nLoading automatic segmentations and anatomy volume from: {segmentation_path}...\n")
+    print("\n=== Manual steps in Slicer ===\n")
     segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_canal_seg.nii.gz"))
     segmentation = segmentation_node.GetSegmentation()
     segmentation_node.SetName("automatic_segmentation")
@@ -256,11 +279,10 @@ if user_input not in ("", "yes"):
     volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, f"{nii_filename}.nii.gz"))
     volume_node.SetName("anatomy")
 
-    import_and_load_dicom(pcMRI_path)
+    # import_and_load_dicom(pcMRI_path)
 
     slicer.util.selectModule('Data')
 
-    print("\n=== Next steps in Slicer ===\n")
     print("1) Subtract cord from canal segmentation:")
     print("   • Module 'Data': move 'cord_a' into node 'automatic_segmentation'")
     print("   • Module 'Segment Editor':")
@@ -272,7 +294,6 @@ if user_input not in ("", "yes"):
 
     while repeat:
         user_input = prompt_yes_with_fallback("Type ok or press [enter] when done: ", default="ok")
-        user_input = input("Type 'ok' when done: ").strip().lower()
 
         if user_input == "ok":
             repeat = False   # exit loop
@@ -304,15 +325,11 @@ if user_input not in ("", "yes"):
     # Set colors (RGB in 0–1). Blue and Brown.
     manual_segmentation_node.GetSegmentation().GetSegment(canal_id).SetColor(0.4, 0.6, 1.0)   # blue
     manual_segmentation_node.GetSegmentation().GetSegment(bg_id).SetColor(0.55, 0.35, 0.10)    # brown
-else:
-    # segmentation_node = slicer.util.getNode("automatic_segmentation")
-    # manual_segmentation_node = slicer.util.getNode("manual_segmentation")
-    # volume_node = slicer.util.loadVolume(os.path.join(scene_path, f"{nii_filename}.nii.gz"))
-    print("TODO: load nodes from scene")
+    
 print("2) Create manual segmentation of remaining CSF space.")
 print("   • Module 'Segment Editor':")
 
-if user_input != "yes":    
+if user_input not in ("", "yes"):    
     print("       - With 'Paint tool; add seed regions to 'csf' and 'background' segments")
     print("       - to fill the segments: 'Grow from seeds' → 'Initialize'")
     print("       - If you like the result, click 'Apply'")
@@ -325,23 +342,45 @@ print("       - Manually edit 'canal' and 'background' with Paint and Erase tool
 repeat = True
 
 while repeat:
-    user_input = prompt_yes_with_fallback("Type '[save]' to save, type 'done' to finish:", default="save")
+    user_input = prompt_yes_with_fallback("\nType '[save]' to save, type 'done' to finish:\n", default="save")
     
-    if user_input == "save":
-        save_segmentation_work(segmentation_node, manual_segmentation_node, volume_node, scene_path, "segmentation.mrml")
-
-        print(f"scene saved to: {scene_path}\n")
+    if user_input in ("", "save"):
+        print(f"saving scene to: {scene_temp_path}... \n")
+        save_segmentation_work(segmentation_node, manual_segmentation_node, volume_node, scene_temp_path, "segmentation.mrml")
         print("       - Manually edit 'canal' and 'background' with Paint and Erase tools")
 
     elif user_input == "done":
-        save_segmentation_work(segmentation_node, manual_segmentation_node, volume_node, scene_path, "segmentation.mrml")
-        print(f"scene saved to: {scene_path}\n")
+        print(f"saving scene to: {scene_temp_path}...\n")
+        save_segmentation_work(segmentation_node, manual_segmentation_node, volume_node, scene_temp_path, "segmentation.mrml")
         repeat = False   # exit loop  
     else:
         print("⚠️ Type 'save' or 'done'. Try again.")
 
-print("3. Merge and close.") 
+print("3. Merge and export as stl.") 
 
+# TODO: merge manual and automatic segmentations
+
+user_input = prompt_yes_with_fallback("\nDo you want to export stl and replace previous version? (yes,[no]):\n", default="no")
+
+if user_input=="yes":
+
+    # Export the segmentation to STL
+    exporter = slicer.vtkSlicerSegmentationsModuleLogic()
+    exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(scene_temp_path, segmentation_node, None, "STL")
+    # Find the exported STL file (it should be the only STL file in the folder)
+    exported_files = [f for f in os.listdir(export_folder) if f.endswith(".stl") and not f.startswith("._")]
+    # If only one STL file is found, rename it
+    default_filename = os.path.join(export_folder, exported_files[0])  # Get the exported STL file
+    new_filename = os.path.join(export_folder, "segmentation.stl")
+    os.rename(default_filename, new_filename)
+    print(f"Exported STL file renamed to: {new_filename}")
+
+    # Replace results from temporaty folder to final folder
+    clear_folder(scene_final_path)
+
+
+    
+    clear_folder(scene_temp_path)
 
 # Save the MRML scene
 
