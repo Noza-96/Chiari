@@ -1,11 +1,10 @@
-from qt import QInputDialog, QMessageBox
-import platform
-import os
+from qt import QInputDialog
+import os, shutil
 import slicer
 import vtk
-import DICOMLib
-from DICOMLib import DICOMUtils
 import tempfile 
+import sys
+
 vtk.vtkObject.GlobalWarningDisplayOff()
 
 # Clear the MRML scene to delete all loaded data
@@ -126,7 +125,7 @@ def display_segmentation_3D(segmentation_node, opacity2D=0.4):
     segmentation_display_node.SetOpacity2DFill(opacity2D)
     segmentation_display_node.SetOpacity2DOutline(opacity2D)
 
-def save_segmentation_work(auto_seg_node, manual_seg_node, volume_node, scene_dir, scene_filename="segmentation.mrml"):
+def save_segmentation_work(auto_seg_node, volume_node, scene_dir, scene_filename="segmentation.mrml"):
     os.makedirs(scene_dir, exist_ok=True)
 
     if auto_seg_node:
@@ -134,23 +133,17 @@ def save_segmentation_work(auto_seg_node, manual_seg_node, volume_node, scene_di
             auto_seg_node.CreateDefaultStorageNode()
         slicer.util.saveNode(auto_seg_node, os.path.join(scene_dir, "automatic_segmentation.seg.nrrd"))
 
-    if manual_seg_node:
-        if volume_node:
-            manual_seg_node.SetReferenceImageGeometryParameterFromVolumeNode(volume_node)
-        if not manual_seg_node.GetStorageNode():
-            manual_seg_node.CreateDefaultStorageNode()
-        slicer.util.saveNode(manual_seg_node, os.path.join(scene_dir, "manual_segmentation.seg.nrrd"))
-
     if volume_node:
         if not volume_node.GetStorageNode():
             volume_node.CreateDefaultStorageNode()
-        slicer.util.saveNode(volume_node, os.path.join(scene_dir, "anatomy.nii.gz"))
+        slicer.util.saveNode(volume_node, os.path.join(scene_dir, "anatomy.nrrd"))
 
     scene_temp_path = os.path.join(scene_dir, scene_filename)
     slicer.mrmlScene.SetURL(scene_temp_path)
     slicer.mrmlScene.Commit(scene_temp_path)
 
 def prompt_yes_with_fallback(prompt, default):
+    ans = default
     try:
         ans = input(prompt).strip().lower()
     except EOFError:
@@ -201,22 +194,6 @@ def clear_folder(folder):
     if os.path.exists(folder):
         [os.remove(os.path.join(folder, f)) for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
 
-# def import_and_load_dicom(pcMRI_path):
-#     # Open the DICOM module to initialize the database
-#     slicer.util.selectModule('DICOM')
-
-#     # Ensure the DICOM database is open
-#     if not slicer.dicomDatabase.isOpen:
-#         dicomDatabaseDir = slicer.app.temporaryPath + "/DICOM"
-#         slicer.dicomDatabase.openDatabase(dicomDatabaseDir)
-
-#     # Import the DICOM files using the existing database (without using TemporaryDICOMDatabase)
-#     DICOMUtils.importDicom(pcMRI_path, slicer.dicomDatabase)
-#     slicer.app.processEvents()
-
-#     print(f"Successfully imported all DICOM files from: {pcMRI_path}")
-
-
 # Main script execution starts here    
 pid = sys.argv[1]
 chiari_path = sys.argv[2]
@@ -251,38 +228,28 @@ else:
     if user_input in ("", "yes"):
         seg_scene_file = seg_temp_file
 
-if user_input in ("", "yes"):
-    # load the corresponding scene with manual segmentation in progress
-    print(f"\nLoading scene from: {seg_scene_file}...\n")
-    print("\n=== Manual steps in Slicer ===\n")
-    slicer.util.loadScene(seg_temp_file)
-    segmentation_node = slicer.util.getNode("automatic_segmentation") if slicer.util.getNode("automatic_segmentation", False) else None
-    manual_segmentation_node = slicer.util.getNode("manual_segmentation") if slicer.util.getNode("manual_segmentation", False) else None
-    volume_node = slicer.util.getNode("anatomy") if slicer.util.getNode("anatomy", False) else None
-else: 
+if user_input not in ("", "yes"):
     # load automatic segmentations and anatomy volume
     print(f"\nLoading automatic segmentations and anatomy volume from: {segmentation_path}...\n")
-    print("\n=== Manual steps in Slicer ===\n")
+    # automatic segmentation of the canal
     segmentation_node = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_canal_seg.nii.gz"))
     segmentation = segmentation_node.GetSegmentation()
     segmentation_node.SetName("automatic_segmentation")
     segmentation.GetSegment(segmentation.GetNthSegmentID(0)).SetName("canal_a")
-
+    # automatic segmentation of the cord
     segmentation_node_2 = slicer.util.loadSegmentation(os.path.join(segmentation_path, f"{nii_filename}_seg.nii.gz"))
     segmentation_2 = segmentation_node_2.GetSegmentation()
-    segment_id_2 = segmentation_2.GetNthSegmentID(0)  # Get the ID of the segment to move
+    segment_id_2 = segmentation_2.GetNthSegmentID(0)  
     segmentation_2.GetSegment(segment_id_2).SetName("cord_a")
 
     display_segmentation_3D(segmentation_node)
-
-    # Get the segmentation object inside the node
     volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, f"{nii_filename}.nii.gz"))
     volume_node.SetName("anatomy")
-
-    # import_and_load_dicom(pcMRI_path)
-
     slicer.util.selectModule('Data')
 
+    print("\n=== Manual steps in Slicer ===\n")
+
+    # STEP 1: Subtract cord from canal segmentation
     print("1) Subtract cord from canal segmentation:")
     print("   • Module 'Data': move 'cord_a' into node 'automatic_segmentation'")
     print("   • Module 'Segment Editor':")
@@ -290,99 +257,135 @@ else:
     print("       - Logical Operators → Operation: Subtract → 'cord_a'")
     print("       - Apply\n")
 
+
     repeat = True
-
     while repeat:
-        user_input = prompt_yes_with_fallback("Type ok or press [enter] when done: ", default="ok")
+        user_input = prompt_yes_with_fallback("1.Type 's1' when done: ", "NO")
 
-        if user_input == "ok":
-            repeat = False   # exit loop
+        if user_input == "s1":
+            repeat = False   
         else:
             print("⚠️ Try again.")
 
-    # Remove the second segmentation node from the scene
+    # Remove extra information
     slicer.mrmlScene.RemoveNode(segmentation_node_2)
-
-    # Remove the cord_a segment from the first segmentation node
     segment_id = segmentation.GetSegmentIdBySegmentName("cord_a")
     segmentation.RemoveSegment(segment_id)
-    # Create a new segmentation node
+
+    # Create a new segmentation node for manual segmentation and define segments
     manual_segmentation_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSegmentationNode", "manual_segmentation")
-
-    # open it in Segment Editor as the active node
     slicer.modules.segmenteditor.widgetRepresentation().self().editor.setSegmentationNode(manual_segmentation_node)
-
-    # Set the anatomy volume as the active master volume
     slicer.modules.segmenteditor.widgetRepresentation().self().editor.setSourceVolumeNode(volume_node)
-
-    canal_id = manual_segmentation_node.GetSegmentation().AddEmptySegment("csf")
-    bg_id    = manual_segmentation_node.GetSegmentation().AddEmptySegment("background")
-    
-    # Rename segments
-    manual_segmentation_node.GetSegmentation().GetSegment(canal_id).SetName("csf")
-    manual_segmentation_node.GetSegmentation().GetSegment(bg_id).SetName("background")
-
-    # Set colors (RGB in 0–1). Blue and Brown.
-    manual_segmentation_node.GetSegmentation().GetSegment(canal_id).SetColor(0.4, 0.6, 1.0)   # blue
-    manual_segmentation_node.GetSegmentation().GetSegment(bg_id).SetColor(0.55, 0.35, 0.10)    # brown
-    
-print("2) Create manual segmentation of remaining CSF space.")
-print("   • Module 'Segment Editor':")
-
-if user_input not in ("", "yes"):    
+    manual_segmentation = manual_segmentation_node.GetSegmentation()
+    canal_id = manual_segmentation.AddEmptySegment("csf")
+    bg_id    = manual_segmentation.AddEmptySegment("background")
+    manual_segmentation.GetSegment(canal_id).SetName("csf")
+    manual_segmentation.GetSegment(bg_id).SetName("background")
+    manual_segmentation.GetSegment(canal_id).SetColor(0.4, 0.6, 1.0)  
+    manual_segmentation.GetSegment(bg_id).SetColor(0.55, 0.35, 0.10)  
+      
+    # STEP 2: Initialize manual segmentation
+    print("2) Create manual segmentation of remaining CSF space.")
+    print("   • Module 'Segment Editor':")
     print("       - With 'Paint tool; add seed regions to 'csf' and 'background' segments")
     print("       - to fill the segments: 'Grow from seeds' → 'Initialize'")
     print("       - If you like the result, click 'Apply'")
-    print("       - Otherwise, click 'Cancel' and refine the painted seeds, then repeat.")
-else:
-    slicer.util.selectModule('Data')
+    print("       - Otherwise, click 'Cancel' and refine the painted seeds, then repeat.\n")
 
-print("       - Manually edit 'canal' and 'background' with Paint and Erase tools")
+    repeat = True
+    while repeat:
+        user_input = prompt_yes_with_fallback("2.Type 's2' when done: ", "NO")
+
+        if user_input == "s2":
+            repeat = False   
+        else:
+            print("⚠️ Try again.")
+
+    slicer.util.selectModule('SegmentEditor')
+    slicer.modules.segmenteditor.widgetRepresentation().self().editor.setSegmentationNode(segmentation_node)
+    slicer.modules.segmenteditor.widgetRepresentation().self().editor.setSourceVolumeNode(volume_node)
+    slicer.util.selectModule('Data')
+    
+    # STEP 3: Merge manual and automatic segmentations
+    print("3) Merge manual and automatic segmentations.")
+    print("   • Module 'Data': move 'csf' into node 'automatic_segmentation'")
+    print("   • Module 'Segment Editor':")
+    print("       - Select 'canal_a'")
+    print("       - Logical Operators → Operation: Add → 'csf'")
+    print("       - Apply\n")              
+
+    repeat = True
+    while repeat:
+        user_input = prompt_yes_with_fallback("3.Type 's3' when done: ", "NO")
+        if user_input == "s3":
+            segmentation_node.SetName("segmentation")
+            segment_id = segmentation.GetSegmentIdBySegmentName("canal_a")
+            segmentation.GetSegment(segment_id).SetName("canal")
+            segment_id = segmentation.GetSegmentIdBySegmentName("csf")
+            segmentation.RemoveSegment(segment_id)
+            slicer.mrmlScene.RemoveNode(manual_segmentation_node)  # remove manual node from scene
+            print(f"saving scene to: {scene_temp_path}... \n")
+            save_segmentation_work(segmentation_node, volume_node, scene_temp_path, "segmentation.mrml")
+            repeat = False 
+        else:
+            print("⚠️ Try again.")
+            
+else:
+    print(f"\nLoading scene from: {seg_scene_file}...\n")
+    slicer.util.loadScene(seg_scene_file)
+    segmentation_node = slicer.util.getNode("segmentation") if slicer.util.getNode("segmentation", False) else None
+    volume_node = slicer.util.getNode("anatomy") if slicer.util.getNode("anatomy", False) else None
+    slicer.util.selectModule('SegmentEditor')
+
+# STEP 4: Final manual edits
+print("4) Manual edits.") 
+print("   • Module 'Segment Editor':")
+print("       - Manually edit 'canal' with Paint and Erase tools")
+
 
 repeat = True
-
 while repeat:
-    user_input = prompt_yes_with_fallback("\nType '[save]' to save, type 'done' to finish:\n", default="save")
+    user_input = prompt_yes_with_fallback("\nType 'save' or [enter] to save, 's4' when done: ", default="save")
     
-    if user_input in ("", "save"):
+
+    if user_input in ("","save", "s3", "s4"):
         print(f"saving scene to: {scene_temp_path}... \n")
-        save_segmentation_work(segmentation_node, manual_segmentation_node, volume_node, scene_temp_path, "segmentation.mrml")
-        print("       - Manually edit 'canal' and 'background' with Paint and Erase tools")
-
-    elif user_input == "done":
-        print(f"saving scene to: {scene_temp_path}...\n")
-        save_segmentation_work(segmentation_node, manual_segmentation_node, volume_node, scene_temp_path, "segmentation.mrml")
-        repeat = False   # exit loop  
+        save_segmentation_work(segmentation_node, volume_node, scene_temp_path, "segmentation.mrml")
+        if user_input == "s4": 
+            repeat = False
     else:
-        print("⚠️ Type 'save' or 'done'. Try again.")
-
-print("3. Merge and export as stl.") 
-
-# TODO: merge manual and automatic segmentations
-
-user_input = prompt_yes_with_fallback("\nDo you want to export stl and replace previous version? (yes,[no]):\n", default="no")
-
-if user_input=="yes":
-
-    # Export the segmentation to STL
-    exporter = slicer.vtkSlicerSegmentationsModuleLogic()
-    exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(scene_temp_path, segmentation_node, None, "STL")
-    # Find the exported STL file (it should be the only STL file in the folder)
-    exported_files = [f for f in os.listdir(export_folder) if f.endswith(".stl") and not f.startswith("._")]
-    # If only one STL file is found, rename it
-    default_filename = os.path.join(export_folder, exported_files[0])  # Get the exported STL file
-    new_filename = os.path.join(export_folder, "segmentation.stl")
-    os.rename(default_filename, new_filename)
-    print(f"Exported STL file renamed to: {new_filename}")
-
-    # Replace results from temporaty folder to final folder
-    clear_folder(scene_final_path)
+        print("⚠️ Try again.")
 
 
-    
-    clear_folder(scene_temp_path)
+print("5) Export STL and exit.")
+repeat = True
+while repeat:
+    user_input = prompt_yes_with_fallback("\nType 'export' to export STL and close Slicer: ", "no")
+    if user_input == "export":
+        repeat = False
+    else:
+        print("⚠️ Try again.")
 
-# Save the MRML scene
+# Export the segmentation to STL
+exporter = slicer.vtkSlicerSegmentationsModuleLogic()
+exporter.ExportSegmentsClosedSurfaceRepresentationToFiles(scene_temp_path, segmentation_node, None, "STL")
+# Find the exported STL file (it should be the only STL file in the folder)
+exported_files = [f for f in os.listdir(scene_temp_path) if f.endswith(".stl") and not f.startswith("._")]
+# If only one STL file is found, rename it
+default_filename = os.path.join(scene_temp_path, exported_files[0])  # Get the exported STL file
+new_filename = os.path.join(scene_temp_path, "segmentation.stl")
+os.rename(default_filename, new_filename)
+print(f"Exported STL file renamed to: {new_filename}")
+save_segmentation_work(segmentation_node, volume_node, scene_temp_path, "segmentation.mrml")
+
+# Replace results from temporaty folder to final folder
+clear_folder(scene_final_path) # clean up final folder
+os.makedirs(scene_final_path, exist_ok=True) 
+shutil.copytree(scene_temp_path, scene_final_path, dirs_exist_ok=True) # copy all files from temp to final folder
+clear_folder(scene_temp_path) # clean up temporary folder
+
+# Avoid "Save scene?" prompt
+sys.exit()
 
 
 
