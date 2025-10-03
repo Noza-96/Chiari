@@ -240,7 +240,15 @@ shutil.copytree(scene_temp_path, scene_final_path, dirs_exist_ok=True) # copy al
 clear_folder(scene_temp_path) # clean up temporary folder
 
 # Avoid "Save scene?" prompt
-sys.exit()
+repeat = True
+while repeat:
+    print("Done.")
+    user_input = prompt_yes_with_fallback("Done. Type 'e' to exit", "NO")
+
+    if user_input == "e":
+        sys.exit()  
+    else:
+        print("⚠️ Try again.\n")
 
 
 

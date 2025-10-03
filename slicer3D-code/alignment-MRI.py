@@ -4,6 +4,7 @@ import os
 import SegmentEditorEffects
 import slicer
 import vtk
+from DICOMLib import DICOMUtils
 
 # Suppress VTK warnings and errors
 vtk.vtkObject.GlobalWarningDisplayOff()
@@ -87,25 +88,30 @@ def assign_to_slices(sorted_volumes, slice_views):
             print(f"Skipping slice view '{view_name}' or volume index {i}")
 
     # Assign 'anatomy' to the last slice view
-    anatomy_node = slicer.util.getNode("anatomy")
-    last_view = slice_views[-1]
-    composite_node = layout_manager.sliceWidget(last_view).sliceLogic().GetSliceCompositeNode()
-    composite_node.SetBackgroundVolumeID(anatomy_node.GetID())
+    # anatomy_node = slicer.util.getNode("anatomy")
+    # last_view = slice_views[-1]
+    # composite_node = layout_manager.sliceWidget(last_view).sliceLogic().GetSliceCompositeNode()
+    # composite_node.SetBackgroundVolumeID(anatomy_node.GetID())
 
-def import_and_load_dicom(pcMRI_path):
-    # Open the DICOM module to initialize the database
+
+def import_and_load_dicom (pcMRI_path):
+    # Open the DICOM module to initialize the database/UI
     slicer.util.selectModule('DICOM')
 
-    # Ensure the DICOM database is open
-    if not slicer.dicomDatabase.isOpen:
-        dicomDatabaseDir = slicer.app.temporaryPath + "/DICOM"
-        slicer.dicomDatabase.openDatabase(dicomDatabaseDir)
+    db = slicer.dicomDatabase
+    
+    # Wipe existing DB entries 
+    for pid in list(db.patients()):
+        db.removePatient(pid)
 
-    # Import the DICOM files using the existing database (without using TemporaryDICOMDatabase)
-    DICOMUtils.importDicom(pcMRI_path, slicer.dicomDatabase)
-    slicer.app.processEvents()
+    # Import
+    DICOMUtils.importDicom(pcMRI_path)
 
-    print(f"Successfully imported all DICOM files from: {pcMRI_path}")
+def sanitize(name: str) -> str:
+    # keep only alphanumeric characters, space, dot, underscore, and dash
+    safe = "".join(c if (c.isalnum() or c in " ._-") else "_" for c in name).strip()
+    # replace spaces with underscores
+    return safe.replace(" ", "_")
 
 def maximize_slice_view(view_name):
     layout_node = slicer.app.applicationLogic().GetLayoutNode()
@@ -113,7 +119,8 @@ def maximize_slice_view(view_name):
     layout_map = {
         "Red": slicer.vtkMRMLLayoutNode.SlicerLayoutOneUpRedSliceView,
         "Yellow": slicer.vtkMRMLLayoutNode.SlicerLayoutOneUpYellowSliceView,
-        "Green": slicer.vtkMRMLLayoutNode.SlicerLayoutOneUpGreenSliceView
+        "Green": slicer.vtkMRMLLayoutNode.SlicerLayoutOneUpGreenSliceView,
+        "Slice4": slicer.vtkMRMLLayoutNode.SlicerLayoutOneUpSlice4SliceView
     }
 
     if view_name in layout_map:
@@ -153,6 +160,14 @@ def display_segmentation_3D(segmentation_node, opacity2D=0.4):
     segmentation_display_node.SetOpacity3D(0.6)
     segmentation_display_node.SetOpacity2DFill(opacity2D)
     segmentation_display_node.SetOpacity2DOutline(opacity2D)
+
+def prompt_yes_with_fallback(prompt, default):
+    ans = default
+    try:
+        ans = input(prompt).strip().lower()
+    except EOFError:
+        ans = default  # no stdin → treat like pressing Enter
+    return ans 
 
 def get_slice_labels(flow_path):
     """
@@ -199,10 +214,67 @@ transformation_path = os.path.join(main_path, 'transformation')
 
 flow_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
 
+os.makedirs(pcMRI_path, exist_ok=True)
+# Check if there are .seq.nrrd files in pcMRI_path
+seq_files = [f for f in os.listdir(pcMRI_path) if f.endswith(".seq.nrrd")]
+
+if seq_files:
+    print(f"Found {len(seq_files)} nddr files. ")
+else:
+    print("No nrrd files found...")
+    # load DICOMs pcMRI
+    import_and_load_dicom(flow_path)
+    print(f"Successfully imported all DICOM files from: {pcMRI_path}")
+
+    print("\n--- Manual STEPS ---\n")
+    # MANUAL STEP 1: Load DICOMs into scene
+
+    repeat = True
+    while repeat:
+        print("1) Load added DICOM's into the scene:")
+        print("   • Module 'Add DICOM Data':  ")
+        print("       - 'Examine' → Import as 'Image Sequence' (NO 'Multivolume')→ 'Load'")
+        user_input = prompt_yes_with_fallback("Type 's1' when done: ", "NO")
+
+        if user_input == "s1":
+            repeat = False   
+        else:
+            print("⚠️ Try again.\n")
+
+    # Get all scalar volume nodes
+    volume_nodes = slicer.util.getNodesByClass("vtkMRMLScalarVolumeNode")
+
+    for vol in volume_nodes:
+        vol_name = vol.GetName()
+        seq_name = f"{vol_name}_seq"
+
+        # Create a sequence node and put this volume in it (single time point "0")
+        seq_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLSequenceNode", seq_name)
+        seq_node.SetDataNodeAtValue(vol, "0")
+
+        # Save as .seq.nrrd
+        out_path = os.path.join(pcMRI_path, f"{sanitize(vol_name)}.seq.nrrd")
+        slicer.util.saveNode(seq_node, out_path)
+
+        print(f"Saved: {out_path}")
+        seq_files = [f for f in os.listdir(pcMRI_path) if f.endswith(".seq.nrrd")]
+
+slicer.util.selectModule('Data')
+slicer.mrmlScene.Clear()
+files = os.listdir(pcMRI_path)
+nrrd_files = [file for file in files if file != '.DS_Store' and file.lower().endswith('.nrrd')]
+for file_name in nrrd_files:
+    file_path = os.path.join(pcMRI_path, file_name)
+    slicer.util.loadSequence(file_path)
+    
+id_slices = get_slice_labels(flow_path)
+print(f"pc-mri sequences {id_slices} loaded...")
 
 # load anatomy
 volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, "anatomy.nrrd"))
 volume_node.SetName("anatomy")
+
+print("anatomy loaded...")
 
 # Convert stl as model and transform it to segmentation node
 model_node = slicer.util.loadModel(os.path.join(segmentation_path, 'segmentation.stl'))
@@ -213,38 +285,31 @@ display_segmentation_3D(segmentation_node)
 slicer.mrmlScene.RemoveNode(model_node)
 segmentation_node.CreateDefaultDisplayNodes()
 
-import_and_load_dicom(flow_path)
+print("segmentation loaded...")
+        
 
-# --- Extract slice labels from z#-LABEL folder names ---
-id_slices = get_slice_labels(flow_path)
-print("id_slices:", id_slices)
-
-
-# Get all .nrrd files in the directory pcMRI and load them as Sequence
-files = os.listdir(pcMRI_path)
-nrrd_files = [file for file in files if file != '.DS_Store' and file.lower().endswith('.nrrd')]
-for file_name in nrrd_files:
-    file_path = os.path.join(pcMRI_path, file_name)
-    slicer.util.loadSequence(file_path)
-    
-# Adjust setup slicer 3D to 3x2
-slicer.app.layoutManager().setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutFourUpView)
-slice_views = ["Red",  "Green", "Yellow", "Slice4"]
+if len(id_slices) == 3:
+    slicer.app.layoutManager().setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutFourUpView)
+    slice_views = ["Red",  "Green", "Yellow"]
+else:
+    # Adjust setup slicer 3D to 2x2
+    slicer.app.layoutManager().setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutTwoOverTwoView)
+    slice_views = ["Red",  "Green", "Yellow", "Slice4"]
 
 # Sort the volumes by z-coordinate
 sorted_volumes = get_volumes_sorted_by_z()
 
-    
 # Assign the sorted volumes to the slice views
 assign_to_slices(sorted_volumes, slice_views)
 
 # Adjust the slice views
 adjust_slice_views(slice_views)
 
-
 # rename sliced volumes
 for label, node in zip(id_slices, sorted_volumes):
     node.SetName(label)
+
+print("slice views adjusted...")
 
 # Iterate over all volume nodes in the scene
 for k in range(len(sorted_volumes)):
@@ -294,14 +359,17 @@ for k in range(len(sorted_volumes)):
             transform_node = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLTransformNode", "ManualTransform")
             # Create a vtkTransform object
             vtk_transform = vtk.vtkTransform()
-            # TODO: set the Active Transform to the new transform node
             # Apply the transform to segmentation node
             segmentation_node.SetAndObserveTransformNodeID(transform_node.GetID())
             segmentation_display_node = segmentation_node.GetDisplayNode()
             display_segmentation_3D(segmentation_node, opacity2D=0.4)
 
             while True:
-                user_input = input('Type "ok" when you have finished the manual transformation: ')
+                print(f"\n2) Manual transformation of slice: {pcmri_node.GetName()}")
+                print("   • Module 'Transforms':  ")
+                print("       - 'Transform':→ 'ManualTransform'")
+                print(f"       - Add translation/rotation as needed to adjust {pcmri_node.GetName()} to segmentation")
+                user_input = prompt_yes_with_fallback('Type "ok" when you have finished the manual transformation: ', "NO")
                 if user_input.lower() == 'ok':
 
                     response = QMessageBox.question(None, 'Export pcmri', 'Do you want to save results?', QMessageBox.No | QMessageBox.Yes, QMessageBox.Yes)
@@ -310,16 +378,23 @@ for k in range(len(sorted_volumes)):
                             os.makedirs(transformation_path)
 
                         # Save transformation matrix
-                        save_transformation_matrix(transform_node, transformation_path)
+                        save_transformation_matrix(transform_node, pcmri_transformation)
                         slicer.mrmlScene.RemoveNode(transform_node)
 
                         # Output the results
-                        print("transformation matrix saved to: " + transformation_path)
+                        print("transformation matrix saved to: " + pcmri_transformation)
                     break
     if not os.path.exists(segmentation_2D_path):
 
         segmentation_2D_slices(segmentation_node, pcmri_node, segmentation_2D_path)
         # slicer.mrmlScene.RemoveNode(segmentation_node)
         
+repeat = True
+while repeat:
+    user_input = prompt_yes_with_fallback("\nDone. Type 'e' to exit", "NO")
 
+    if user_input == "e":
+        sys.exit()  
+    else:
+        print("⚠️ Try again.\n")
     

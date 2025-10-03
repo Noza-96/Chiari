@@ -5,7 +5,7 @@ addpath('processing/');
 addpath('processing/Functions/');
 addpath('processing/Functions/Others/');
 
-subject = "s4";
+subject = "s5";
 
 %% 1) Organize DICOM data
 % out: list DICOMs and organize into flow and anatomy 
