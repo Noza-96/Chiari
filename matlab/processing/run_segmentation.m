@@ -73,6 +73,11 @@ function run_segmentation(subject)
     python_script = full_path(fullfile(dir_chiari,'git-chiari', 'slicer3D-code','segmentation.py'));
     system("slicer3D  --python-script """ + python_script + """ """ + subject + """ """ + dir_chiari + """");
 
+    resp = '';
+    while ~strcmpi(resp,'ok')
+        resp = input('Type "ok" to continue: ','s');
+    end
+
 end
 
 % ---------------- helpers (local) ----------------

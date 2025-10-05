@@ -242,7 +242,7 @@ clear_folder(scene_temp_path) # clean up temporary folder
 # Avoid "Save scene?" prompt
 repeat = True
 while repeat:
-    print("Done.")
+
     user_input = prompt_yes_with_fallback("Done. Type 'e' to exit", "NO")
 
     if user_input == "e":
