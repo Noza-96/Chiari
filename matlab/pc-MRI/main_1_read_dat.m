@@ -3,7 +3,6 @@ close all; clear; clc
 cas.subj = 's5'; cas.model = 'GE'; % GE (Utah) or SIEMENS (Granada)
 cas = scan_folders_set_cas(cas);
 
-
 resettimevector = false;
 
 aux.fig_opts = set_plotting_style;

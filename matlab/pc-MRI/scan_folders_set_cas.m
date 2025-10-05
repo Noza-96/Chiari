@@ -227,8 +227,11 @@ function createOrCleanDir(dirPath)
     if ~isfolder(dirPath)
         mkdir(dirPath);
     else
+        warning('off', 'all');
         rmdir(fullfile(dirPath, '*'));
+        delete(fullfile(dirPath, '*'));
     end
+    warning('on', 'all');
 end
 
 function absolutePath = full_path(folder_path)
