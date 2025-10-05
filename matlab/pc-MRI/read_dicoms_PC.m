@@ -166,9 +166,7 @@ function dat  = read_dicoms_PC(cas, resettimevector)
             
             % Display to verify
             fprintf('Transformation %s applied! \n', filename);
-            
-            disp(transformation_matrix);
-            
+                        
             pixel_coordinates = applyTransformation(pixel_coordinates, transformation_matrix);
         end
 

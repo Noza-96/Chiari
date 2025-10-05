@@ -1,4 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+close all; clear; clc
+cas.subj = 's4'; cas.model = 'GE'; % GE (Utah) or SIEMENS (Granada)
+cas = scan_folders_set_cas(cas);
+
 
 resettimevector = false;
 

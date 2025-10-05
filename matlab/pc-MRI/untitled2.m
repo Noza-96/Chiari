@@ -1,4 +1,3 @@
-function cas = scan_folders_set_cas(cas)
 
 % Computations folder
 cas.dircloud = fullfile('..', '..', '..','computations');
@@ -37,9 +36,25 @@ for i = 1:length(auxDirs)
     createOrCleanDir(auxDirs{i});
 end
     
-    system(sprintf('wsl bash ./aux_PC/get_folders_PC.sh "%s"', cas.dirdcm));
-    system(sprintf('wsl bash ./aux_RT/get_folders_RT.sh "%s"', cas.dirdcm));
-    system(sprintf('wsl bash ./aux_FM/get_folders_FM.sh "%s"', cas.dirdcm));
+    % system('cp get_folders_PC.sh ./aux_PC');
+    % system('cp get_folders_RT.sh ./aux_RT');
+    % system('cp get_folders_FM.sh ./aux_FM');
+
+    % commstr_PC = strcat("sed -i 's|dummyfoldertoreplace|", cas.dirdcm, "|g' ./aux_PC/get_folders_PC.sh");
+    % commstr_RT = strcat("sed -i 's|dummyfoldertoreplace|", cas.dirdcm, "|g' ./aux_RT/get_folders_RT.sh");
+    % commstr_FM = strcat("sed -i 's|dummyfoldertoreplace|", cas.dirdcm, "|g' ./aux_FM/get_folders_FM.sh");
+    
+    % system(commstr_PC);
+    % system(commstr_RT);
+    % system(commstr_FM);
+    
+    % system('bash ./aux_PC/get_folders_PC.sh');
+    % system('bash ./aux_RT/get_folders_RT.sh');
+    % system('bash ./aux_FM/get_folders_FM.sh');
+
+    system(sprintf('bash ./aux_PC/get_folders_PC.sh "%s"', cas.dirdcm));
+    system(sprintf('bash ./aux_RT/get_folders_RT.sh "%s"', cas.dirdcm));
+    system(sprintf('bash ./aux_FM/get_folders_FM.sh "%s"', cas.dirdcm));
 
     strfolders_PC = fileread('./aux_PC/folders.txt');
     folders_PC = regexp(strfolders_PC, '\r\n|\r|\n', 'split');
@@ -212,7 +227,6 @@ end
     cas.icas        = icas;
     cas.tech        = tech;
 
-end
 
 
 % Helper function to create a directory if it does not exist
