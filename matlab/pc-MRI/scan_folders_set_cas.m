@@ -37,9 +37,14 @@ for i = 1:length(auxDirs)
     createOrCleanDir(auxDirs{i});
 end
     
-    system(sprintf('wsl bash ./aux_PC/get_folders_PC.sh "%s"', cas.dirdcm));
-    system(sprintf('wsl bash ./aux_RT/get_folders_RT.sh "%s"', cas.dirdcm));
-    system(sprintf('wsl bash ./aux_FM/get_folders_FM.sh "%s"', cas.dirdcm));
+    % Example: PC script
+    run_bash_script('./aux_PC/get_folders_PC.sh', cas.dirdcm);
+    
+    % Example: RT script
+    run_bash_script('./aux_RT/get_folders_RT.sh', cas.dirdcm);
+    
+    % Example: FM script
+    run_bash_script('./aux_FM/get_folders_FM.sh', cas.dirdcm);
 
     strfolders_PC = fileread('./aux_PC/folders.txt');
     folders_PC = regexp(strfolders_PC, '\r\n|\r|\n', 'split');
@@ -263,3 +268,59 @@ function filtered = filter_folders_by_keywords(folders, keywords)
     % Return filtered folders
     filtered = cellstr(folders_str(keep_idx));
 end
+
+function [status, cmdout] = run_bash_script(scriptPath, folderArg)
+% Runs a bash script cross-platform (Windows w/ WSL or Git Bash; macOS/Linux with /bin/bash)
+
+    if nargin < 2
+        error('Usage: run_bash_script(scriptPath, folderArg)');
+    end
+
+    % Ensure outputs folders exist (since your .sh doesn’t mkdir them)
+    outDirs = {'./aux_PC','./aux_RT','./aux_FM'};
+    for d = outDirs
+        if ~exist(d{1}, 'dir'); mkdir(d{1}); end
+    end
+
+    if ispc
+        % Prefer WSL, else Git Bash
+        if exist('C:\Windows\System32\wsl.exe','file')
+            % WSL path: call bash inside WSL
+            cmd = sprintf('wsl bash "%s" "%s"', scriptPath, folderArg);
+        else
+            % Try common Git Bash locations
+            gitBashCandidates = { ...
+                'C:\Program Files\Git\bin\bash.exe', ...
+                'C:\Program Files\Git\usr\bin\bash.exe', ...
+                'C:\Program Files (x86)\Git\bin\bash.exe' ...
+            };
+            bashExe = '';
+            for p = gitBashCandidates
+                if exist(p{1}, 'file'); bashExe = p{1}; break; end
+            end
+            if isempty(bashExe)
+                error(['No bash found. Install WSL (`wsl --install`) or Git for Windows, ', ...
+                       'or add bash.exe to PATH.']);
+            end
+            cmd = sprintf('"%s" "%s" "%s"', bashExe, scriptPath, folderArg);
+        end
+    else
+        % macOS / Linux: use /bin/bash (fallback to `which bash`)
+        bashExe = '/bin/bash';
+        if ~isfile(bashExe)
+            [~, whichOut] = system('which bash');
+            whichOut = strtrim(whichOut);
+            if isempty(whichOut)
+                error('bash not found on this system.');
+            end
+            bashExe = whichOut;
+        end
+        cmd = sprintf('"%s" "%s" "%s"', bashExe, scriptPath, folderArg);
+    end
+
+    [status, cmdout] = system(cmd);
+    if status ~= 0
+        warning('Script failed.\nCommand: %s\nOutput:\n%s', cmd, cmdout);
+    end
+end
+
