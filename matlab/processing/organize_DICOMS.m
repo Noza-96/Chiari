@@ -1,24 +1,18 @@
-function organize_DICOMS(subject)
+function cas = organize_DICOMS(subject)
 % ORGANIZE_FLOW_ANATOMY
+% - Create directories
 % - Lists DICOMs
 % - Picks/organizes anatomy (T2) into patient-data/<subject>/anatomy/<series_desc>
 % - Organizes flow series into patient-data/<subject>/flow/zK-<level>/01PC/<series_desc>_{00,MAG_01,P_02}
 
     %% Setup
     fprintf('\n--- Processing subject: %s ---\n\n', subject);
-    fprintf('1) Organize DICOM data...\n')
-    
-    dir_chiari = full_path(fullfile(pwd, '..', '..'));
-    dicom_path     = full_path(fullfile(dir_chiari,'patient-data', subject));
 
-    anatomy_root = full_path(fullfile(dicom_path, 'anatomy'));
-    flow_root = full_path(fullfile(dicom_path, 'flow'));
+    fprintf('1) Create directories...\n')
+    cas = create_directories(subject);
 
-
-    anatomy_has_content = hasContent(anatomy_root);
-    flow_has_content    = hasContent(flow_root);
-
-    if anatomy_has_content && flow_has_content
+    fprintf('2) Organize DICOM data...\n')
+    if hasContent(cas.dir_anatomy) && hasContent(cas.dir_flow)
         if askYN('-DICOMs are already organized. Skip? ([y]/n): ')
             return;
         end
@@ -28,29 +22,22 @@ function organize_DICOMS(subject)
     
     fprintf('Image data Patient %s: \n', subject);
     
-    T = list_dicom_series(dicom_path);
+    T = list_dicom_series(cas.dir_patient);
     
-    anatomy_root = full_path(fullfile(dir_chiari,'patient-data', subject, 'anatomy'));
-    createDirIfNotExists(anatomy_root);
-    
+
     % Find an existing subfolder inside 'anatomy' (if any)
-    existing = dir(anatomy_root);
+    existing = dir(cas.dir_anatomy);
     existing = existing([existing.isdir] & ~ismember({existing.name},{'.','..'}));
     
     fprintf('Segmentation data .... \n\n');
     
     useExisting = false;
     if ~isempty(existing)
-        existing_path = fullfile(anatomy_root, existing(1).name);
+        existing_path = fullfile(cas.dir_anatomy, existing(1).name);
         fprintf('Existing content in "anatomy":\n%s\n', existing(1).name);
         if askYN('Do you want to use it? (y/n): ')
             % Keep existing anatomy; skip T2 selection
             useExisting = true;
-            anatomy_dicom = existing_path;
-            dest_folder   = existing_path;
-            series_desc   = existing(1).name;
-            idx = [];
-            T2T = table();  % empty placeholder
             fprintf('Keeping existing data; skipping new selection.\n\n');
         else
             rmdir(existing_path, 's');
@@ -60,18 +47,15 @@ function organize_DICOMS(subject)
     % Select T2 series to construct segmentation only if replacing or none exists
     if ~useExisting
         % pass 'true' to skip internal "existing anatomy" prompt inside picker
-        [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(dicom_path, dir_chiari, subject, T, true);
+        [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(cas.dir_patient, dir_chiari, subject, T, true);
         copyfile(anatomy_dicom, dest_folder);
     end
     
     fprintf('\nVelocity data .... \n\n');
-    
-    
-    flow_root = full_path(fullfile(dir_chiari,'patient-data', subject, 'flow'));
-    createDirIfNotExists(flow_root);
+        
     
     % Show existing content (if any)
-    items = dir(flow_root);
+    items = dir(cas.dir_flow);
     items = items([items.isdir]);
     items = items(~ismember({items.name},{'.','..'}));
     if ~isempty(items)
@@ -80,11 +64,13 @@ function organize_DICOMS(subject)
             fprintf('%s\n', items(k).name);
         end
         if ~askYN('Do you want to use it? (y/n):')
-            delete_folder_contents(flow_root);  % wipe but keep root folder
+            rmdir(cas.dir_flow, 's');
+            % delete_folder_contents(cas.dir_flow);  % wipe but keep root folder
             fprintf('Existing flow content removed.\n');
         else
             fprintf('Keeping existing data; skipping new selection.\n\n');
             gotoSkipFlow = true; 
+            load(fullfile(cas.dirmat, 'data_0'));
         end
     end
     % If we didn't choose to skip, allow selecting multiple "flow/PC" series.
@@ -94,7 +80,7 @@ function organize_DICOMS(subject)
         TF = T(flowMask, :);
     
         if isempty(TF)
-            warning('No DICOM series with "flow" or "PC" found under: %s', dicom_path);
+            warning('No DICOM series with "flow" or "PC" found under: %s', cas.dir_patient);
         else
             % Build menu
             choices = strings(height(TF),1);
@@ -102,11 +88,11 @@ function organize_DICOMS(subject)
             for i = 1:height(TF)
                 choices(i) = sprintf('%2d) %s / %s / %s : Ser%03d  %s', ...
                     i, TF.PAT{i}, TF.ST{i}, TF.SE{i}, TF.SeriesNumber(i), TF.SeriesDescription{i});
-                pth = fullfile(dicom_path, TF.PAT{i}, TF.ST{i}, TF.SE{i});
+                pth = fullfile(cas.dir_patient, TF.PAT{i}, TF.ST{i}, TF.SE{i});
                 if ~isfolder(pth)
-                    pth = fullfile(dicom_path, TF.ST{i}, TF.SE{i});
+                    pth = fullfile(cas.dir_patient, TF.ST{i}, TF.SE{i});
                     if ~isfolder(pth)
-                        pth = fullfile(dicom_path, TF.SE{i});
+                        pth = fullfile(cas.dir_patient, TF.SE{i});
                     end
                 end
                 paths(i) = pth;
@@ -132,7 +118,7 @@ function organize_DICOMS(subject)
                 sstt = detect_level(TF.SeriesDescription{sel});
     
                 % flow/zK-label/01PC/<series_desc>
-                z_folder   = fullfile(flow_root, sprintf('z%d-%s', z, sstt));
+                z_folder   = fullfile(cas.dir_flow, sprintf('z%d-%s', z, sstt));
                 dest_path  = fullfile(z_folder, '01PC', series_desc);
                 createDirIfNotExists(dest_path);
     
@@ -146,6 +132,8 @@ function organize_DICOMS(subject)
                 z = z + 1;  % next slice level
             end
         end
+        cas = scan_folders_set_cas(cas);
+        save(fullfile(cas.dirmat, 'data_0'),'-mat');
     end
 
 end
@@ -164,105 +152,110 @@ function absolutePath = full_path(folder_path)
 end
 
 function T = list_dicom_series(rootDir, csvOut)
-% LIST_DICOM_SERIES  Print/return one line per SE0000xx series.
-%   T = list_dicom_series(rootDir)
-%   T = list_dicom_series(rootDir, 'series_list.csv')
-%
-% Output columns: PAT, ST, SE, StudyDate, StudyTime, SeriesNumber, SeriesDescription
-
-if nargin < 1 || ~isfolder(rootDir)
-    error('Folder not found: %s', string(rootDir));
-end
-if nargin < 2, csvOut = ''; end
-
-% Find all SE folders under rootDir (e.g., s3/PAT00000/ST000001/SE000009)
-seDirs = dir(fullfile(rootDir, '**', 'SE*'));
-seDirs = seDirs([seDirs.isdir]);
-
-rows = [];
-data = struct('PAT', {}, 'ST', {}, 'SE', {}, 'StudyDate', {}, 'StudyTime', {}, ...
-              'SeriesNumber', {}, 'SeriesDescription', {});
-
-for k = 1:numel(seDirs)
-    thisSE = fullfile(seDirs(k).folder, seDirs(k).name);
-    % Look for one MR* file inside this SE folder
-    mr = dir(fullfile(thisSE, 'MR*'));
-    mr = mr(~[mr.isdir]);
-    if isempty(mr)
-        % sometimes files are nested one level deeper; handle it
-        mr = dir(fullfile(thisSE, '**', 'MR*'));
+    % LIST_DICOM_SERIES  Print/return one line per SE0000xx series.
+    %   T = list_dicom_series(rootDir)
+    %   T = list_dicom_series(rootDir, 'series_list.csv')
+    %
+    % Output columns: PAT, ST, SE, StudyDate, StudyTime, SeriesNumber, SeriesDescription
+    
+    if nargin < 1 || ~isfolder(rootDir)
+        error('Folder not found: %s', string(rootDir));
+    end
+    if nargin < 2, csvOut = ''; end
+    
+    % Find all SE folders under rootDir (e.g., s3/PAT00000/ST000001/SE000009)
+    seDirs = dir(fullfile(rootDir, '**', 'SE*'));
+    seDirs = seDirs([seDirs.isdir]);
+    
+    rows = [];
+    data = struct('PAT', {}, 'ST', {}, 'SE', {}, 'Manufacturer', {}, 'StudyDate', {}, 'StudyTime', {}, ...
+                  'SeriesNumber', {}, 'SeriesDescription', {});
+    
+    for k = 1:numel(seDirs)
+        thisSE = fullfile(seDirs(k).folder, seDirs(k).name);
+        % Look for one MR* file inside this SE folder
+        mr = dir(fullfile(thisSE, 'MR*'));
         mr = mr(~[mr.isdir]);
+        if isempty(mr)
+            % sometimes files are nested one level deeper; handle it
+            mr = dir(fullfile(thisSE, '**', 'MR*'));
+            mr = mr(~[mr.isdir]);
+        end
+        if isempty(mr)
+            % no dicoms here
+            continue
+        end
+    
+        sampleFile = fullfile(mr(1).folder, mr(1).name);
+        try
+            info = dicominfo(sampleFile);
+        catch
+            % skip unreadable series
+            continue
+        end
+    
+        % Pull fields with safe fallbacks
+        StudyDate  = getfield_try(info, 'StudyDate', '00000000');
+        StudyTime  = sanitize_time(getfield_try(info, 'StudyTime', '000000'));
+        SeriesNum  = getfield_try(info, 'SeriesNumber', 0);
+        SeriesDesc = getfield_try(info, 'SeriesDescription', '');
+        if isempty(SeriesDesc)
+            SeriesDesc = getfield_try(info, 'ProtocolName', '');
+        end
+        Manufacturer      = upper(strtrim(getfield_try(info, 'Manufacturer', '')));
+    
+        if contains(Manufacturer, 'SIEMENS')
+            Manufacturer = 'SIEMENS';
+        elseif contains(Manufacturer, 'GE')
+            Manufacturer = 'GE';
+        else
+            error('Manufacturer "%s" is not known.', Manufacturer);
+        end
+        % Extract PAT/ST/SE names from the path for convenience
+        parts = split(string(thisSE), filesep);
+        % Expect .../PATxxxxx/STxxxxxx/SExxxxxx
+        PAT = "";
+        ST  = "";
+        SE  = string(seDirs(k).name);
+        if numel(parts) >= 3
+            PAT = parts(end-2);
+            ST  = parts(end-1);
+        end
+        data(end+1) = struct( ... 
+            'PAT', char(PAT), ...
+            'ST',  char(ST), ...
+            'SE',  char(SE), ...
+            'Manufacturer',  char(Manufacturer), ...
+            'StudyDate',  char(StudyDate), ...
+            'StudyTime',  char(StudyTime), ...
+            'SeriesNumber', double(SeriesNum), ...
+            'SeriesDescription', char(SeriesDesc));
     end
-    if isempty(mr)
-        % no dicoms here
-        continue
+    
+    % Turn into table and sort by PAT, ST, SeriesNumber
+    if isempty(data)
+        T = table();
+        fprintf('No series found under %s\n', rootDir);
+        return
     end
-
-    sampleFile = fullfile(mr(1).folder, mr(1).name);
-    try
-        info = dicominfo(sampleFile);
-    catch
-        % skip unreadable series
-        continue
+    T = struct2table(data);
+    T = sortrows(T, {'PAT','ST','SeriesNumber'});
+    lastPAT = '';
+    lastST  = '';
+    for i = 1:height(T)
+        if ~strcmp(lastPAT, T.PAT{i}) || ~strcmp(lastST, T.ST{i})
+            fprintf('\n%s / %s\n', T.PAT{i}, T.ST{i});
+            lastPAT = T.PAT{i}; lastST = T.ST{i};
+        end
+        fprintf('%s : Ser%03d %s\n', T.SE{i}, T.SeriesNumber(i), T.SeriesDescription{i});
     end
-
-    % Pull fields with safe fallbacks
-    StudyDate  = getfield_try(info, 'StudyDate', '00000000');
-    StudyTime  = sanitize_time(getfield_try(info, 'StudyTime', '000000'));
-    SeriesNum  = getfield_try(info, 'SeriesNumber', 0);
-    SeriesDesc = getfield_try(info, 'SeriesDescription', '');
-    if isempty(SeriesDesc)
-        SeriesDesc = getfield_try(info, 'ProtocolName', '');
+    fprintf('\nTotal series: %d\n\n', height(T));
+    
+    % Optional CSV
+    if ~isempty(csvOut)
+        writetable(T, csvOut);
+        fprintf('Wrote %s\n', csvOut);
     end
-
-    % Extract PAT/ST/SE names from the path for convenience
-    parts = split(string(thisSE), filesep);
-    % Expect .../PATxxxxx/STxxxxxx/SExxxxxx
-    PAT = "";
-    ST  = "";
-    SE  = string(seDirs(k).name);
-    if numel(parts) >= 3
-        PAT = parts(end-2);
-        ST  = parts(end-1);
-    end
-
-    data(end+1) = struct( ... %#ok<AGROW>
-        'PAT', char(PAT), ...
-        'ST',  char(ST), ...
-        'SE',  char(SE), ...
-        'StudyDate',  char(StudyDate), ...
-        'StudyTime',  char(StudyTime), ...
-        'SeriesNumber', double(SeriesNum), ...
-        'SeriesDescription', char(SeriesDesc));
-end
-
-% Turn into table and sort by PAT, ST, SeriesNumber
-if isempty(data)
-    T = table();
-    fprintf('No series found under %s\n', rootDir);
-    return
-end
-T = struct2table(data);
-T = sortrows(T, {'PAT','ST','SeriesNumber'});
-
-% Pretty print like:
-% SE000009 : Ser013 WATER_3D_Sag_T2_Cube_FS_CERVICAL
-lastPAT = '';
-lastST  = '';
-for i = 1:height(T)
-    if ~strcmp(lastPAT, T.PAT{i}) || ~strcmp(lastST, T.ST{i})
-        fprintf('\n%s / %s\n', T.PAT{i}, T.ST{i});
-        lastPAT = T.PAT{i}; lastST = T.ST{i};
-    end
-    fprintf('%s : Ser%03d %s\n', T.SE{i}, T.SeriesNumber(i), T.SeriesDescription{i});
-end
-fprintf('\nTotal series: %d\n\n', height(T));
-
-% Optional CSV
-if ~isempty(csvOut)
-    writetable(T, csvOut);
-    fprintf('Wrote %s\n', csvOut);
-end
 end
 
 % ---- helpers ----
@@ -281,7 +274,7 @@ function t = sanitize_time(tin)
     if numel(t) >= 6, t = t(1:6); else, t = pad(t, 6, 'right', '0'); end
 end
 
-function [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(dicom_path, dir_chiari, subject, T, skipExistingCheck)
+function [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(cas, T, skipExistingCheck)
 % PICK_T2_SERIES
 % - Lists DICOM series and filters to T2
 % - Lets user choose one
@@ -296,7 +289,7 @@ function [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(di
     isT2 = ~cellfun(@isempty, regexpi(T.SeriesDescription, 'T2', 'once'));
     T2T  = T(isT2, :);
     if isempty(T2T)
-        error('No series with "T2" found under: %s', dicom_path);
+        error('No series with "T2" found under: %s', cas.dir_patient);
     end
 
     % build choices and paths
@@ -305,19 +298,15 @@ function [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(di
     for i = 1:height(T2T)
         choices(i) = sprintf('%s / %s / %s : Ser%03d  %s', ...
             T2T.PAT{i}, T2T.ST{i}, T2T.SE{i}, T2T.SeriesNumber(i), T2T.SeriesDescription{i});
-        pth = fullfile(dicom_path, T2T.PAT{i}, T2T.ST{i}, T2T.SE{i});
+        pth = fullfile(cas.dir_patient, T2T.PAT{i}, T2T.ST{i}, T2T.SE{i});
         if ~isfolder(pth)
-            pth = fullfile(dicom_path, T2T.ST{i}, T2T.SE{i});
+            pth = fullfile(cas.dir_patient, T2T.ST{i}, T2T.SE{i});
             if ~isfolder(pth)
-                pth = fullfile(dicom_path, T2T.SE{i});
+                pth = fullfile(cas.dir_patient, T2T.SE{i});
             end
         end
         paths(i) = pth;
     end
-
-    % anatomy root
-    anatomy_root = full_path(fullfile(dir_chiari,'patient-data', subject, 'anatomy'));
-    if ~isfolder(anatomy_root), mkdir(anatomy_root); end
 
     % --- user picks series ---
     if height(T2T) > 1
@@ -330,28 +319,22 @@ function [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(di
     end
     anatomy_dicom = char(paths(idx));
     series_desc   = regexprep(T2T.SeriesDescription{idx}, '[^\w\-]', '_');
-    dest_folder   = fullfile(anatomy_root, series_desc);
+    dest_folder   = fullfile(cas.dir_anatomy, series_desc);
 
     % --- optionally ask about replacing existing anatomy (if not skipped) ---
     if ~skipExistingCheck
-        existing = dir(anatomy_root);
+        existing = dir(cas.dir_anatomy);
         existing = existing([existing.isdir] & ~ismember({existing.name},{'.','..'}));
         if ~isempty(existing)
             resp = askYN(sprintf('Anatomy already contains folder "%s". Replace it with "%s"? (y/n): ', ...
                                  existing(1).name, series_desc));
             if resp
-                rmdir(fullfile(anatomy_root, existing(1).name), 's');
+                rmdir(fullfile(cas.dir_anatomy, existing(1).name), 's');
             else
                 error('Aborted: user chose not to replace existing anatomy folder.');
             end
         end
     end
-end
-
-% ---------- small helpers ----------
-function s = safeGet(cellstrCol, i)
-    if i <= numel(cellstrCol) && ~isempty(cellstrCol{i}), s = cellstrCol{i};
-    else, s = ''; end
 end
 
 function v = askInt(prompt, lo, hi)
@@ -399,22 +382,6 @@ function name = sanitize_series_desc(s)
     name = regexprep(name, '_+', '_');           % collapse repeats
     name = regexprep(name, '^_+|_+$', '');       % trim underscores
     if isempty(name), name = 'Series'; end
-end
-
-function delete_folder_contents(rootPath)
-% Remove all files and subfolders inside rootPath, keep root
-    if ~isfolder(rootPath), return; end
-    listing = dir(rootPath);
-    keep = ~ismember({listing.name},{'.','..'});
-    listing = listing(keep);
-    for k = 1:numel(listing)
-        p = fullfile(listing(k).folder, listing(k).name);
-        if listing(k).isdir
-            rmdir(p, 's');
-        else
-            delete(p);
-        end
-    end
 end
 
 function sstt = detect_level(desc)
@@ -539,4 +506,34 @@ function tf = hasContent(folder)
 % Return true if folder exists and has anything inside (ignores . and ..)
 
     tf = isfolder(folder) && numel(dir(fullfile(folder,'*'))) > 2;
+end
+
+function cas = create_directories(subject)
+    cas.subj                = subject; 
+    cas.dir_chiari          = full_path(fullfile(pwd, '..', '..'));
+    cas.dir_git             = fullfile(cas.dir_chiari,'git-chiari');
+    cas.dir_patient         = fullfile(cas.dir_chiari,'patient-data', cas.subj);
+    cas.dir_comp            = fullfile(cas.dir_chiari,'computations');
+    cas.dir_anatomy         = fullfile(cas.dir_patient, 'anatomy');
+    cas.dir_flow            = fullfile(cas.dir_patient, 'flow');
+    cas.dirdat              = fullfile(cas.dir_comp,'pc-mri', cas.subj);
+    cas.dirmat              = fullfile(cas.dirdat, 'mat');
+    cas.diraux              = fullfile(cas.dirmat, 'aux')
+    cas.dirvid              = fullfile(cas.dir_comp, 'videos', cas.subj);
+    cas.dirfig              = fullfile(cas.dir_comp, 'figures', cas.subj);
+    cas.dirROI              = fullfile(cas.dirmat,'ROIs');
+    cas.diransys            = fullfile(cas.dir_comp, 'ansys', cas.subj);
+    cas.diransys_out        = fullfile(cas.diransys, 'outputs');
+    cas.diransys_in         = fullfile(cas.diransys, 'inputs');
+    cas.diransys_profiles   = fullfile(cas.diransys_in, 'profiles');
+    cas.dirseg              = fullfile(cas.dir_comp, 'segmentation', cas.subj);
+
+    % List of directories to ensure exist
+    dirsToCreate = {cas.dir_anatomy, cas.dir_flow, cas.dirmat, cas.dirdat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, ... 
+        cas.dirseg,cas.dirfig, cas.dirROI,fullfile(cas.dirseg, 'stl'), fullfile(cas.diransys_in, "planes"), fullfile(cas.diransys_in, "flow-rates"), fullfile(cas.diransys_in, "case-files"), fullfile(cas.diransys_in, "journals")};
+    
+    % Create directories if not present
+    for i = 1:length(dirsToCreate)
+        createDirIfNotExists(dirsToCreate{i});
+    end
 end

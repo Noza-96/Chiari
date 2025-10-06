@@ -9,15 +9,15 @@ subject = "s4";
 
 %% 1) Organize DICOM data
 % out: list DICOMs and organize into flow and anatomy 
-organize_DICOMS(subject)
+cas = organize_DICOMS(subject);
 
 %% 2) Segmentation CSF space
 % out: automatic + manual segmentation -> .STL file
-run_segmentation(subject)
+run_segmentation(cas)
 
 %% 3) Alignment velocity measurements to segmentation
 % out: translation velocity DICOMs to adjucts to segmentation
-alignment_MRI(subject)
+alignment_MRI(cas)
 %% 4) PC-MRI measurements
 % out: flow and tissue metrics extracted from PC-MRI measurements
 

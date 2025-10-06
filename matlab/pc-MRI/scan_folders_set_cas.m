@@ -1,83 +1,56 @@
 function cas = scan_folders_set_cas(cas)
 
-% Computations folder
-cas.dircloud = fullfile('..', '..', '..','computations');
-% DICOM folder
-cas.dirdcm = fullfile('..', '..', '..','patient-data',cas.subj,'flow');
-
-% Save data folder
-cas.dirdat = fullfile(cas.dircloud,'pc-mri');
-
-% Define directories with a modular structure
-cas.dirmat = fullfile(cas.dirdat, cas.subj, 'mat');
-cas.dirflm = fullfile(cas.dirdat, cas.subj, 'flm');
-cas.dirvid = fullfile(cas.dircloud, 'videos', cas.subj);
-cas.dirfig = fullfile(cas.dircloud, 'figures', cas.subj);
-cas.dirROI = fullfile(cas.dirmat,'ROIs');
-
-
-cas.diransys = fullfile(cas.dircloud, 'ansys', cas.subj);
-cas.diransys_out = fullfile(cas.diransys, 'outputs');
-cas.diransys_in = fullfile(cas.diransys, 'inputs');
-cas.diransys_profiles = fullfile(cas.diransys_in, 'profiles');
-cas.dirseg = fullfile(cas.dircloud, 'segmentation', cas.subj);
-
-% List of directories to ensure exist
-dirsToCreate = {cas.dirmat, cas.diransys, cas.diransys_out, cas.diransys_in, cas.diransys_profiles, cas.dirvid, ... 
-    cas.dirseg, cas.dirfig, cas.dirROI, fullfile(cas.diransys_in, "planes"), fullfile(cas.diransys_in, "flow-rates"), fullfile(cas.diransys_in, "case-files"), fullfile(cas.diransys_in, "journals")};
-
-% Create directories if not present
-for i = 1:length(dirsToCreate)
-    createDirIfNotExists(dirsToCreate{i});
-end
-
 % Auxiliary directories to clean or create
-auxDirs = {'./aux_PC', './aux_RT', './aux_FM'};
-for i = 1:length(auxDirs)
-    createOrCleanDir(auxDirs{i});
-end
-    
-system(sprintf('bash ./get_folders_PC.sh "%s"', cas.dirdcm));
-system(sprintf('bash ./get_folders_RT.sh "%s"', cas.dirdcm));
-system(sprintf('bash ./get_folders_FM.sh "%s"', cas.dirdcm));
+out_folder = fullfile(cas.dir_git, 'matlab', 'pc-MRI');
+get_folders = fullfile(cas.dir_git, 'matlab', 'pc-MRI','get_folders.sh');
 
-strfolders_PC = fileread('./aux_PC/folders.txt');
+for measurement = ["PC", "RT", "FM"]
+    createOrCleanDir(fullfile(out_folder, "aux_" + measurement));
+    system(sprintf('bash %s "%s" "%s" "%s"', get_folders, cas.dir_flow, out_folder, measurement));
+    dir(fullfile(out_folder, "aux_" + measurement, "folders.txt")).bytes 
+    if dir(fullfile(out_folder, "aux_" + measurement, "folders.txt")).bytes > 0
+        % File exists and is not empty — break or return
+        break
+    end
+end
+
+strfolders_PC = fileread(fullfile(out_folder,'aux_PC', 'folders.txt'));
 folders_PC = regexp(strfolders_PC, '\r\n|\r|\n', 'split');
 folders_PC(end) = [];
 
-strfolders_PC_ = fileread('./aux_PC/folders_.txt');
+strfolders_PC_ = fileread(fullfile(out_folder,'aux_PC', 'folders_.txt'));
 folders_PC_ = regexp(strfolders_PC_, '\r\n|\r|\n', 'split');
 folders_PC_(end) = [];
 
-strfolders_PC_P = fileread('./aux_PC/folders_P.txt');
+strfolders_PC_P = fileread(fullfile(out_folder, 'aux_PC', 'folders_P.txt'));
 folders_PC_P = regexp(strfolders_PC_P, '\r\n|\r|\n', 'split');
 folders_PC_P(end) = [];
 
-strfolders_PC_MAG = fileread('./aux_PC/folders_MAG.txt');
+strfolders_PC_MAG = fileread(fullfile(out_folder, 'aux_PC', 'folders_MAG.txt'));
 folders_PC_MAG = regexp(strfolders_PC_MAG, '\r\n|\r|\n', 'split');
 folders_PC_MAG(end) = [];
 
-strfolders_RT = fileread('./aux_RT/folders.txt');
+strfolders_RT = fileread(fullfile(out_folder, 'aux_RT', 'folders.txt'));
 folders_RT = regexp(strfolders_RT, '\r\n|\r|\n', 'split');
 folders_RT(end) = [];
 
-strfolders_RT_ = fileread('./aux_RT/folders_.txt');
+strfolders_RT_ = fileread(fullfile(out_folder, 'aux_RT', 'folders_.txt'));
 folders_RT_ = regexp(strfolders_RT_, '\r\n|\r|\n', 'split');
 folders_RT_(end) = [];
 
-strfolders_RT_P = fileread('./aux_RT/folders_P.txt');
+strfolders_RT_P = fileread(fullfile(out_folder, 'aux_RT', 'folders_P.txt'));
 folders_RT_P = regexp(strfolders_RT_P, '\r\n|\r|\n', 'split');
 folders_RT_P(end) = [];
 
-strfolders_RT_MAG = fileread('./aux_RT/folders_MAG.txt');
+strfolders_RT_MAG = fileread(fullfile(out_folder, 'aux_RT', 'folders_MAG.txt'));
 folders_RT_MAG = regexp(strfolders_RT_MAG, '\r\n|\r|\n', 'split');
 folders_RT_MAG(end) = [];
 
-strfolders_FM = fileread('./aux_FM/folders.txt');
+strfolders_FM = fileread(fullfile(out_folder, 'aux_FM', 'folders.txt'));
 folders_FM = regexp(strfolders_FM, '\r\n|\r|\n', 'split');
 folders_FM(end) = [];
 
-strfolders_FM_ = fileread('./aux_FM/folders_.txt');
+strfolders_FM_ = fileread(fullfile(out_folder, 'aux_FM', 'folders_.txt'));
 folders_FM_ = regexp(strfolders_FM_, '\r\n|\r|\n', 'split');
 folders_FM_(end) = [];
 
@@ -214,55 +187,11 @@ cas.tech        = tech;
 
 end
 
-
-% Helper function to create a directory if it does not exist
-function createDirIfNotExists(dirPath)
-    if ~isfolder(dirPath)
-        mkdir(dirPath);
-    end
-end
-
 % Helper function to clean or create a directory
 function createOrCleanDir(dirPath)
     if ~isfolder(dirPath)
         mkdir(dirPath);
     else
-        warning('off', 'all');
-        rmdir(fullfile(dirPath, '*'));
         delete(fullfile(dirPath, '*'));
     end
-    warning('on', 'all');
-end
-
-function absolutePath = full_path(folder_path)
-    absolutePath = char(java.io.File(folder_path).getCanonicalPath());
-end
-
-function filtered = filter_folders_by_keywords(folders, keywords)
-% FILTER_FOLDERS_BY_KEYWORDS Filters a cell array of folder paths
-%   Only matches keywords that appear directly after 'flow/z#-' in the path.
-
-    folders_str = string(folders);
-    keywords_str = string(keywords);
-
-    % Initialize logical index
-    keep_idx = false(size(folders_str));
-
-    % Loop through folder paths
-    for i = 1:numel(folders_str)
-        % Extract identifier after 'flow/z#-'
-        tokens = regexp(folders_str(i), "z\d+-(\w+)", "tokens");
-        if ~isempty(tokens)
-            id = tokens{1}{1}; % Get the matched part after 'z#-'
-            for j = 1:numel(keywords_str)
-                if strcmp(id, keywords_str(j)) % exact match only
-                    keep_idx(i) = true;
-                    break;
-                end
-            end
-        end
-    end
-
-    % Return filtered folders
-    filtered = cellstr(folders_str(keep_idx));
 end

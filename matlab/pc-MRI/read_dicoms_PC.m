@@ -2,11 +2,11 @@ function dat  = read_dicoms_PC(cas, resettimevector)
 
     Ndat = length(cas.folders_PC);
 
-    if strcmp(cas.model, 'GE')
-        dicom_ext = 'MR*';
-    elseif strcmp(cas.model, 'SIEMENS')
-        dicom_ext = '*.dcm';
-    end
+    % if strcmp(cas.model, 'GE')
+    %     dicom_ext = 'MR*';
+    % elseif strcmp(cas.model, 'SIEMENS')
+    %     dicom_ext = '*.dcm';
+    % end
 
     % Get data for each case and store in cell structures were first dimension is case number:
 
@@ -25,6 +25,18 @@ function dat  = read_dicoms_PC(cas, resettimevector)
 
             fname = fullfile([cas.dirdcm, '/', cas.folders_PC_P{idat}], dicomlist(jj).name);
             info{idat}{jj} = dicominfo(fname);
+
+            % Identify manufacturer
+            if idat == 1 && jj == 1
+                if contains(upper(info{idat}{jj}.Manufacturer), 'SIEMENS')
+                    cas.model = 'SIEMENS';
+                    dicom_ext = '*.dcm';
+                    
+                elseif contains(upper(info{idat}{jj}.Manufacturer), 'GE')
+                    cas.model = 'GE';
+                    dicom_ext = 'MR*';
+                end
+            end
 
             % Hack to find VENC:
             if strcmp(cas.model, 'SIEMENS')
