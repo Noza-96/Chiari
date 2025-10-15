@@ -1,39 +1,31 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-close all; clear; clc
-cas.subj = 's5'; cas.model = 'GE'; % GE (Utah) or SIEMENS (Granada)
-cas = scan_folders_set_cas(cas);
+function [cas, dat_PC] = main_1_read_dat(cas)
 
-resettimevector = false;
+    % Auxiliary directories to clean or create
+    out_folder = fullfile(tempdir, 'pc-MRI');
 
-aux.fig_opts = set_plotting_style;
-[aux.nt10, aux.klr] = define_colors;
+    cas = scan_folders_set_cas(cas, out_folder);
 
-disp([newline + "Setting up folders ..." + newline])
+    resettimevector = false;
 
-if cas.Ncas_PC > 0
-    disp(["Reading PC DICOMS ..." + newline])
-    dat_PC = read_dicoms_PC(cas, resettimevector);
+    if cas.Ncas > 0
+        dat_PC = read_dicoms_PC(cas, resettimevector);
+    else
+        error("No PC DICOMS found!" + newline)
+    end
+    
+    remove_temp_directories(out_folder);
+
 end
 
-if cas.Ncas_RT > 0
-    disp(["Reading RT DICOMS ..." + newline])
-    dat_RT = read_dicoms_RT(cas, resettimevector);
+function remove_temp_directories(out_folder)
+    % Get all directories starting with 'aux' in out_folder
+    d = dir(fullfile(out_folder, 'aux*'));
+    for k = 1:numel(d)
+        if d(k).isdir
+            rmdir(fullfile(out_folder, d(k).name), 's'); % 's' removes contents recursively
+        end
+    end
 end
-
-if cas.Ncas_FM > 0
-    disp(["Reading FM DICOMS ..." + newline])
-    dat_FM = read_dicoms_FM(cas);ilapps
-end
-
-disp(["Saving everything in a .mat file ..." + newline])
-
-
-save(fullfile(cas.dirmat, "01-read_dat.mat"), 'aux', 'cas', 'dat_PC');
-
-% Figure to visualize locations pc-mri measurements in read_dicoms_pc
-
-disp([newline + "Done!" + newline])
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

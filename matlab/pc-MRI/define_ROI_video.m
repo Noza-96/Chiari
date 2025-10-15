@@ -2,7 +2,7 @@ function dat = define_ROI_video(cas, dat)
     for idat = 1:dat.Ndat
 
         sstt_name = strjoin(cellstr(string(cas.locations(idat))), '-');
-        roi_dir   = fullfile(cas.dirmat,'ROIs');
+        roi_dir   = fullfile(cas.dir.mat,'ROIs');
         if ~exist(roi_dir, 'dir'), mkdir(roi_dir); end
 
         roi_file    = fullfile(roi_dir, sstt_name + "ROI.mat");

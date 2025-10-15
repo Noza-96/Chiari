@@ -7,23 +7,24 @@ function cas = run_segmentation(cas)
 
     auto_seg_name = "auto_segmentation";
 
+
     fprintf('\n2) Segmentation CSF space...\n')
 
-    if exist(fullfile(cas.dirseg, 'stl','segmentation.stl'),'file')
+    if exist(fullfile(cas.dir.seg, 'stl','segmentation.stl'),'file')
         if askYN('-Segmentation already exist. Skip? ([y]/n): ')
             return;
         end
     end
 
-    nii_file      = fullfile(cas.dirseg, auto_seg_name + ".nii.gz");
+    nii_file = fullfile(cas.dir.seg, auto_seg_name + ".nii.gz");
 
     % ---------------- Find anatomy DICOM folder ----------------
 
-    sub = dir(cas.dir_anatomy);
+    sub = dir(cas.dir.anatomy);
     sub = sub([sub.isdir] & ~ismember({sub.name},{'.','..'}));
 
     if isempty(sub)
-        error('No series folder inside anatomy: %s', cas.dir_anatomy);
+        error('No series folder inside anatomy: %s', cas.dir.anatomy);
     elseif numel(sub) == 1
         anatomy_dicom = fullfile(sub(1).folder, sub(1).name);
         fprintf('-Using anatomy series: %s\n', sub(1).name);
@@ -38,7 +39,7 @@ function cas = run_segmentation(cas)
 
     % ---------------- DICOM -> NIfTI ----------------
     if ~isfile(nii_file)
-        status = system("dcm2niix -o " + cas.dirseg + ...
+        status = system("dcm2niix -o " + cas.dir.seg + ...
                         " -f " + auto_seg_name + " -z y " + anatomy_dicom);
         if status == 0
             disp("-Conversion DICOM to NIfTI completed.");
@@ -50,7 +51,7 @@ function cas = run_segmentation(cas)
     end
 
     % ---------------- Automated segmentation (SCT) ----------------
-    if ~isfile(fullfile(cas.dirseg, auto_seg_name + "_seg.nii.gz"))
+    if ~isfile(fullfile(cas.dir.seg, auto_seg_name + "_seg.nii.gz"))
         system( "sct_deepseg -task seg_sc_contrast_agnostic -i " + nii_file);
         system( "sct_deepseg -task canal_t2w -i " + nii_file);
         system( "sct_deepseg -task seg_spinal_rootlets_t2w -i " + nii_file);
@@ -59,13 +60,12 @@ function cas = run_segmentation(cas)
     end
     disp("-Running Slicer3D...")
     % ---------------- Slicer3D post-processing ----------------
-    python_script = fullfile(cas.dir_git, 'slicer3D-code','segmentation.py');
-    system("slicer3D  --python-script """ + python_script + """ """ + subject + """ """ + cas.dir_chiari + """");
+    python_script = fullfile(cas.dir.git, 'slicer3D-code', 'segmentation.py');
+    slicer_path = fullfile(config_path('slicer', fullfile('..', 'config_file.txt')));
 
-    resp = '';
-    while ~strcmpi(resp,'ok')
-        resp = input('Type "ok" to continue: ','s');
-    end
+    [~, ~] = system("""" + slicer_path + """ --python-script """ + python_script + """ """ + cas.subj + """ """ + cas.dir.chiari + """");
+
+    input('Type "ok" to continue: ','s');
 
 end
 

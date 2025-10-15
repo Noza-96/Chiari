@@ -1,16 +1,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% clear; close all; 
-% 
-% [aux, cas, dat_PC, single_reading] = run_if_empty('s4', 'GE');  % if skipping previous steps
+function [cas,dat_PC] = main_2_crop_set_roi(cas,dat_PC, crop_size)
+
+fprintf('\n4) PC-MRI measurements...\n')
 
 reference_location = 'C3C4'; 
 % (set to 'zero' to set location to 0.0)
 % (set to 'fromsag' to replace ljocations with those from sagittal geometry)
 % (e.g. 'C02C03' to shift all locationsy so that the C02C03 locations coincides with sagittal geometry)
-
-crop_size = 100; % Number of pixels to crop 256x256 image in
-
-makemovies = false;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -28,15 +24,8 @@ dat_PC = define_ROI_video(cas, dat_PC);
 
 disp("Saving everything in a .mat file ..." + newline)
 
-save(fullfile(cas.dirmat, "02-crop_set_roi.mat"), 'aux', 'cas', 'dat_PC');
+save(fullfile(cas.dir.mat, "data_2.mat"), 'cas', 'dat_PC');
 disp("Done!" + newline)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function [aux, cas, dat_PC, single_reading] = run_if_empty(subject, model)
-        cas.subj = subject;
-        cas.model = model; % GE (Utah) or SIEMENS (Granada)
-        single_reading = {};
-        cas = scan_folders_set_cas(cas, single_reading);
-        load(fullfile(cas.dirmat, "01-read_dat.mat"), 'aux', 'cas', 'dat_PC');
 end

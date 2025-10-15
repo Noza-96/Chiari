@@ -1,21 +1,19 @@
 function dat  = read_dicoms_PC(cas, resettimevector)
 
-    Ndat = length(cas.folders_PC);
+    Ndat = length(cas.folders_);
 
-    % if strcmp(cas.model, 'GE')
-    %     dicom_ext = 'MR*';
-    % elseif strcmp(cas.model, 'SIEMENS')
-    %     dicom_ext = '*.dcm';
-    % end
+    if strcmp(cas.model, 'GE')
+        dicom_ext = 'MR*';
+    elseif strcmp(cas.model, 'SIEMENS')
+        dicom_ext = '*.dcm';
+    end
 
     % Get data for each case and store in cell structures were first dimension is case number:
 
     pixel_coord = cell(1, Ndat);
     for idat = 1:Ndat
-        
-        disp([cas.dirdcm, '/', cas.folders_PC_P{idat}]);
-        
-        dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_P{idat}], dicom_ext));
+                
+        dicomlist = dir(fullfile(cas.dir.flow, cas.folders_P{idat}, dicom_ext));
 
         numim = numel(dicomlist);
 
@@ -23,7 +21,7 @@ function dat  = read_dicoms_PC(cas, resettimevector)
 
         for jj = 1:numim
 
-            fname = fullfile([cas.dirdcm, '/', cas.folders_PC_P{idat}], dicomlist(jj).name);
+            fname = fullfile(cas.dir.flow,  cas.folders_P{idat}, dicomlist(jj).name);
             info{idat}{jj} = dicominfo(fname);
 
             % Identify manufacturer
@@ -73,7 +71,7 @@ function dat  = read_dicoms_PC(cas, resettimevector)
 
         % Load DICOM files with magnitude out of parallel directory for complementary use:
         
-        if isempty(cas.folders_PC_MAG) == 1
+        if isempty(cas.folders_MAG) == 1
             
             display("Magnitude images do not exist.")
 
@@ -87,15 +85,15 @@ function dat  = read_dicoms_PC(cas, resettimevector)
 
         else
 
-            dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_MAG{idat}], dicom_ext));
+            dicomlist = dir(fullfile(cas.dir.flow, cas.folders_MAG{idat}, dicom_ext));
 
             numim = numel(dicomlist);
 
-            fname_showorient{idat} = fullfile([cas.dirdcm, '/', cas.folders_PC_MAG{idat}], dicomlist(1).name);
+            fname_showorient{idat} = fullfile(cas.dir.flow, cas.folders_MAG{idat}, dicomlist(1).name);
 
             for jj = 1:numim
 
-                fname = fullfile([cas.dirdcm, '/', cas.folders_PC_MAG{idat}], dicomlist(jj).name);
+                fname = fullfile(cas.dir.flow, cas.folders_MAG{idat}, dicomlist(jj).name);
 
                 infomag{idat}{jj} = dicominfo(fname);
 
@@ -107,13 +105,13 @@ function dat  = read_dicoms_PC(cas, resettimevector)
 
         % Load DICOM files with stuff out of parallel directory for complementary use:
 
-        dicomlist = dir(fullfile([cas.dirdcm, '/', cas.folders_PC_{idat}], dicom_ext));
+        dicomlist = dir(fullfile(cas.dir.flow, cas.folders_{idat}, dicom_ext));
 
         numim = numel(dicomlist);
 
         for jj = 1:numim
 
-            fname = fullfile([cas.dirdcm, '/', cas.folders_PC_{idat}], dicomlist(jj).name);
+            fname = fullfile(cas.dir.flow, cas.folders_{idat}, dicomlist(jj).name);
 
             infocom{idat}{jj} = dicominfo(fname);
 
@@ -170,16 +168,16 @@ function dat  = read_dicoms_PC(cas, resettimevector)
         end
         
         filename = cas.locations{idat} + "_transformation.txt";
-        transformation_path = fullfile(cas.dirseg, 'transformation', filename);
+        transformation_path = fullfile(cas.dir.seg, 'transformation', filename);
 
         if exist(transformation_path)
             % Read the matrix (assumes 4 rows, 4 columns, space-separated)
             transformation_matrix = dlmread(transformation_path);
-            
+                     
+            pixel_coordinates = applyTransformation(pixel_coordinates, transformation_matrix);
+
             % Display to verify
             fprintf('Transformation %s applied! \n', filename);
-                        
-            pixel_coordinates = applyTransformation(pixel_coordinates, transformation_matrix);
         end
 
         % Store in cell for this case
@@ -234,7 +232,7 @@ function dat  = read_dicoms_PC(cas, resettimevector)
         
         % Save the slice location in cm:
 
-        locz{idat} = -location{idat};
+        locz{idat} = - location{idat};
         
     end
 

@@ -5,10 +5,6 @@ function dat = apply_ROI_compute_Q(dat, correct_aliasing, unwrap_periodic, smoot
     fcal_V_cm_px = dat.fcal_V_cm_px;
     Nt   = dat.Nt;
     venc = dat.venc;
-
-    
-
-
     ROI_SAS  = dat.ROI_SAS;
     ROI_COR  = dat.ROI_COR;
     ROI_SPC  = dat.ROI_SPC;
