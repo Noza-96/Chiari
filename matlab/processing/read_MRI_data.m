@@ -1,11 +1,11 @@
 function [cas, dat_PC] = read_MRI_data(cas)
 
-    fprintf('1) Organize and read MRI data...\n')
+    fprintf('1) Setup subject and extract MRI data...\n')
     %% Create directories
     cas = create_directories(cas);
 
     if hasContent(cas.dir.anatomy) && hasContent(cas.dir.flow)
-        if askYN('-MRI data already extracted. Skip? ([y]/n): ')
+        if askYN('- MRI data already extracted. Skip? ([y]/n): ')
             load(fullfile(cas.dir.mat, 'data_0.mat'), 'cas', 'dat_PC');
             return;
         end
@@ -21,6 +21,6 @@ function [cas, dat_PC] = read_MRI_data(cas)
     
     %% 
     file_name = "data_0.mat";
-    fprintf("Saving everything in a .mat file %s...\n", file_name)
+    fprintf("Saving everything in %s file ...\n", file_name)
     save(fullfile(cas.dir.mat, file_name), 'cas','dat_PC');
 end

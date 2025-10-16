@@ -1,9 +1,6 @@
 % Create figure with segmentation together with MRI locations
 function movieVector = create_animation_pc(dat_PC, cas)
 
-    addpath("../processing/Functions/")
-    addpath('../processing/Functions/Others/')
-    
     % load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
 
     fs = 20;
@@ -150,8 +147,11 @@ function create_animation_ansys(dat_PC, loc, n)
     
     % outlines
     contour(dat_PC.ROI_SAS{loc},  [0.5 0.5], 'k',      'LineWidth', 1.5);
-    contour(dat_PC.ROI_TONS{loc}, [0.5 0.5], 'Color', orange, 'LineWidth', 1.5);
     contour(dat_PC.ROI_COR{loc}, [0.5 0.5], 'Color', 'b', 'LineWidth', 1.5);
+    if sum(dat_PC.ROI_TONS{loc}(:)) > 0
+        contour(dat_PC.ROI_TONS{loc}, [0.5 0.5], 'Color', orange, 'LineWidth', 1.5);
+    end
+
 
     % filled COR region (semi-transparent red)
     % cor_mask  = dat_PC.ROI_COR{loc};

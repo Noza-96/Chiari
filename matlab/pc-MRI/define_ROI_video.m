@@ -12,9 +12,9 @@ function dat = define_ROI_video(cas, dat)
         if exist(roi_file,'file') == 0
             set_new_ROI = true;
         else
-            disp("Previous ROI found for location: "+cas.locations(idat))
-            display_regions(roi_file)
-            answer = input("Do you want to use it? [y/n] ", 's');
+            fprintf("\n\tPrevious ROI found for location: %s \n\t", cas.locations{idat})
+            display_regions(roi_file, cas.locations{idat})
+            answer = input("Do you want to use it? [y]/n ", 's');
             if answer == 'n'
                 set_new_ROI = true;
             else
@@ -23,7 +23,6 @@ function dat = define_ROI_video(cas, dat)
                 dat.ROI_COR{idat}=ROI_COR;
                 dat.ROI_SPC{idat}=ROI_SPC;
                 if exist('ROI_TONS','var'), dat.ROI_TONS{idat}=ROI_TONS; end
-                disp("Using the previous ROI ...")
                 close all;
                 continue
             end
@@ -32,13 +31,13 @@ function dat = define_ROI_video(cas, dat)
         % build from scratch / edit
         has_vertices = exist(vertex_file, 'file');
         if has_vertices
-            disp('Loading previous vertices ...')
+            fprintf('\tLoading previous vertices ...')
             S = load(vertex_file);
             if ~isfield(S,'hvertices_dura'), S.hvertices_dura = []; end
             if ~isfield(S,'hvertices_pia'),  S.hvertices_pia  = []; end
             if ~isfield(S,'hvertices_tons'), S.hvertices_tons = []; end
         else
-            disp('No previous vertex data found. You will need to draw the contours.')
+            fprintf('\tNo previous vertex data found.')
             S = struct('hvertices_dura',[],'hvertices_pia',[],'hvertices_tons',[]);
         end
 
@@ -46,7 +45,7 @@ function dat = define_ROI_video(cas, dat)
         Nt    = dat.Nt{idat};
         U_tot = dat.U_tot{idat};
         magni = dat.magni{idat};
-        compl = dat.compl{idat};
+        phase = dat.phase{idat};
         venc  = dat.venc{idat};
 
         satval = 0.9;
@@ -56,15 +55,17 @@ function dat = define_ROI_video(cas, dat)
         % time-averaged helper images
         S_U_tot = sum(abs(U_tot), 3) / Nt;
         S_magni = sum(abs(magni), 3) / Nt;
-        S_compl = sum(abs(compl), 3) / Nt;
+        S_phase = sum(abs(phase), 3) / Nt;
 
         S_U_tot = imadjust(S_U_tot / max(S_U_tot(:)), [0.0, 0.9]);
         S_magni = imadjust(S_magni / max(S_magni(:)), [0.0, 0.9]);
-        S_compl = imadjust(S_compl / max(S_compl(:)), [0.0, 0.9]);
+        S_phase = imadjust(S_phase / max(S_phase(:)), [0.0, 0.9]);
 
         %% -------- DURA ----------
-        disp("Please click on left or right panel and contour the DURA ...")
-        show_composed_figure(S_compl, S_magni, S_U_tot)
+        tt = "DURA";
+        fprintf("\n\nPlease click on left or right panel and contour the DURA ...\n")
+        fprintf("\tj: next frame   k: previous frame   s: save\n");
+        show_composed_figure(S_phase, S_magni, S_U_tot, tt)
 
         if ~isempty(S.hvertices_dura)
             h = drawpolygon('Position', S.hvertices_dura, 'Color', [1, 0, 0], 'FaceAlpha', 0);
@@ -80,26 +81,27 @@ function dat = define_ROI_video(cas, dat)
         nshow = 0; it = 1; key = '';
         while nshow < 10000
             nshow = nshow + 1;
-            S_compl_it = squeeze(compl(:,:,it)); S_compl_it = S_compl_it/max(S_compl_it(:)+eps);
+            S_phase_it = squeeze(phase(:,:,it)); S_phase_it = S_phase_it/max(S_phase_it(:)+eps);
             S_magni_it = squeeze(magni(:,:,it)); S_magni_it = S_magni_it/max(S_magni_it(:)+eps);
             S_Utot_it  = squeeze(U_tot(:,:,it))/(satval*venc);
 
-            show_composed_figure(S_compl_it, S_magni_it, S_Utot_it)
-            subaxis(1,3,1,'Margin',0,'Spacing',0); h = drawpolygon('Position', hvertices_dura,'Color',[1,0,0],'FaceAlpha',0);
-            subaxis(1,3,2,'Margin',0,'Spacing',0); h = drawpolygon('Position', hvertices_dura,'Color',[1,0,0],'FaceAlpha',0);
-            subaxis(1,3,3,'Margin',0,'Spacing',0); h = drawpolygon('Position', hvertices_dura,'Color',[1,0,0],'FaceAlpha',0);
-            pause
+            show_composed_figure(S_phase_it, S_magni_it, S_Utot_it, tt)
+            subaxis(1,3,1); 
+            h = drawpolygon('Position', hvertices_dura,'Color',[1,0,0],'FaceAlpha',0);
+            subaxis(1,3,2); 
+            h = drawpolygon('Position', hvertices_dura,'Color',[1,0,0],'FaceAlpha',0);
+            subaxis(1,3,3); 
+            h = drawpolygon('Position', hvertices_dura,'Color',[1,0,0],'FaceAlpha',0);
             hvertices_dura = h.Position;
             BW_SPC = logical(poly2mask(hvertices_dura(:,1), hvertices_dura(:,2), size(S_U_tot,1), size(S_U_tot,2)));
 
-            disp("j: next frame   k: previous frame   s: save");
             key = get_key();
             if key == 'j'
                 it = it + 1; if it > Nt, it = 1; end
             elseif key == 'k'
                 it = it - 1; if it < 1,  it = Nt; end
             elseif key == 's'
-                disp('Dura saved. Moving on...')
+                fprintf('%s ROI saved. Moving on...', tt)
                 break
             end
         end
@@ -107,9 +109,10 @@ function dat = define_ROI_video(cas, dat)
        
 
         %% -------- PIA ----------
-        disp("Please click on left or right panel and contour the PIA ...")
-        % show_composed_figure_after_dura(BW_SPC, S_compl, S_magni, S_U_tot)
-        show_composed_figure(S_compl, S_magni, S_U_tot)
+        tt = "PIA";
+        % show_composed_figure_after_dura(BW_SPC, S_phase, S_magni, S_U_tot)
+        show_composed_figure(S_phase, S_magni, S_U_tot, tt)
+        
 
         if ~isempty(S.hvertices_pia)
             h = drawpolygon('Position', S.hvertices_pia, 'Color', [1, 0, 0], 'FaceAlpha', 0);
@@ -124,11 +127,11 @@ function dat = define_ROI_video(cas, dat)
         nshow = 0; it = 1; key = '';
         while nshow < 10000
             nshow = nshow + 1;
-            S_compl_it = squeeze(compl(:,:,it)); S_compl_it = S_compl_it/max(S_compl_it(:)+eps);
+            S_phase_it = squeeze(phase(:,:,it)); S_phase_it = S_phase_it/max(S_phase_it(:)+eps);
             S_magni_it = squeeze(magni(:,:,it)); S_magni_it = S_magni_it/max(S_magni_it(:)+eps);
             S_Utot_it  = squeeze(U_tot(:,:,it))/(satval*venc);
 
-            show_composed_figure(S_compl_it, S_magni_it, S_Utot_it)
+            show_composed_figure(S_phase_it, S_magni_it, S_Utot_it, tt)
             subaxis(1,3,1,'Margin',0,'Spacing',0); h = drawpolygon('Position', hvertices_pia,'Color',[1,0,0],'FaceAlpha',0);
             subaxis(1,3,2,'Margin',0,'Spacing',0); h = drawpolygon('Position', hvertices_pia,'Color',[1,0,0],'FaceAlpha',0);
             subaxis(1,3,3,'Margin',0,'Spacing',0); h = drawpolygon('Position', hvertices_pia,'Color',[1,0,0],'FaceAlpha',0);
@@ -143,7 +146,7 @@ function dat = define_ROI_video(cas, dat)
             elseif key == 'k'
                 it = it - 1; if it < 1,  it = Nt; end
             elseif key == 's'
-                disp('Pia saved. Moving on...')
+                printf('%s saved. Moving on...', tt)
                 break
             end
         end
@@ -155,8 +158,9 @@ function dat = define_ROI_video(cas, dat)
         
 
         %% -------- TONSILS (optional) ----------
+        tt = "TONSILS";
         disp("OPTIONAL: Contour the TONSILS (press 'q' now to skip if not visible).")
-        show_composed_figure(S_compl, S_magni, S_U_tot)
+        show_composed_figure(S_phase, S_magni, S_U_tot, tt)
 
         S_magni_in = BW_SPC .* S_magni;
         S_Utot_in  = BW_SPC .* S_U_tot;
@@ -200,7 +204,7 @@ function dat = define_ROI_video(cas, dat)
                 while nshow < 10000
                     nshow = nshow + 1;
 
-                    S_compl_it = squeeze(compl(:,:,it)); S_compl_it = S_compl_it/max(S_compl_it(:)+eps);
+                    S_phase_it = squeeze(phase(:,:,it)); S_phase_it = S_phase_it/max(S_phase_it(:)+eps);
                     S_magni_it = squeeze(magni(:,:,it)); S_magni_it = S_magni_it/max(S_magni_it(:)+eps);
                     S_Utot_it  = squeeze(U_tot(:,:,it))/(satval*venc);
 
@@ -209,7 +213,7 @@ function dat = define_ROI_video(cas, dat)
 
                     % 2-panel tonsils view
                     figure(99); clf
-                    show_composed_figure(S_compl_it, S_magni_it, S_Utot_it)
+                    show_composed_figure(S_phase_it, S_magni_it, S_Utot_it, tt)
 
                     subaxis(1,3,1,'Margin',0,'Spacing',0); h = drawpolygon('Position', hvertices_tons,'Color',[1,1,0],'FaceAlpha',0);
                     subaxis(1,3,2,'Margin',0,'Spacing',0); h = drawpolygon('Position', hvertices_tons,'Color',[1,1,0],'FaceAlpha',0);
@@ -226,7 +230,7 @@ function dat = define_ROI_video(cas, dat)
                     elseif key == 'k'
                         it = it - 1; if it < 1,  it = Nt; end
                     elseif key == 's'
-                        disp('Tonsils saved.')
+                        printf('\t%s saved. Moving on...', tt)
                         ROI_TONS = logical(BW_TONS);
                         ROI_SAS  = ROI_SAS & ~ ROI_TONS;
                         ROI_TONS  = ROI_TONS & ~ ROI_COR;
@@ -234,7 +238,7 @@ function dat = define_ROI_video(cas, dat)
                         close all;
                         break
                     elseif key == 'q'
-                        disp('Skipping tonsils for this location.')
+                        printf('\tSkipping tonsils for this location.')
                         skipped_tonsils = true;
                         ROI_TONS = false(size(BW_SPC));   % keep empty
                         save(vertex_file, 'hvertices_pia', 'hvertices_dura');
@@ -254,11 +258,11 @@ function dat = define_ROI_video(cas, dat)
         dat.ROI_SPC{idat}=ROI_SPC;
         
 
-        display_regions(roi_file)
+        display_regions(roi_file, cas.locations{idat})
         pause 
     end
 
-    function display_regions(roi_file)
+    function display_regions(roi_file, location)
         % Load ROIs
         load(roi_file,'ROI_SAS','ROI_SPC','ROI_COR','ROI_TONS')
         
@@ -285,7 +289,7 @@ function dat = define_ROI_video(cas, dat)
         
         axis equal tight ij
         colorbar('Ticks',[1,2,3], 'TickLabels',{'SAS','COR','TONS'})
-        title('ROI masks')
+        title(location)
         drawnow;
     end
 
@@ -298,26 +302,37 @@ function dat = define_ROI_video(cas, dat)
         if isempty(key), key = ''; end
     end
 
-    function show_composed_figure(SC, SM, SU)
+    function show_composed_figure(SC, SM, SU, tt)
         figure(99)
         hF = gcf;
         monitors = get(0, 'MonitorPositions');
         monitor1 = monitors(1, :);
-        hF.Position(1:2) = [monitor1(1)+80, monitor1(2)+80];
-        hF.Position(3:4) = [3*(floor(monitor1(3)/3))-160, floor(monitor1(3)/3)-160];
+        hF.Position(3:4) = [3*(floor(monitor1(3)/3))-100, floor(monitor1(3)/3)-80];
+        % Compute centered horizontal position
+        centerX = monitor1(1) + (monitor1(3) - hF.Position(3)) / 2;
+        % Align to top (small margin if you want)
+        marginTop = 100; % pixels below the top edge
+        topY = monitor1(2) + monitor1(4) - hF.Position(4) - marginTop;
+        hF.Position(1:2) = [centerX, topY];
         clf
-        subaxis(1, 3, 1, 'Margin', 0, 'Spacing', 0)
+        subaxis(1, 3, 1,  'Spacing', 0)
         imshow(SC)
-        text(4, 4, "COMPL", 'fontsize', 18, 'color', 'yellow')
+        text(4, 4, "PHASE", 'fontsize', 18, 'color', 'yellow')
         crameri lapaz
-        subaxis(1, 3, 2, 'Margin', 0, 'Spacing', 0)
+        subaxis(1, 3, 2,  'Spacing', 0)
         imshow(SM)
         text(4, 4, "MAGNI", 'fontsize', 18, 'color', 'yellow')
         crameri lapaz
-        subaxis(1, 3, 3, 'Margin', 0, 'Spacing', 0)
+        subaxis(1, 3, 3,  'Spacing', 0)
         imshow(SU, [-1.0, 1.0])
         text(4, 4, "UTOT", 'fontsize', 18, 'color', 'yellow')
         crameri vik
+        if lower(tt) == "tonsils"
+            sstt = "Contour the " + tt + " (j: next frame, k: previous frame, s: save, q: quit)";
+        else
+            sstt = "Contour the " + tt + " (j: next frame   k: previous frame   s: save)";
+        end
+        title (sstt, FontSize=14)
     end
 
     function show_composed_figure_after_dura(BW_SPC_in, SC, SM, SU)
@@ -325,12 +340,14 @@ function dat = define_ROI_video(cas, dat)
         hF = gcf;
         monitors = get(0, 'MonitorPositions');
         monitor1 = monitors(1, :);
-        hF.Position(1:2) = [monitor1(1)+80, monitor1(2)+80 ];
         hF.Position(3:4) = [3*(floor(monitor1(3)/3))-160, floor(monitor1(3)/3)-160];
+        % Compute centered horizontal position
+        centerX = monitor1(1) + (monitor1(3) - hF.Position(3)) / 2;
+        hF.Position(1:2) = [centerX, monitor1(2) + 20];
         clf
         subaxis(1, 3, 1, 'Margin', 0, 'Spacing', 0)
         imshow(BW_SPC_in .* SC)
-        text(4, 4, "COMPL", 'fontsize', 18, 'color', 'yellow')
+        text(4, 4, "PHASE", 'fontsize', 18, 'color', 'yellow')
         crameri lapaz
         subaxis(1, 3, 2, 'Margin', 0, 'Spacing', 0)
         imshow(BW_SPC_in .* SM)
@@ -347,8 +364,10 @@ function dat = define_ROI_video(cas, dat)
         hF = gcf;
         monitors = get(0, 'MonitorPositions');
         monitor1 = monitors(1, :);
-        hF.Position(1:2) = [monitor1(1)+80, monitor1(2)+80 ];
-        hF.Position(3:4) = [2*(floor(monitor1(3)/3))-160, floor(monitor1(3)/3)-160];
+        hF.Position(3:4) = [3*(floor(monitor1(3)/3))-160, floor(monitor1(3)/3)-160];
+        % Compute centered horizontal position
+        centerX = monitor1(1) + (monitor1(3) - hF.Position(3)) / 2;
+        hF.Position(1:2) = [centerX, monitor1(2) + 20];
         clf
         subaxis(1, 2, 1, 'Margin', 0, 'Spacing', 0)
         imshow(SM_in)

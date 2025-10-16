@@ -5,7 +5,7 @@ addpath('processing/');
 addpath('processing/Functions/');
 addpath('processing/Functions/Others/');
 
-cas.subj = "s5";
+cas.subj = "s4";
 
 
 %% 0) Check compatibility
@@ -25,6 +25,7 @@ run_segmentation(cas);
 %% 3) Alignment velocity measurements to segmentation
 % out: translation velocity DICOMs to adjucts to segmentation
 alignment_MRI(cas);
+
 %% 4) PC-MRI measurements
 crop_size = 100;
 [cas,dat_PC] = main_2_crop_set_roi(cas,dat_PC, crop_size);

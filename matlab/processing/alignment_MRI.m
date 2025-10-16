@@ -13,16 +13,15 @@ function alignment_MRI(cas)
     % ---------------- Paths & constants ----------------
 
     if isfolder(cas.dir.trans) && numel(dir(cas.dir.trans)) > 2
-        if askYN('-Transformations already exist. Skip? ([y]/n): ')
+        if askYN('- Transformations already exist. Skip? ([y]/n): ')
             return;
         end
     end
     
-    disp("-Running Slicer3D...")
-    % ---------------- Slicer3D post-processing ----------------
+    disp("- Running Slicer3D...")
+    
+    % ---------------- Slicer3D ----------------
     python_script = fullfile(cas.dir.git, 'slicer3D-code','alignment-MRI.py');
-    slicer_path = config_path('slicer', fullfile('..', 'config_file.txt'));
 
-    [~, ~] = system("""" + slicer_path + """ --python-script """ + python_script + """ """ + cas.subj + """ """ + cas.dir.chiari + """");
-
+    run_slicer_python(cas, python_script)
 end

@@ -101,7 +101,7 @@ if user_input not in ("", "yes"):
     volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, f"{nii_filename}.nii.gz"))
     volume_node.SetName("anatomy")
     slicer.util.selectModule('Data')
-    
+
     slicer.app.layoutManager().setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutSideBySideView)
 
     print("\n=== Manual steps in Slicer ===\n")
@@ -245,7 +245,7 @@ clear_folder(scene_temp_path) # clean up temporary folder
 repeat = True
 while repeat:
 
-    user_input = prompt_yes_with_fallback("Done. Type 'e' to exit", "NO")
+    user_input = prompt_yes_with_fallback("Done. Type 'e' to exit: ", "NO")
 
     if user_input == "e":
         sys.exit()  

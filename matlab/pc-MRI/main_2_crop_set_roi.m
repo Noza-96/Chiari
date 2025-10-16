@@ -1,31 +1,22 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [cas,dat_PC] = main_2_crop_set_roi(cas,dat_PC, crop_size)
 
 fprintf('\n4) PC-MRI measurements...\n')
 
-reference_location = 'C3C4'; 
-% (set to 'zero' to set location to 0.0)
-% (set to 'fromsag' to replace ljocations with those from sagittal geometry)
-% (e.g. 'C02C03' to shift all locationsy so that the C02C03 locations coincides with sagittal geometry)
+fprintf("- Apply linear transformation to align DICOMs with segmentation...\n")
+dat_PC = apply_linear_transformation(dat_PC, cas);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-disp("Adjusting vertical location ..." + newline)
-
-dat_PC = adjust_vertical_location_PC(cas, dat_PC, reference_location);
-
-disp("Cropping data ..." + newline)
+fprintf("\n- Cropping data... \n")
 
 dat_PC = crop_data(cas, dat_PC, crop_size);
 
-disp("Setting up ROIs ..." + newline)
+fprintf("\n- Setting up ROIs... ")
 
 dat_PC = define_ROI_video(cas, dat_PC);
 
-disp("Saving everything in a .mat file ..." + newline)
+filename = "data_1.mat";
+fprintf("\n\nSaving %s ...\n\n", filename)
 
-save(fullfile(cas.dir.mat, "data_2.mat"), 'cas', 'dat_PC');
-disp("Done!" + newline)
+save(fullfile(cas.dir.mat, filename), 'cas', 'dat_PC');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end

@@ -1,21 +1,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % [aux, cas, dat_PC] = run_if_empty('s4', 'GE');  % if skipping previous steps
 
-function [cas,dat_PC] = main_3_apply_roi_compute_Q(cas,dat_PC, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter, offset_vel)
+function [cas,dat_PC] = main_3_apply_roi_compute_Q(cas, dat, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter, offset_vel)
 
-    disp("Applying ROIs and computing Q ..." + newline)
+    fprintf("- Applying ROIs and computing Q...\n")
     
-    visualization_plots = true;
     
-    % offset_vel = false; % correction offset velocity
-    % correct_aliasing = false; % wrap in time - aliasing correction
-    % unwrap_periodic = false; % allow for periodic wraping
-    % smooth_spatial_outliers = false;  % Flag to apply spatial outlier smoothing
-    % gauss_filter = false; % apply gauss filter
+    dat_PC = apply_ROI_compute_Q(dat, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter);
     
-    dat_PC = apply_ROI_compute_Q(dat_PC, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter);
-    
-    disp(["Repeating and interpolating Q ..." + newline])
+    fprintf("\tCorrection offset ...\n")
     
     if offset_vel == true 
         dat_PC = correction_offset(dat_PC);
@@ -23,32 +16,38 @@ function [cas,dat_PC] = main_3_apply_roi_compute_Q(cas,dat_PC, correct_aliasing,
     
     dat_PC = repeat_interpolate_Q(dat_PC);
     
-    disp(["Computing SV and zero correction ..." + newline])
+    fprintf("\tComputing SV and zero correction ...\n")
     
     dat_PC = compute_SVQ_zc(dat_PC);
     
-    disp(["Fourier decomposition ..." + newline])
+    fprintf("\tFourier decomposition ...\n")
     
     dat_PC = decompose_fourier(cas, dat_PC);
+
+    movieVector = create_animation_pc(dat_PC, cas);
     
-    disp("Saving everything in a .mat file ..." + newline)
-    
-    
-    save(fullfile(cas.dir.mat, "data_3.mat"),'cas', 'dat_PC');
-    
-    disp( "Done!" + newline)
-    
-    if visualization_plots
+    if sum(correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter, offset_vel)>0
+        filename = "data_3.mat"; file_animation = "pcmri_filtered.mp4";
+        fprintf("\n\nSaving %s and %s...\n\n", filename, file_animation)
+        save_animation(movieVector, fullfile(cas.dir.vid, file_animation));
+        save(fullfile(cas.dir.mat, filename),'cas', 'dat_PC');
         
-        % plot_flow_rates(dat_PC, cas);  
-    
-        movieVector = create_animation_pc(dat_PC, cas);
-        
-        if offset_vel == true
-            save_animation(movieVector, fullfile(cas.dir.vid, "flow_measurements_"+cas.subj+"_off.mp4"));
-        else
-            save_animation(movieVector, fullfile(cas.dir.vid, "flow_measurements_"+cas.subj+".mp4"));
+        file_animation_raw = fullfile(cas.dir.vid, "pcmri_raw.mp4");
+        if ~exist(file_animation_raw, "file")
+            fprintf("\tAnalyze raw data ...")
+            dat_raw = apply_ROI_compute_Q(dat, false, false, false, false);
+            dat_raw = repeat_interpolate_Q(dat_raw);
+            dat_raw = compute_SVQ_zc(dat_raw);
+            dat_raw = decompose_fourier(cas, dat_raw);    
+            movieVector = create_animation_pc(dat_raw, cas);
+            save_animation(movieVector, fullfile(cas.dir.vid, file_animation_raw));
+            fprintf("\n\nSaving %s ...\n\n", file_animation_raw);
         end
+
     
-    end
+    
+
+
+
+    
 end

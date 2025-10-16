@@ -7,16 +7,15 @@ function dat = crop_data(cas, dat, croppedsize)
         
     else
 
-        disp("Previous cropping position found.")
+        fprintf("\tPrevious cropping positions found.\n\t")
 
-        answer = input("Do you want to use it? [y/n] ", 's');
+        answer = input("Do you want to use it? [y]/n ", 's');
         
         if answer == 'n'
             set_new_cropping = true;
         else
             load(fullfile(cas.dir.mat, "crop_xc_yc.mat"));
             set_new_cropping = false;
-            disp("Using the previous cropping position.")
         end
         
     end
@@ -27,7 +26,7 @@ function dat = crop_data(cas, dat, croppedsize)
 
         for idat = 1:dat.Ndat
 
-            disp("Click at the center of where to crop images ...")
+            fprintf("\tClick at the center of where to crop images ...")
 
             S_U_tot{idat} = sum(abs(dat.U_tot{idat}), 3)/dat.Nt{idat};
             S_compl{idat} = sum(abs(dat.compl{idat}), 3)/dat.Nt{idat};
@@ -73,8 +72,8 @@ function dat = crop_data(cas, dat, croppedsize)
         xmax = sizeorig(2);
 
         if (xmax <= croppedsize) || (ymax <= croppedsize)
-            disp("Crop size is larger than image size!")
-            disp("Setting crop size equal to image size")
+            fprintf("\tCrop size is larger than image size!")
+            fprintf("\tSetting crop size equal to image size")
             cl = floor(0.5*min(xmax, ymax));
         end
 

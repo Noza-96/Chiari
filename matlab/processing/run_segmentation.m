@@ -11,7 +11,7 @@ function cas = run_segmentation(cas)
     fprintf('\n2) Segmentation CSF space...\n')
 
     if exist(fullfile(cas.dir.seg, 'stl','segmentation.stl'),'file')
-        if askYN('-Segmentation already exist. Skip? ([y]/n): ')
+        if askYN('- Segmentation already exist. Skip? ([y]/n): ')
             return;
         end
     end
@@ -27,13 +27,13 @@ function cas = run_segmentation(cas)
         error('No series folder inside anatomy: %s', cas.dir.anatomy);
     elseif numel(sub) == 1
         anatomy_dicom = fullfile(sub(1).folder, sub(1).name);
-        fprintf('-Using anatomy series: %s\n', sub(1).name);
+        fprintf('- Using anatomy series: %s\n', sub(1).name);
     else
-        fprintf('-Available anatomy series:\n');
+        fprintf('-  Available anatomy series:\n');
         for i = 1:numel(sub)
             fprintf('%2d) %s\n', i, sub(i).name);
         end
-        idx = askInt('-Select anatomy series number: ', 1, numel(sub));
+        idx = askInt('- Select anatomy series number: ', 1, numel(sub));
         anatomy_dicom = fullfile(sub(idx).folder, sub(idx).name);
     end
 
@@ -42,12 +42,12 @@ function cas = run_segmentation(cas)
         status = system("dcm2niix -o " + cas.dir.seg + ...
                         " -f " + auto_seg_name + " -z y " + anatomy_dicom);
         if status == 0
-            disp("-Conversion DICOM to NIfTI completed.");
+            disp("- Conversion DICOM to NIfTI completed.");
         else
-            error("-Error: DICOM->NIfTI conversion failed.");
+            error("- Error: DICOM->NIfTI conversion failed.");
         end
     else
-        disp("-NIfTI file already exists. Skipping conversion.");
+        disp("- NIfTI file already exists. Skipping conversion.");
     end
 
     % ---------------- Automated segmentation (SCT) ----------------
@@ -56,16 +56,14 @@ function cas = run_segmentation(cas)
         system( "sct_deepseg -task canal_t2w -i " + nii_file);
         system( "sct_deepseg -task seg_spinal_rootlets_t2w -i " + nii_file);
     else
-        disp("-Automated segmentation already exists...");
+        disp("- Automated segmentation already exists...");
     end
-    disp("-Running Slicer3D...")
-    % ---------------- Slicer3D post-processing ----------------
+    disp("- Running Slicer3D...")
+
+    % ---------------- Slicer3D ----------------
     python_script = fullfile(cas.dir.git, 'slicer3D-code', 'segmentation.py');
-    slicer_path = fullfile(config_path('slicer', fullfile('..', 'config_file.txt')));
 
-    [~, ~] = system("""" + slicer_path + """ --python-script """ + python_script + """ """ + cas.subj + """ """ + cas.dir.chiari + """");
-
-    input('Type "ok" to continue: ','s');
+    run_slicer_python(cas, python_script)
 
 end
 

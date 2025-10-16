@@ -166,19 +166,6 @@ function dat  = read_dicoms_PC(cas, resettimevector)
 
             end
         end
-        
-        filename = cas.locations{idat} + "_transformation.txt";
-        transformation_path = fullfile(cas.dir.seg, 'transformation', filename);
-
-        if exist(transformation_path)
-            % Read the matrix (assumes 4 rows, 4 columns, space-separated)
-            transformation_matrix = dlmread(transformation_path);
-                     
-            pixel_coordinates = applyTransformation(pixel_coordinates, transformation_matrix);
-
-            % Display to verify
-            fprintf('Transformation %s applied! \n', filename);
-        end
 
         % Store in cell for this case
         pixel_coord{idat} = pixel_coordinates;
@@ -190,13 +177,9 @@ function dat  = read_dicoms_PC(cas, resettimevector)
 
             t{idat}(jj) = double(triggertime{idat}(jj)) / 1000.0;
 
-            % Save the phase and magnitude images:
-
             phase{idat}(:, :, jj) = im{idat}{jj};
             magni{idat}(:, :, jj) = immag{idat}{jj};
             compl{idat}(:, :, jj) = imcom{idat}{jj};
-
-            % Convert image pairs to velocity fields in cm/s (Note: positive is craniocaudal flow):
             
             % Convert image pairs to velocity fields in cm/s:
             if strcmp(cas.model, 'GE')
@@ -232,7 +215,7 @@ function dat  = read_dicoms_PC(cas, resettimevector)
         
         % Save the slice location in cm:
 
-        locz{idat} = - location{idat};
+        locz{idat} = location{idat} - location{1};
         
     end
 
@@ -258,36 +241,6 @@ function dat  = read_dicoms_PC(cas, resettimevector)
     dat.venc         = venc;
     dat.fcal_H_cm_px = fcal_H_cm_px;
     dat.fcal_V_cm_px = fcal_V_cm_px;
+    dat.locations = cas.locations;
 
 end
-
-function transformed_pixel_coordinates = applyTransformation(pixel_coordinates, transformation_matrix)
-% Apply a 4x4 transformation matrix to a [rows x cols x 3] pixel coordinate grid
-%
-% Inputs:
-%   pixel_coordinates     - [rows x cols x 3] array of original (x,y,z) positions
-%   transformation_matrix - [4 x 4] transformation matrix from 3D slicer
-%
-% Output:
-%   transformed_pixel_coordinates - [rows x cols x 3] array of transformed positions
-
-    % Get dimensions
-    [rows, cols, ~] = size(pixel_coordinates);
-    N = rows * cols;
-
-    % Flatten pixel coordinates into [N x 3]
-    coords = reshape(pixel_coordinates, [N, 3]);
-
-    % Convert to homogeneous coordinates [N x 4]
-    coords_hom = [coords, ones(N, 1)];
-
-    % Apply transformation matrix [N x 4]
-    transformed_coords_hom = (transformation_matrix * coords_hom')';  % [N x 4]
-
-    % Extract (x, y, z)
-    transformed_coords = transformed_coords_hom(:, 1:3);
-
-    % Reshape back to [rows x cols x 3]
-    transformed_pixel_coordinates = reshape(transformed_coords, [rows, cols, 3]);
-end
-
