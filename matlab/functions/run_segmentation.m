@@ -8,7 +8,7 @@ function cas = run_segmentation(cas)
     auto_seg_name = "auto_segmentation";
 
 
-    fprintf('\n2) Segmentation CSF space...\n')
+    fprintf('\n2) Segmentation CSF space:\n')
 
     if exist(fullfile(cas.dir.seg, 'stl','segmentation.stl'),'file')
         if askYN('- Segmentation already exist. Skip? ([y]/n): ')

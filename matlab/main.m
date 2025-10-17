@@ -1,9 +1,7 @@
 % Add functions
 clear; close all; clc;
-addpath('pc-MRI/');
-addpath('processing/');
-addpath('processing/Functions/');
-addpath('processing/Functions/Others/');
+addpath('functions/');
+addpath('functions/others/');
 
 cas.subj = "s4";
 
@@ -11,8 +9,6 @@ cas.subj = "s4";
 %% 0) Check compatibility
 % out: config file with paths
 check_compatibility(["Slicer", "ANSYS"]);
-
-fprintf('\n--- Processing subject: %s ---\n\n', cas.subj);
 
 %% 1) Setup subject and extract MRI data 
 % out: list DICOMs and organize into flow and anatomy 
@@ -27,16 +23,10 @@ run_segmentation(cas);
 alignment_MRI(cas);
 
 %% 4) PC-MRI measurements
-crop_size = 100;
-[cas,dat_PC] = main_2_crop_set_roi(cas,dat_PC, crop_size);
+[cas,dat_PC] = main_2_crop_set_roi(cas,dat_PC, 100);
 
-%% 
-correct_aliasing = true; % wrap in time - aliasing correction
-unwrap_periodic = true; % allow for periodic wraping
-smooth_spatial_outliers = true;  % Flag to apply spatial outlier smoothing
-gauss_filter = true; % apply gauss filter
-offset_vel = true;  % correction offset 
-[cas,dat_PC] = main_3_apply_roi_compute_Q(cas,dat_PC, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter, offset_vel);
+%% 5) Filter and create animation
+[cas,dat_PC] = main_3_apply_roi_compute_Q(cas,dat_PC, true, true, true, true, true);
 
 %% 6) Define geometry in SpaceClaim
 % out: computational domain

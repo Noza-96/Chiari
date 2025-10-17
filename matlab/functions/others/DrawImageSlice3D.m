@@ -99,16 +99,6 @@ col_dircos(X) = dinfo.ImageOrientationPatient(4);
 col_dircos(Y) = dinfo.ImageOrientationPatient(5);
 col_dircos(Z) = dinfo.ImageOrientationPatient(6);
 
-% % Check normality and orthogonality of the row and col vectors
-% Crownorm = dot(row_dircos, row_dircos);
-% Ccolnorm = dot(col_dircos, col_dircos);
-% Cdotprod = dot(row_dircos, col_dircos);
-% 
-% if abs(Cdotprod) > 1e-5
-%     warnstr = sprintf('Possible dicominfo error: the dotproduct of the row and col vectors is %f should be 0',Cdotprod );
-%     disp(warnstr)
-% end
-
 % Calculate image dimensions
 row_length = dinfo.PixelSpacing(1) * nr;
 col_length = dinfo.PixelSpacing(2) * nc;

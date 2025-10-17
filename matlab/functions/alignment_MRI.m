@@ -8,7 +8,7 @@ function alignment_MRI(cas)
 % Assumes organize_flow_anatomy(subject) (or equivalent) already created
 % patient-data/<subject>/anatomy/<series_desc> with DICOMs inside.
 
-    fprintf('\n3) Alignment velocity measurements to segmentation...\n')
+    fprintf('\n3) Alignment velocity measurements to segmentation:\n')
 
     % ---------------- Paths & constants ----------------
 

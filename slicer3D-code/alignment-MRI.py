@@ -391,7 +391,7 @@ for k in range(len(sorted_volumes)):
         
 repeat = True
 while repeat:
-    user_input = prompt_yes_with_fallback("\nDone. Type 'e' to exit", "NO")
+    user_input = prompt_yes_with_fallback("\nDone. Type 'e' to exit: ", "NO")
 
     if user_input == "e":
         sys.exit()  

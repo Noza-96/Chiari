@@ -1,3 +1,69 @@
+function [cas, dat_PC] = read_MRI_data(cas)
+
+    fprintf('\n--- Processing subject: %s ---\n\n', cas.subj);
+
+    fprintf('1) Setup subject and extract MRI data:\n')
+    %% Create directories
+    cas = create_directories(cas);
+
+    if hasContent(cas.dir.anatomy) && hasContent(cas.dir.flow)
+        if askYN('- MRI data already extracted. Skip? ([y]/n): ')
+            load(fullfile(cas.dir.mat, 'data_0.mat'), 'cas', 'dat_PC');
+            return;
+        end
+    end
+
+    %% 
+    fprintf('\nOrganize DICOM data...\n')
+    cas = organize_DICOMS(cas);
+
+    %% 
+    fprintf('\nExtract PC-MRI data...\n')
+    [cas, dat_PC] = main_1_read_dat(cas);
+    
+    %% 
+    file_name = "data_0.mat";
+    fprintf("Saving %s ...\n", file_name)
+    save(fullfile(cas.dir.mat, file_name), 'cas','dat_PC');
+end
+
+
+function cas = create_directories(cas)
+% - Create directories
+    cas.dir.chiari          = full_path(fullfile(pwd, '..', '..'));
+    cas.dir.git             = fullfile(cas.dir.chiari,'git-chiari');
+    cas.dir.patient         = fullfile(cas.dir.chiari,'patient-data', cas.subj);
+    cas.dir.comp            = fullfile(cas.dir.chiari,'computations');
+    cas.dir.anatomy         = fullfile(cas.dir.patient, 'anatomy');
+    cas.dir.flow            = fullfile(cas.dir.patient, 'flow');
+    cas.dir.dat              = fullfile(cas.dir.comp,'pc-mri', cas.subj);
+    cas.dir.mat              = fullfile(cas.dir.dat, 'mat');
+    cas.dir.aux              = fullfile(cas.dir.mat, 'aux');
+    cas.dir.vid              = fullfile(cas.dir.comp, 'videos', cas.subj);
+    cas.dir.fig              = fullfile(cas.dir.comp, 'figures', cas.subj);
+    cas.dir.ROI              = fullfile(cas.dir.mat,'ROIs');
+    cas.dir.ansys            = fullfile(cas.dir.comp, 'ansys', cas.subj);
+    cas.dir.ansys_out        = fullfile(cas.dir.ansys, 'outputs');
+    cas.dir.ansys_in         = fullfile(cas.dir.ansys, 'inputs');
+    cas.dir.ansys_profiles   = fullfile(cas.dir.ansys_in, 'profiles');
+    cas.dir.seg              = fullfile(cas.dir.comp, 'segmentation', cas.subj);
+    cas.dir.trans            = fullfile(cas.dir.seg,'transformation');
+
+    % List of directories to ensure exist
+    dirsToCreate = {cas.dir.anatomy, cas.dir.flow, cas.dir.mat, cas.dir.dat, cas.dir.ansys, cas.dir.ansys_out, cas.dir.ansys_in, cas.dir.ansys_profiles, cas.dir.vid, ... 
+        cas.dir.seg,cas.dir.fig, cas.dir.ROI,fullfile(cas.dir.seg, 'stl'), fullfile(cas.dir.ansys_in, "planes"), fullfile(cas.dir.ansys_in, "flow-rates"), fullfile(cas.dir.ansys_in, "case-files"), fullfile(cas.dir.ansys_in, "journals")};
+    
+    % Create directories if not present
+    for i = 1:length(dirsToCreate)
+        createDirIfNotExists(dirsToCreate{i});
+    end
+end
+
+function tf = hasContent(folder)
+% Return true if folder exists and has anything inside (ignores . and ..)
+    tf = isfolder(folder) && numel(dir(fullfile(folder,'*'))) > 2;
+end
+
 function cas = organize_DICOMS(cas)
 % ORGANIZE_FLOW_ANATOMY
 % - Lists DICOMs
@@ -476,8 +542,104 @@ function split_flow_series(src_path, dest_base, base_name)
         end
     end
 
-    rmdir(fullfile(dest_base, [base_name]), 's');
+    rmdir(fullfile(dest_base, base_name), 's');
 
     fprintf('Organized into:\n  %s\n  %s\n  %s\n', dest00, destMAG, destP02);
 end
+
+function [cas, dat_PC] = main_1_read_dat(cas)
+
+    % Auxiliary directories to clean or create
+    out_folder = fullfile(tempdir, 'pc-MRI');
+
+    cas = scan_folders_set_cas(cas, out_folder);
+
+    resettimevector = false;
+
+    if cas.Ncas > 0
+        dat_PC = read_dicoms_PC(cas, resettimevector);
+    else
+        error("No PC DICOMS found!" + newline)
+    end
+    
+    % Get all directories starting with 'aux' in out_folder
+    d = dir(fullfile(out_folder, 'aux*'));
+    for k = 1:numel(d)
+        if d(k).isdir
+            rmdir(fullfile(out_folder, d(k).name), 's'); % 's' removes contents recursively
+        end
+    end
+
+end
+
+function cas = scan_folders_set_cas(cas, out_folder)
+
+    get_folders = fullfile(cas.dir.git, 'matlab','functions','others','get_folders.sh');
+   
+    for measurement = "PC" % ["PC", "RT", "FM"]
+        createOrCleanDir(fullfile(out_folder, "aux_" + measurement));
+        system(sprintf('bash %s "%s" "%s" "%s"', get_folders, cas.dir.flow, out_folder, measurement));
+        if dir(fullfile(out_folder, "aux_" + measurement, "folders.txt")).bytes > 0
+            % File exists and is not empty — break or return
+            break
+        end
+    end
+    
+    strfolders_PC = fileread(fullfile(out_folder,'aux_PC', 'folders.txt'));
+    folders_PC = regexp(strfolders_PC, '\r\n|\r|\n', 'split');
+    folders_PC(end) = [];
+    
+    strfolders_PC_ = fileread(fullfile(out_folder,'aux_PC', 'folders_.txt'));
+    folders_PC_ = regexp(strfolders_PC_, '\r\n|\r|\n', 'split');
+    folders_PC_(end) = [];
+    
+    strfolders_PC_P = fileread(fullfile(out_folder, 'aux_PC', 'folders_P.txt'));
+    folders_PC_P = regexp(strfolders_PC_P, '\r\n|\r|\n', 'split');
+    folders_PC_P(end) = [];
+    
+    strfolders_PC_MAG = fileread(fullfile(out_folder, 'aux_PC', 'folders_MAG.txt'));
+    folders_PC_MAG = regexp(strfolders_PC_MAG, '\r\n|\r|\n', 'split');
+    folders_PC_MAG(end) = [];
+    
+    Ncas_PC = length(folders_PC);
+    
+    if Ncas_PC > 0
+        for nn = 1:Ncas_PC
+            % include only data 
+            ind = strfind(folders_PC{nn}, '/')-1;
+            ind = ind(1);
+            locations_PC{nn} = folders_PC{nn}(4:ind);
+            names_PC{nn} = strrep(folders_PC{nn},'/','-');
+            zones_PC{nn} = folders_PC{nn}(1:2);
+        end
+    else
+        folders_PC = {};
+        folders_PC_ = {};
+        folders_PC_P = {};
+        folders_PC_MAG = {};
+        names_PC = {};
+        zones_PC = {};
+        locations_PC = {};
+    end
+    cas.Ncas        = Ncas_PC;
+    cas.folders     = folders_PC;
+    cas.folders_    = folders_PC_;
+    cas.folders_P   = folders_PC_P;
+    cas.folders_MAG = folders_PC_MAG;
+    cas.names       = names_PC;
+    cas.zones       = zones_PC;
+    cas.locations   = locations_PC;
+
+end
+
+
+% Helper function to clean or create a directory
+function createOrCleanDir(dirPath)
+    if ~isfolder(dirPath)
+        mkdir(dirPath);
+    else
+        delete(fullfile(dirPath, '*'));
+    end
+end
+
 
