@@ -5,10 +5,9 @@ addpath('functions/others/');
 
 cas.subj = "s4";
 
-
 %% 0) Check compatibility
 % out: config file with paths
-check_compatibility(["Slicer", "ANSYS"]);
+check_compatibility(["Slicer"]);
 
 %% 1) Setup subject and extract MRI data 
 % out: list DICOMs and organize into flow and anatomy 
