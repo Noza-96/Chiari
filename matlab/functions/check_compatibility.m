@@ -42,10 +42,10 @@ function paths = check_tools_exist(commands)
             [status, ~] = system(check_cmd);
     
             if status ~= 0
-                fprintf('%s might be missing (install: %s)', cmd, url)
+                fprintf('\n- %s might be missing (install: %s)\n\n', cmd, url)
                 paths{i} = askForPath(cmd + "_PATH", ...
-                    "If " + cmd + "already installed, paste path executable");
-                paths{i} = """" + paths{i} + """";
+                    "If " + cmd + " is already installed ...");
+                paths{i} = paths{i};
             else
                 paths{i} = cmd;
             end
@@ -82,11 +82,11 @@ function find_programs_paths(programs, config_file)
     
         if contains(prog, 'ansys')
             ansys_guess  = guessANSYS();  % Find ANSYS root folder
-            if isempty(ansys_guess) || ~isfolder(ansys_guess)
-                ansys_guess = uigetdir('C:\', ...
+            if isempty(ansys_guess) || (~ismac && ~isfolder(ansys_guess))
+                ansys_guess = askForPath('ANSYS_PATH', ...
                     'Select ANSYS root folder (e.g., C:\Program Files\ANSYS Inc\)');
             end
-            if isempty(ansys_guess) || ~isfolder(ansys_guess)
+            if isempty(ansys_guess) || (~ismac && ~isfolder(ansys_guess))
                 error("Invalid ANSYS folder: '%s'", string(ansys_guess));
             end
         end
@@ -113,7 +113,7 @@ function find_programs_paths(programs, config_file)
         fprintf(fid, 'ANSYS_PATH="%s"\n', ansys_guess);
     end
 
-    fprintf('Config written to: %s\n', config_file);
+    fprintf('\nConfig written to: %s\n', config_file);
 end
 
 % ------- helpers -------
@@ -168,8 +168,9 @@ function p = guessANSYS()
             p = '';
         end
     elseif ismac
-        fprintf('ANSYS not available on macOS... \n');
+        fprintf('\n- ANSYS not available on macOS... \n');
         p = 'NAN';
+        return
     else
         % Linux typical installs
         candidates = ["/usr/ansys_inc", "/opt/ansys_inc"];

@@ -6,7 +6,9 @@ function [cas, dat_PC] = read_MRI_data(cas)
     %% Create directories
     cas = create_directories(cas);
 
-    if hasContent(cas.dir.anatomy) && hasContent(cas.dir.flow)
+    data_file = fullfile(cas.dir.mat, 'data_0.mat');
+
+    if exist(data_file,'file')
         if askYN('- MRI data already extracted. Skip? ([y]/n): ')
             load(fullfile(cas.dir.mat, 'data_0.mat'), 'cas', 'dat_PC');
             return;
@@ -59,11 +61,6 @@ function cas = create_directories(cas)
     end
 end
 
-function tf = hasContent(folder)
-% Return true if folder exists and has anything inside (ignores . and ..)
-    tf = isfolder(folder) && numel(dir(fullfile(folder,'*'))) > 2;
-end
-
 function cas = organize_DICOMS(cas)
 % ORGANIZE_FLOW_ANATOMY
 % - Lists DICOMs
@@ -72,13 +69,6 @@ function cas = organize_DICOMS(cas)
 
     %% Setup
     data_name = 'data_0.mat';
-
-    if hasContent(cas.dir.anatomy) && hasContent(cas.dir.flow)
-        if askYN('-DICOMs are already organized. Skip? ([y]/n): ')
-            load(fullfile(cas.dir.mat, data_name),"cas");
-            return;
-        end
-    end
     
     % List DICOM series
     T = list_dicom_series(cas.dir.patient);
