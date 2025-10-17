@@ -40,6 +40,9 @@ function cas = run_segmentation(cas)
     % ---------------- DICOM -> NIfTI ----------------
     if ~isfile(nii_file)
         dcm_nif_path = fullfile(config_path('dcm2niix', fullfile(cas.dir.chiari, 'config_file.txt')));
+        if dcm_nif_path~="dcm2niix"
+            dcm_nif_path = fullfile(dcm_nif_path, "dcm2niix");
+        end
         status = system(dcm_nif_path + " -o " + cas.dir.seg + ...
                         " -f " + auto_seg_name + " -z y " + anatomy_dicom);
         if status == 0
@@ -52,7 +55,9 @@ function cas = run_segmentation(cas)
     end
 
     sct_path = fullfile(config_path('sct_deepseg', fullfile(cas.dir.chiari, 'config_file.txt')));
-
+    if sct_path~="sct_deepseg"
+        sct_path = fullfile(dcm_nif_path, "sct_deepseg");
+    end
     % ---------------- Automated segmentation (SCT) ----------------
     if ~isfile(fullfile(cas.dir.seg, auto_seg_name + "_seg.nii.gz"))
         system( sct_path + " -task seg_sc_contrast_agnostic -i " + nii_file);
