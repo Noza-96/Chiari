@@ -71,9 +71,11 @@ function cas = organize_DICOMS(cas)
 % - Organizes flow series into patient-data/<cas.subj>/flow/zK-<level>/01PC/<series_desc>_{00,MAG_01,P_02}
 
     %% Setup
+    data_name = 'data_0.mat';
 
     if hasContent(cas.dir.anatomy) && hasContent(cas.dir.flow)
         if askYN('-DICOMs are already organized. Skip? ([y]/n): ')
+            load(fullfile(cas.dir.mat, data_name),"cas");
             return;
         end
     end
@@ -188,7 +190,7 @@ function cas = organize_DICOMS(cas)
                 z = z + 1;  % next slice level
             end
         end
-        save(fullfile(cas.dir.mat, 'data_0'),"cas");
+        save(fullfile(cas.dir.mat, data_name),"cas");
     end
 
 end

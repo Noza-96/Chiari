@@ -1,33 +1,31 @@
 function check_compatibility(programs)
 
-    % --- Define commands and installation URLs ---
-    commands = {
-        'sct_deepseg', 'https://spinalcordtoolbox.com/user_section/installation/windows.html';
-        'bash',        'https://git-scm.com/downloads/win';
-        'dcm2niix',    'https://pypi.org/project/dcm2niix/'
-    };
-
     config_file = full_path(fullfile(pwd, '..', '..', 'config_file.txt'));
 
     if ~exist(config_file, "file")
-        
+    
+        % --- Define commands and installation URLs ---
+        commands = {
+            'sct_deepseg', 'https://spinalcordtoolbox.com/user_section/installation/windows.html';
+            'bash',        'https://git-scm.com/downloads/win';
+            'dcm2niix',    'https://pypi.org/project/dcm2niix/'
+        };
+            
         % check tools exist
-        missing = check_tools_exist(commands);
-        if ~isempty(missing)
-            fprintf('\nCommands that need to be installed:\n');
-            for i = 1:numel(missing)
-                fprintf('  - %s\n', missing{i});
-            end
-            error('Some required commands are missing — see list above.');
-        end
+        paths = check_tools_exist(commands);
 
         % create config paths
         find_programs_paths(programs, config_file);
+        fid = fopen(config_file, 'a');
+        for i=1:length(paths)
+            fprintf(fid, upper(commands{i,1}) + "_PATH=""%s""\n", paths{i});
+        end
     end
 end
 
-function missing = check_tools_exist(commands)
-        missing = {};
+
+function paths = check_tools_exist(commands)
+        paths = cell(size(commands,1),1); 
     
         % --- Loop through each command ---
         for i = 1:size(commands,1)
@@ -44,7 +42,12 @@ function missing = check_tools_exist(commands)
             [status, ~] = system(check_cmd);
     
             if status ~= 0
-                missing{end+1} = sprintf('%s (install: %s)', cmd, url); 
+                fprintf('%s might be missing (install: %s)', cmd, url)
+                paths{i} = askForPath(cmd + "_PATH", ...
+                    "If " + cmd + "already installed, paste path executable");
+                paths{i} = """" + paths{i} + """";
+            else
+                paths{i} = cmd;
             end
         end
 end

@@ -39,7 +39,8 @@ function cas = run_segmentation(cas)
 
     % ---------------- DICOM -> NIfTI ----------------
     if ~isfile(nii_file)
-        status = system("dcm2niix -o " + cas.dir.seg + ...
+        dcm_nif_path = fullfile(config_path('dcm2niix', fullfile(cas.dir.chiari, 'config_file.txt')));
+        status = system(dcm_nif_path + " -o " + cas.dir.seg + ...
                         " -f " + auto_seg_name + " -z y " + anatomy_dicom);
         if status == 0
             disp("- Conversion DICOM to NIfTI completed.");
@@ -50,11 +51,13 @@ function cas = run_segmentation(cas)
         disp("- NIfTI file already exists. Skipping conversion.");
     end
 
+    sct_path = fullfile(config_path('sct_deepseg', fullfile(cas.dir.chiari, 'config_file.txt')));
+
     % ---------------- Automated segmentation (SCT) ----------------
     if ~isfile(fullfile(cas.dir.seg, auto_seg_name + "_seg.nii.gz"))
-        system( "sct_deepseg -task seg_sc_contrast_agnostic -i " + nii_file);
-        system( "sct_deepseg -task canal_t2w -i " + nii_file);
-        system( "sct_deepseg -task seg_spinal_rootlets_t2w -i " + nii_file);
+        system( sct_path + " -task seg_sc_contrast_agnostic -i " + nii_file);
+        system( sct_path + " -task canal_t2w -i " + nii_file);
+        system( sct_path + " -task seg_spinal_rootlets_t2w -i " + nii_file);
     else
         disp("- Automated segmentation already exists...");
     end
