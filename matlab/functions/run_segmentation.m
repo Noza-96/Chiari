@@ -41,10 +41,10 @@ function cas = run_segmentation(cas)
     if ~isfile(nii_file)
         dcm_nif_path = fullfile(config_path('dcm2niix', fullfile(cas.dir.chiari, 'config_file.txt')));
         if dcm_nif_path~="dcm2niix"
-            dcm_nif_path = fullfile(dcm_nif_path, "dcm2niix");
+            dcm_nif_path = """" + fullfile(dcm_nif_path, "dcm2niix") + """";
         end
-        status = system(dcm_nif_path + " -o " + cas.dir.seg + ...
-                        " -f " + auto_seg_name + " -z y " + anatomy_dicom);
+        cmd = dcm_nif_path + " -o " + cas.dir.seg + " -f " + auto_seg_name + " -z y " + anatomy_dicom;
+        status = system(cmd);
         if status == 0
             disp("- Conversion DICOM to NIfTI completed.");
         else
@@ -53,16 +53,22 @@ function cas = run_segmentation(cas)
     else
         disp("- NIfTI file already exists. Skipping conversion.");
     end
-
-    sct_path = fullfile(config_path('sct_deepseg', fullfile(cas.dir.chiari, 'config_file.txt')));
-    if sct_path~="sct_deepseg"
-        sct_path = fullfile(dcm_nif_path, "sct_deepseg");
+    sct_name = "sct_deepseg";
+    sct_path = fullfile(config_path(sct_name, fullfile(cas.dir.chiari, 'config_file.txt')));
+    if sct_path~=sct_name
+        sct_path = fullfile(sct_path, sct_name);
     end
+    [~,version_sct] = system("where " + sct_name);
+    version_sct = str2double(regexp(version_sct, '(?<=sct_)\d+\.?\d*', 'match', 'once'));
     % ---------------- Automated segmentation (SCT) ----------------
     if ~isfile(fullfile(cas.dir.seg, auto_seg_name + "_seg.nii.gz"))
-        system( sct_path + " -task seg_sc_contrast_agnostic -i " + nii_file);
-        system( sct_path + " -task canal_t2w -i " + nii_file);
-        system( sct_path + " -task seg_spinal_rootlets_t2w -i " + nii_file);
+        if version_sct < 7
+            system( sct_path + " -task seg_sc_contrast_agnostic -i " + nii_file);
+            system( sct_path + " -task canal_t2w -i " + nii_file);
+        else
+            system( sct_path + " spinalcord -i " + nii_file);
+            system( sct_path + " sc_canal_t2 -i " + nii_file);
+        end
     else
         disp("- Automated segmentation already exists...");
     end
