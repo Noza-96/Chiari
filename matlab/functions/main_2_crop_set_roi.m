@@ -123,9 +123,9 @@ function dat = crop_data(cas, dat, croppedsize)
         
         fh = 99;
 
-        for idat = 1:dat.Ndat
+        fprintf("\tClick at the center of where to crop images ...")
 
-            fprintf("\tClick at the center of where to crop images ...")
+        for idat = 1:dat.Ndat
 
             S_U_tot{idat} = sum(abs(dat.U_tot{idat}), 3)/dat.Nt{idat};
             S_compl{idat} = sum(abs(dat.compl{idat}), 3)/dat.Nt{idat};
@@ -246,13 +246,13 @@ function dat = define_ROI_video(cas, dat)
         has_vertices = exist(vertex_file, 'file');
         if has_vertices
             previous_ROI = 1;
-            fprintf('\tLoading previous vertices ...\n')
+            fprintf('\tLoading previous vertices for: %s\n', cas.locations{idat})
             S = load(vertex_file);
             if ~isfield(S,'hvertices_dura'), S.hvertices_dura = []; end
             if ~isfield(S,'hvertices_cord'),  S.hvertices_cord  = []; end
             if ~isfield(S,'hvertices_tons'), S.hvertices_tons = []; end
         else
-            fprintf('\tNo previous vertex data found.')
+            fprintf('\n\tNo previous vertex data found for: %s', cas.locations{idat})
             S = struct('hvertices_dura',[],'hvertices_cord',[],'hvertices_tons',[]);
         end
 
@@ -394,9 +394,9 @@ function dat = define_ROI_video(cas, dat)
         crameri vik
         if ini == 0
             if lower(tt) == "tonsils"
-                sstt = "\bf(OPTIONAL, q:quit) Click on left or right panel and contour the " + tt + "";
+                sstt = "\bf(OPTIONAL, q:quit) Click on left or right panel and contour the " + tt + " \rm (when done, press any key to continue)";
             else
-                sstt = "\bfClick on left or right panel and contour the " + tt;
+                sstt = "\bfClick on left or right panel to contour the " + tt + "  \rm (when done, press any key to continue)";
             end
         else
             if lower(tt) == "tonsils"

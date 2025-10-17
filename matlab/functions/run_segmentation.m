@@ -1,12 +1,13 @@
-function cas = run_segmentation(cas)
+function cas = run_segmentation(cas, skip_segmentation)
 % RUN_SEGMENTATION(subject)
 % - Finds the anatomy DICOM folder under patient-data/<subject>/anatomy
 % - Converts DICOMs to NIfTI 
 % - Runs SCT auto-segmentation
 % - Launches Slicer3D to create manual segmentations
 
-    auto_seg_name = "auto_segmentation";
+    if skip_segmentation == true, return, end
 
+    auto_seg_name = "auto_segmentation";
 
     fprintf('\n2) Segmentation CSF space:\n')
 
@@ -16,11 +17,11 @@ function cas = run_segmentation(cas)
         end
     end
 
-    nii_file = fullfile(cas.dir.seg, auto_seg_name + ".nii.gz");
+    nii_file = fullfile(full_path(cas.dir.seg), auto_seg_name + ".nii.gz");
 
     % ---------------- Find anatomy DICOM folder ----------------
 
-    sub = dir(cas.dir.anatomy);
+    sub = dir(full_path(cas.dir.anatomy));
     sub = sub([sub.isdir] & ~ismember({sub.name},{'.','..'}));
 
     if isempty(sub)
@@ -43,7 +44,7 @@ function cas = run_segmentation(cas)
         if dcm_nif_path~="dcm2niix"
             dcm_nif_path = """" + fullfile(dcm_nif_path, "dcm2niix") + """";
         end
-        cmd = dcm_nif_path + " -o " + cas.dir.seg + " -f " + auto_seg_name + " -z y " + anatomy_dicom;
+        cmd = dcm_nif_path + " -o " + full_path(cas.dir.seg) + " -f " + auto_seg_name + " -z y " + anatomy_dicom;
         status = system(cmd);
         if status == 0
             disp("- Conversion DICOM to NIfTI completed.");
@@ -75,7 +76,7 @@ function cas = run_segmentation(cas)
     disp("- Running Slicer3D...")
 
     % ---------------- Slicer3D ----------------
-    python_script = fullfile(cas.dir.git, 'slicer3D-code', 'segmentation.py');
+    python_script = fullfile(full_path(cas.dir.git), 'slicer3D-code', 'segmentation.py');
 
     run_slicer_python(cas, python_script)
 

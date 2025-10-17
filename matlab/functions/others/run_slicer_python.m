@@ -2,7 +2,7 @@ function run_slicer_python(cas, python_script)
     slicer_path = fullfile(config_path('slicer', fullfile(cas.dir.chiari, 'config_file.txt')));
 
     args = "--no-splash --python-script """ + python_script + ...
-           """ """ + cas.subj + """ """ + cas.dir.chiari + """";
+           """ """ + cas.subj + """ """ + full_path(cas.dir.chiari) + """";
     
     if ispc
         % ----- Windows -----

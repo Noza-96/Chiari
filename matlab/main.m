@@ -15,11 +15,11 @@ check_compatibility(["Slicer", "ANSYS"]);
 
 %% 2) Segmentation CSF space
 % out: automatic + manual segmentation -> .STL file
-run_segmentation(cas);
+run_segmentation(cas, true);
 
 %% 3) Alignment velocity measurements to segmentation
 % out: translation velocity DICOMs to adjucts to segmentation
-alignment_MRI(cas);
+alignment_MRI(cas, true);
 
 %% 4) PC-MRI measurements
 [cas,dat_PC] = main_2_crop_set_roi(cas,dat_PC, 100);

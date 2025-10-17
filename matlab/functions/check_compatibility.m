@@ -1,6 +1,6 @@
 function check_compatibility(programs)
 
-    config_file = full_path(fullfile(pwd, '..', '..', 'config_file.txt'));
+    config_file = full_path(fullfile('..', '..', 'config_file.txt'));
 
     if ~exist(config_file, "file")
     

@@ -32,7 +32,7 @@ end
 
 function cas = create_directories(cas)
 % - Create directories
-    cas.dir.chiari          = full_path(fullfile(pwd, '..', '..'));
+    cas.dir.chiari          = fullfile( '..', '..');
     cas.dir.git             = fullfile(cas.dir.chiari,'git-chiari');
     cas.dir.patient         = fullfile(cas.dir.chiari,'patient-data', cas.subj);
     cas.dir.comp            = fullfile(cas.dir.chiari,'computations');
