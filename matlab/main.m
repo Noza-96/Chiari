@@ -3,14 +3,15 @@ clear; close all; clc;
 addpath('functions/');
 addpath('functions/others/');
 
-cas.subj = "s0";
+cas.subj = "s00";
 
 %% 0) Check compatibility
 % out: config file with paths
-check_compatibility(["Slicer", "ANSYS"]);
+check_compatibility(["Slicer"]);
 
 %% 1) Setup subject and extract MRI data 
 % out: list DICOMs and organize into flow and anatomy 
+
 [cas, dat_PC] = read_MRI_data(cas);
 
 %% 2) Segmentation CSF space
@@ -22,10 +23,10 @@ run_segmentation(cas, true);
 alignment_MRI(cas, true);
 
 %% 4) PC-MRI measurements
-[cas,dat_PC] = main_2_crop_set_roi(cas,dat_PC, 100);
+[cas, dat_PC] = main_2_crop_set_roi(cas, 100);
 
 %% 5) Filter and create animation
-[cas,dat_PC] = main_3_apply_roi_compute_Q(cas,dat_PC, true, true, true, true, true);
+[cas, dat_PC] = main_3_apply_roi_compute_Q(cas, true, true, true, true, true, true);
 
 %% 6) Define geometry in SpaceClaim
 % out: computational domain

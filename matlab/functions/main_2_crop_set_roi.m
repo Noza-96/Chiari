@@ -1,47 +1,27 @@
-function [cas,dat_PC] = main_2_crop_set_roi(cas,dat_PC, crop_size)
+function [cas, dat_PC] = main_2_crop_set_roi(cas, crop_size)
 
-fprintf('\n4) PC-MRI measurements:\n')
+    fprintf('\n4) PC-MRI measurements:\n')
+    
+    data_now = "data_1.mat";
+    
+    [cas, dat_PC, didSkip] = check_data_updated(cas, data_now, "data_0.mat", dir(fullfile(cas.dir.trans, '*')));
+    if didSkip, return, end   
+    
+    fprintf("- Apply linear transformation to align DICOMs with segmentation...\n")
 
-data_name = "data_1.mat";
-
-% Check if data needs to be created/updated
-d_prev = dir(fullfile(cas.dir.mat,"data_0.mat"));
-d_now = dir(fullfile(cas.dir.mat,data_name));
-
-dlist = dir(fullfile(cas.dir.trans, '*'));
-
-if ~isempty(dlist)
-    latestDate = max([dlist.datenum, d_prev.datenum]);
-else
-    latestDate = d_prev.datenum;
-end
-
-if exist(fullfile(cas.dir.mat,data_name), 'file')
-    if datetime(latestDate, 'ConvertFrom', 'datenum') > datetime(d_now.datenum, 'ConvertFrom', 'datenum')
-        fprintf("- Data needs to be updated...\n")
-    else
-        if askYN('- Data up to date. Skip? ([y]/n): ')
-            load(fullfile(cas.dir.mat, data_name'), 'cas', 'dat_PC');
-            return;
-        end
-    end
-end
-
-
-fprintf("- Apply linear transformation to align DICOMs with segmentation...\n")
-dat_PC = apply_linear_transformation(dat_PC, cas);
-
-fprintf("\n- Cropping data... \n")
-
-dat_PC = crop_data(cas, dat_PC, crop_size);
-
-fprintf("\n- Setting up ROIs... ")
-
-dat_PC = define_ROI_video(cas, dat_PC);
-
-fprintf("\n\nSaving %s ...\n\n", data_name)
-
-save(fullfile(cas.dir.mat, data_name), 'cas', 'dat_PC');
+    dat_PC = apply_linear_transformation(dat_PC, cas);
+    
+    fprintf("\n- Cropping data... \n")
+    
+    dat_PC = crop_data(cas, dat_PC, crop_size);
+    
+    fprintf("\n- Setting up ROIs... ")
+    
+    dat_PC = define_ROI_video(cas, dat_PC);
+    
+    fprintf("\n\nSaving %s ...\n\n", data_now)
+    
+    save(fullfile(cas.dir.mat, data_now), 'cas', 'dat_PC');
 
 end
 
@@ -49,8 +29,8 @@ end
 function dat_PC = apply_linear_transformation(dat_PC, cas)
 
     for idat = 1:dat_PC.Ndat
-        data_name = dat_PC.locations{idat} + "_transformation.txt";
-        transformation_path = fullfile(cas.dir.seg, 'transformation', data_name);
+        data_now = dat_PC.locations{idat} + "_transformation.txt";
+        transformation_path = fullfile(cas.dir.seg, 'transformation', data_now);
         
         if exist(transformation_path, 'file')
             % Read the matrix (assumes 4 rows, 4 columns, space-separated)
@@ -98,7 +78,6 @@ end
 
 
 function dat = crop_data(cas, dat, croppedsize)
-
 
     if exist(fullfile(cas.dir.mat, "crop_xc_yc.mat"), 'file') == 0
 
@@ -233,10 +212,9 @@ function dat = define_ROI_video(cas, dat)
             answer = input("Do you want to use it? [y]/n ", 's');
             if ~(answer == "n")
                 load(roi_file, 'ROI_SAS','ROI_DURA','ROI_CORD','ROI_TONS');
-                dat.ROI_SAS{idat}=ROI_SAS;
-                dat.ROI_CORD{idat}=ROI_CORD;
-                dat.ROI_DURA{idat}=ROI_DURA;
-                if exist('ROI_TONS','var'), dat.ROI_TONS{idat}=ROI_TONS; end
+                dat.SAS.ROI{idat} = ROI_SAS;
+                dat.CORD.ROI{idat}= ROI_CORD;
+                if exist('ROI_TONS','var'), dat.TONS.ROI{idat}=ROI_TONS; end
                 close all;
                 continue
             end
@@ -286,9 +264,6 @@ function dat = define_ROI_video(cas, dat)
         ROI_CORD = logical(BW_CORD);
         ROI_DURA = logical(BW_DURA);
         ROI_SAS = ROI_DURA & ~ ROI_CORD;
-
-        % S_magni_in = BW_DURA .* S_magni;
-        % S_Utot_in  = BW_DURA .* S_U_tot;
         ROI_TONS = false(size(BW_DURA));
 
         %% -------- TONSILS (optional) ----------
@@ -300,18 +275,17 @@ function dat = define_ROI_video(cas, dat)
             close all;
         else
             ROI_TONS = logical(BW_TONS);
+            ROI_TONS = ROI_TONS & ROI_SAS & ~ ROI_CORD;
             ROI_SAS  = ROI_SAS & ~ ROI_TONS;
-            ROI_TONS  = ROI_TONS & ~ ROI_CORD;
             save(vertex_file, 'hvertices_tons', 'hvertices_cord', 'hvertices_dura');
             close all;
         end     
 
         save(roi_file,'ROI_SAS','ROI_DURA','ROI_CORD','ROI_TONS')
 
-        dat.ROI_SAS{idat}=ROI_SAS;
-        dat.ROI_CORD{idat}=ROI_CORD;
-        dat.ROI_TONS{idat}=ROI_TONS;
-        dat.ROI_DURA{idat}=ROI_DURA;
+        dat.SAS.ROI{idat} = ROI_SAS;
+        dat.CORD.ROI{idat}= ROI_CORD;
+        dat.TONS.ROI{idat}= ROI_TONS;
         
 
         display_regions(roi_file, cas.locations{idat})
@@ -507,4 +481,3 @@ function dat = define_ROI_video(cas, dat)
         end
     end
 end
-

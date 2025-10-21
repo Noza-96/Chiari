@@ -19,7 +19,7 @@ iterations_ts = 20; % iterations per time step
 cycles = 3;         % cyles to be computed
 n_cores = 14;       % number of processors simulation
 
-[cas, dat_PC] = check_subject_initialization(subject, ts_cycle);
+[cas, dat_PC] = check_subject_initialization (subject, ts_cycle);
 
 DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle);
 

@@ -25,7 +25,7 @@ function [cas, dat_PC] = read_MRI_data(cas)
     
     %% 
     file_name = "data_0.mat";
-    fprintf("Saving %s ...\n", file_name)
+    fprintf("\nSaving %s ...\n", file_name)
     save(fullfile(cas.dir.mat, file_name), 'cas','dat_PC');
 end
 
@@ -545,10 +545,8 @@ function [cas, dat_PC] = main_1_read_dat(cas)
 
     cas = scan_folders_set_cas(cas, out_folder);
 
-    resettimevector = false;
-
     if cas.Ncas > 0
-        dat_PC = read_dicoms_PC(cas, resettimevector);
+        dat_PC = read_dicoms_PC(cas);
     else
         error("No PC DICOMS found!" + newline)
     end
@@ -649,7 +647,7 @@ function delete_folder_contents(rootPath)
     end
 end
 
-function dat  = read_dicoms_PC(cas, resettimevector)
+function dat  = read_dicoms_PC(cas)
 
     Ndat = length(cas.folders_);
 
@@ -787,6 +785,7 @@ function dat  = read_dicoms_PC(cas, resettimevector)
         location{idat} = location{idat}(1);
         fcal_V_cm_px{idat} = fcal_V_cm_px{idat}(1);
         fcal_H_cm_px{idat} = fcal_H_cm_px{idat}(1);
+        onepxarea{idat} = fcal_H_cm_px{idat} * fcal_V_cm_px{idat};
 
         for jj = 1:numim
             im{idat}{jj}    = im_unsorted{idat}{sortind(jj)};
@@ -861,9 +860,7 @@ function dat  = read_dicoms_PC(cas, resettimevector)
         % Sometimes the acquisition does not equispace the time vector.
         % We then set the time vector ourselves:
 
-        if resettimevector
-            t{idat}(:) = [0:1:Nt{idat}-1]*dt{idat};
-        end
+        t{idat} = (0:(Nt{idat}-1))/Nt{idat};
         
         % Save the slice location in cm:
 
@@ -881,7 +878,6 @@ function dat  = read_dicoms_PC(cas, resettimevector)
     dat.locz         = locz;
     dat.Nt           = Nt;
     dat.T            = T;
-    dat.dt           = dt;
     dat.t            = t;
     dat.U_tot        = U_tot;
     dat.phase        = phase;
@@ -890,6 +886,7 @@ function dat  = read_dicoms_PC(cas, resettimevector)
     dat.venc         = venc;
     dat.fcal_H_cm_px = fcal_H_cm_px;
     dat.fcal_V_cm_px = fcal_V_cm_px;
+    dat.onepxarea   = onepxarea;
     dat.locations = cas.locations;
 
 end

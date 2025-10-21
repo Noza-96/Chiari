@@ -14,9 +14,9 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
 
         % Extract and scale pcMRI data
         ROI = dat_PC.ROI_SAS{ii};                      % [100 x 100]
-        U = -dat_PC.U_SAS{ii} * 1e-2;       % [m/s]
+        U = dat_PC.U_SAS{ii} * 1e-2;       % [m/s]
         xyz = dat_PC.pixel_coord{ii} * 1e-3; % [m]
-        Q = -dat_PC.Q_SAS{ii};              % Flow rate
+        Q = dat_PC.Q_SAS{ii};              % Flow rate
 
         % Trim empty rows and columns with padding
         zeroRows = all(U(:,:,1) == 0, 2);
@@ -38,7 +38,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
         % Fourier interpolation for velocity profiles
         uu = zeros(size(U,1), ts_cycle);
         for k = 1:size(U,1)
-            [uu(k,:), ~, ~] = four_approx(U(k,:), modes, 0, ts_cycle);
+            [uu(k,:), ~, ~, ~] = four_approx(U(k,:), modes, 0, ts_cycle);
         end
 
         %TODO recalculate flow rate now.
