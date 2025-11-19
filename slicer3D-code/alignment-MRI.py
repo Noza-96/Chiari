@@ -46,7 +46,7 @@ def segmentation_2D_slices(segmentation_node, volume_node, segmentation_2D_path)
 
     # Save final NRRD
     slicer.util.saveNode(output_volume, segmentation_2D_path)
-    print(f"✅ Saved masked volume (2D segmentation) to: {segmentation_2D_path}")
+    print(f"2D segmentation saved to: {segmentation_2D_path}")
 
     # Remove volume from scene
     slicer.mrmlScene.RemoveNode(output_volume)
@@ -86,12 +86,6 @@ def assign_to_slices(sorted_volumes, slice_views):
             composite_node.SetBackgroundVolumeID(volume_node.GetID())
         else:
             print(f"Skipping slice view '{view_name}' or volume index {i}")
-
-    # Assign 'anatomy' to the last slice view
-    # anatomy_node = slicer.util.getNode("anatomy")
-    # last_view = slice_views[-1]
-    # composite_node = layout_manager.sliceWidget(last_view).sliceLogic().GetSliceCompositeNode()
-    # composite_node.SetBackgroundVolumeID(anatomy_node.GetID())
 
 
 def import_and_load_dicom (pcMRI_path):
@@ -209,8 +203,9 @@ chiari_path = sys.argv[2]
 
 main_path =  os.path.join(chiari_path, f'computations/segmentation/{pid}')
 segmentation_path = os.path.join(main_path, 'stl')
-pcMRI_path = os.path.join(main_path, "pcMRI")
-transformation_path = os.path.join(main_path, 'transformation')
+registration_path = os.path.join(main_path, 'registration')
+pcMRI_path = os.path.join(registration_path, "pcMRI")
+transformation_path = os.path.join(registration_path, 'transformation')
 
 flow_path = os.path.join(chiari_path, f'patient-data/{pid}/flow')
 
@@ -316,7 +311,7 @@ for k in range(len(sorted_volumes)):
     pcmri_node = sorted_volumes[k]
     set_manual = True
     pcmri_transformation = os.path.join(transformation_path, pcmri_node.GetName() + "_transformation.txt")
-    segmentation_2D_path = os.path.join(segmentation_path, '2D-segmentation', pcmri_node.GetName() + "_segmentation.nrrd")
+    segmentation_2D_path = os.path.join(main_path, 'registration', '2D-segmentation', pcmri_node.GetName() + "_segmentation.nrrd")
     # Apply a linear transformation to the pc-mri slices
     if os.path.exists(pcmri_transformation):
         response = QMessageBox.question(None, 'Load Existing Transformation', pcmri_node.GetName() + ': apply existing transformation?', QMessageBox.No | QMessageBox.Yes, QMessageBox.Yes )
@@ -396,5 +391,5 @@ while repeat:
     if user_input == "e":
         sys.exit()  
     else:
-        print("⚠️ Try again.\n")
+        print("Try again.\n")
     

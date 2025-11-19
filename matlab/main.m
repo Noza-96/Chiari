@@ -16,17 +16,20 @@ check_compatibility(["Slicer"]);
 
 %% 2) Segmentation CSF space
 % out: automatic + manual segmentation -> .STL file
-run_segmentation(cas, true);
+run_segmentation(cas, false);
 
 %% 3) Alignment velocity measurements to segmentation
 % out: translation velocity DICOMs to adjucts to segmentation
-alignment_MRI(cas, true);
+alignment_MRI(cas, false);
 
 %% 4) PC-MRI measurements
 [cas, dat_PC] = main_2_crop_set_roi(cas, 100);
 
 %% 5) Filter and create animation
 [cas, dat_PC] = main_3_apply_roi_compute_Q(cas, true, true, true, true, true, true);
+
+%% 6) Registration (only if segmentation exist)
+[cas, dat_PC] = main_4_registration(cas);
 
 %% 6) Define geometry in SpaceClaim
 % out: computational domain
