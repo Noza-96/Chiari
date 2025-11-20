@@ -9,6 +9,7 @@ The pipeline facilitates the transformation of patient-specific imaging data int
 <a id="Table_contents"></a>
 
 ## Table of Contents
+0. [Installation & Setup Guide](#Installation): Software specifications
 1. [Segmentation](#Segmentation): Extract CSF anatomy from MRIs using ITK-Snap
 2. [Alignment](#Alignment): Align anatomical segmentation to flow-rate MRI using Slicer.
 3. [Smooth segmentation](#Smooth): Refine segmentation to a smooth 3D model using Fusion 360.
@@ -19,9 +20,146 @@ The pipeline facilitates the transformation of patient-specific imaging data int
 8. [Numerical simulations](#Numerical_simulations): Run simulations in Ansys Fluent to compute velocity and pressure fields.
 9. [Post-processing](#Post-processing): Analyze results in MATLAB to extract insights like longitudinal impedance and velocity comparisons.
 
-## Overview
+## Installation & Setup Guide <a id="Installation"></a>
 
-For details on each step, refer to the [Table of Contents](#Table_contents). Ensure you have the necessary software installed, including ITK-Snap, Slicer, Fusion 360, Rhino, SolidWorks, Ansys, and MATLAB
+This project uses MATLAB, Python, 3D Slicer, Spinal Cord Toolbox, and auxiliary imaging tools.  
+Follow the steps below to prepare your system before running the Chiari Simulation Pipeline.
+
+--------------------------------------------------------------------
+
+1. MATLAB (R2023a)
+
+Download:
+https://www.mathworks.com/products/matlab/student.html
+
+Required Toolbox:
+- Image Processing Toolbox
+
+--------------------------------------------------------------------
+
+2. 3D Slicer (v5.8.1)
+
+Download:
+https://www.slicer.org/
+
+Used for segmentation, anatomical alignment, and MRI visualization.
+
+--------------------------------------------------------------------
+
+3. Python (3.11.12) + Anaconda
+
+Install Python:
+https://www.python.org/downloads/
+
+Install Anaconda:
+https://www.anaconda.com/download
+
+Once you clone the repository, run:
+
+    make install
+    conda activate chiari
+
+This installs all Python dependencies from environment.yml.
+
+--------------------------------------------------------------------
+
+4. dcm2niix (DICOM to NIfTI converter)
+
+Download (version 11-December-2024):
+https://github.com/rordenlab/dcm2niix/releases
+
+Verify installation:
+
+    dcm2niix -h
+
+If not found, add the installation folder to your PATH.
+
+--------------------------------------------------------------------
+
+5. Spinal Cord Toolbox (SCT) + DeepSeg
+
+Installation instructions:
+https://spinalcordtoolbox.com/user_section/installation/windows.html
+
+Check installed DeepSeg tasks:
+
+    sct_deepseg
+
+If SCT is older than version 7.0, required tasks:
+- seg_sc_contrast_agnostic
+- canal_t2w
+
+If SCT version is 7.0 or newer, required tasks:
+- spinalcord
+- sc_canal_t2
+
+Install a missing task (example):
+
+    sct_deepseg sc_canal_t2 -install
+
+--------------------------------------------------------------------
+
+6. ANSYS Fluent (optional, not needed yet)
+
+Version: 2024 R1  
+Download:
+https://www.ansys.com/academic/students/ansys-student
+
+--------------------------------------------------------------------
+
+Project Setup
+
+GitHub repository:
+https://github.com/Noza-96/Chiari
+
+--------------------------------------------------------------------
+
+1. Clone the repository
+
+Install Git:
+Windows: https://git-scm.com/download/win
+macOS: https://git-scm.com/download/mac
+
+Clone:
+
+    cd ~/Documents
+    git clone https://github.com/Noza-96/Chiari.git git-chiari
+    cd git-chiari
+
+(Optional):
+
+    git status
+
+--------------------------------------------------------------------
+
+2. Install the Python environment
+
+From inside the repository:
+
+    make install
+    conda activate chiari
+
+No need for requirements.txt.  
+Environment is fully automated and reproducible.
+
+--------------------------------------------------------------------
+
+3. Update your local copy
+
+Check for updates:
+
+    git fetch
+    git status
+
+If your branch is behind:
+
+    git fetch origin
+    git reset --hard origin/main
+
+Warning: this overwrites any local changes inside git-chiari.
+
+--------------------------------------------------------------------
+
 
 ## 1. Segmentation <a id="Segmentation"></a>
 
