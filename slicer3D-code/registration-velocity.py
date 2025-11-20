@@ -29,7 +29,7 @@ def register_velocity_image(fixed_mask_path, moving_mask_path, moving_img_path, 
 subject = sys.argv[1]
 chiari_path = sys.argv[2]
 
-registration_path = os.path.join(chiari_path, "computations", "pc-mri", subject, "registration")
+registration_path = os.path.join(chiari_path, "computations", "segmentation", subject, "registration")
 segmentation_2D_folder = os.path.join(registration_path, "2D-segmentation")
 input_velocity_folder = os.path.join(registration_path, "input-velocity")
 output_velocity_folder = os.path.join(registration_path, "output-velocity")

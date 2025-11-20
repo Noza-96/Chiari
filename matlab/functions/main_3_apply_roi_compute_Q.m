@@ -7,7 +7,7 @@ function [cas,dat_PC] = main_3_apply_roi_compute_Q(cas, correct_aliasing, unwrap
     data_now = "data_2.mat";
 
     [cas, dat_0, didSkip] = check_data_updated(cas, data_now, "data_1.mat");
-    if didSkip, return, end   
+    if didSkip, dat_PC = dat_0; return, end   
 
     dat_PC = apply_ROI_compute_Q(dat_0, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter, offset_vel, fourier_dec);
 
@@ -57,6 +57,7 @@ function dat_PC = apply_ROI_compute_Q(dat_PC, correct_aliasing, unwrap_periodic,
     area_SAS  = cell(Ndat,1); area_CORD = cell(Ndat,1); area_TONS = cell(Ndat,1);
     U_SAS  = cell(Ndat,1); U_CORD = cell(Ndat,1); U_TONS = cell(Ndat,1); 
     Q_SAS  = cell(Ndat,1); Q_CORD = cell(Ndat,1); Q_TONS = cell(Ndat,1);
+    Upeak_SAS  = zeros(Ndat,1); Upeak_CORD = zeros(Ndat,1); Upeak_TONS = zeros(Ndat,1);
     Vs_SAS  = zeros(Ndat,1); Vs_CORD = zeros(Ndat,1); Vs_TONS = zeros(Ndat,1);
     a0_SAS = cell(Ndat,1); am_SAS = cell(Ndat,1); fm_SAS = cell(Ndat,1);
     a0_CORD= cell(Ndat,1); am_CORD= cell(Ndat,1); fm_CORD= cell(Ndat,1);
@@ -162,15 +163,22 @@ function dat_PC = apply_ROI_compute_Q(dat_PC, correct_aliasing, unwrap_periodic,
         Vs_CORD(idat)  = compute_stroke_volume(Q_CORD{idat}, dat_PC.T{idat});
         Vs_TONS(idat)  = compute_stroke_volume(Q_TONS{idat}, dat_PC.T{idat});
 
+        Upeak_SAS(idat)   = max(abs(U_SAS{idat}(:)));
+        Upeak_CORD(idat)  = max(abs(Q_CORD{idat}(:)))/area_CORD{idat};
+        if nnz(dat_PC.TONS.ROI{idat}(:))
+            Upeak_TONS(idat)  = max(abs(Q_TONS{idat}(:)))/area_TONS{idat};
+        end
+
 
         fprintf("\n")
     end
 
     % === Assign outputs ===
-    dat_PC.SAS.area  = area_SAS;   dat_PC.CORD.area = area_CORD;   dat_PC.TONS.area = area_TONS;
-    dat_PC.SAS.U     = U_SAS;      dat_PC.CORD.U    = U_CORD;      dat_PC.TONS.U    = U_TONS;
-    dat_PC.SAS.Q     = Q_SAS;      dat_PC.CORD.Q    = Q_CORD;      dat_PC.TONS.Q    = Q_TONS;
-    dat_PC.SAS.Vs    = Vs_SAS;     dat_PC.CORD.Vs   = Vs_CORD;     dat_PC.TONS.Vs   = Vs_TONS;
+    dat_PC.SAS.area  = area_SAS;    dat_PC.CORD.area = area_CORD;     dat_PC.TONS.area = area_TONS;
+    dat_PC.SAS.U     = U_SAS;       dat_PC.CORD.U    = U_CORD;        dat_PC.TONS.U    = U_TONS; 
+    dat_PC.SAS.Q     = Q_SAS;       dat_PC.CORD.Q    = Q_CORD;        dat_PC.TONS.Q    = Q_TONS;
+    dat_PC.SAS.Vs    = Vs_SAS;      dat_PC.CORD.Vs   = Vs_CORD;       dat_PC.TONS.Vs   = Vs_TONS;  
+    dat_PC.SAS.Upeak   = Upeak_SAS; dat_PC.CORD.Upeak   = Upeak_CORD; dat_PC.TONS.Upeak   = Upeak_TONS;
     
     dat_PC.SAS.fou.M  = modes;  dat_PC.SAS.fou.a0 = a0_SAS;  dat_PC.SAS.fou.am = am_SAS;  dat_PC.SAS.fou.fm = fm_SAS;
     dat_PC.CORD.fou.M = modes;  dat_PC.CORD.fou.a0 = a0_CORD; dat_PC.CORD.fou.am = am_CORD; dat_PC.CORD.fou.fm = fm_CORD;
