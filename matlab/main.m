@@ -3,11 +3,11 @@ clear; close all; clc;
 addpath('functions/');
 addpath('functions/others/');
 
-cas.subj = "s000";
+cas.subj = "s4";
 
 %% 0) Check compatibility
 % out: config file with paths
-check_compatibility(["Slicer", "Python", "Ansys"]);
+check_compatibility(["Slicer", "Python"]);
 
 %% 1) Setup subject and extract MRI data 
 % out: list DICOMs and organize into flow and anatomy 
