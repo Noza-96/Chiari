@@ -57,10 +57,8 @@ https://www.anaconda.com/download
 
 Once you clone the repository, on git-chiari folder from terminal run:
 
-# Install the environment (works on macOS and Windows)
 conda env create -f environment.yml
 
-# Activate the environment
 conda activate chiari
 
 This installs all Python dependencies from environment.yml.
