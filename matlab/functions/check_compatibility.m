@@ -21,6 +21,8 @@ function check_compatibility(programs)
             fprintf(fid, upper(commands{i,1}) + "_PATH=""%s""\n", paths{i});
         end
     end
+
+
 end
 
 
@@ -79,6 +81,25 @@ function find_programs_paths(programs, config_file)
                 error("Invalid Slicer path: '%s'", string(slicer_guess));
             end
         end
+
+        if contains(prog, 'python')
+            python_guess = findOnPathFirst('Python');        
+            % If not found automatically, ask user
+            fprintf('Steps to run on terminal (git-chiari folder) to obtain path to python environment: \n')
+            fprintf('1) create python environment \n\t conda env create -f environment.yml\n')
+            fprintf('2) activate environment  \n\t conda activate chiari\n')
+            fprintf('3) find location environment  \n\t where.exe python\n')
+
+            if isempty(python_guess) || ~isfile(python_guess)
+                python_guess = askForPath('PYTHON_PATH', ...
+                    '4) copy and paste path (e.g., C:\Users\USR\anaconda3\envs\chiari\python.exe)');
+                python_guess = fullfile(python_guess, 'python.exe');
+            end
+            % Validate path
+            if isempty(python_guess) || ~isfile(python_guess)
+                error("Invalid python path: '%s'", string(python_guess));
+            end
+        end
     
         if contains(prog, 'ansys')
             ansys_guess  = guessANSYS();  % Find ANSYS root folder
@@ -91,7 +112,7 @@ function find_programs_paths(programs, config_file)
             end
         end
 
-        if ~ismember(prog, {'slicer', 'ansys'})
+        if ~ismember(prog, {'slicer', 'ansys', 'python'})
             error("Invalid program name: '%s'", prog);
         end
     end
@@ -111,6 +132,10 @@ function find_programs_paths(programs, config_file)
 
     if any(contains(lower(programs), 'ansys'))
         fprintf(fid, 'ANSYS_PATH="%s"\n', ansys_guess);
+    end
+
+    if any(contains(lower(programs), 'python'))
+        fprintf(fid, 'PYTHON_PATH="%s"\n', python_guess);
     end
 
     fprintf('\nConfig written to: %s\n', config_file);

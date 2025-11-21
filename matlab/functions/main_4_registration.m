@@ -1,21 +1,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [cas,dat_PC] = main_4_registration(cas)
+function [cas,dat_PC] = main_4_registration(cas, loc_registration)
 
-    fprintf("5) Filter and create animation:\n")    
+    fprintf("6) Registration:\n")    
 
     data_now = "data_3.mat";
 
-    [cas, dat_0, didSkip] = check_data_updated(cas, data_now, "data_2.mat");
-    if didSkip, dat_PC = dat_0; return, end   
+    [cas, dat_PC, didSkip] = check_data_updated(cas, data_now, "data_2.mat");
+    dat_0 = dat_PC;
+    if didSkip, return, end   
+
+    % idx locations to do registration
+    idx = find(contains(string(cas.locations), loc_registration));
 
     visualization_plots = true;
     
-    python_venv = "/Users/noza/Documents/chiari/git-chiari/venv/bin/python3.11";
-
+    python_path = fullfile(config_path('python', fullfile(cas.dir.chiari, 'config_file.txt')));
     
-    % --- Validate Python path
-    if ~isfile(python_venv)
-        error("Python virtual environment not found at: %s", python_venv);
+    % --- Valie Python path
+    if ~isfile(python_path)
+        error("Python virtual environment not found at: %s", python_path);
     end
     
     % segmentation_script = fullfile(pwd, '..', '..', 'slicer3D-code', 'segmentation-2D.py');
@@ -32,11 +35,13 @@ function [cas,dat_PC] = main_4_registration(cas)
     % Check if registration output already exists and is newer than input
     reg_files = dir(fullfile(output_registration_dir, '*.nrrd'));
     
-    do_registration = check_if_registration_exists(reg_files, t0);
+    do_registration = check_if_registration_exists(reg_files);
+
     
     if do_registration
         % === Loop over slices and time steps ===
-        for i = 1:length(cas.locations)
+        for i = idx
+            fprintf("\nRegistration location: %s \n\n", cas.locations{idx})
             % ROI and coordinate grid
             roi = dat_PC.SAS.ROI{i};
             xyz = dat_PC.pixel_coord{i};
@@ -70,7 +75,7 @@ function [cas,dat_PC] = main_4_registration(cas)
         disp('.nrrd files created with ROI and velocity information ...')
     
         % 2. Run velocity registration using ANTs
-        cmd2 = python_venv + " " + registration_script + " " + cas.subj + " " + full_path(cas.dir);
+        cmd2 = python_path + " " + registration_script + " " + cas.subj + " " + full_path(cas.dir.chiari) + " " + loc_registration;
         system(cmd2);   
         disp('Registration completed using ANTs ... ' + newline)
     end
@@ -79,69 +84,49 @@ function [cas,dat_PC] = main_4_registration(cas)
     % === Load registered velocity .nrrd files ===
     disp("Loading registered velocity fields from: " + output_registration_dir)
     
-    velocity = struct();  % container
-    
-    velocity.U_SAS = cell(1, length(cas.locations));
-    velocity.pixel_coord = cell(1, length(cas.locations));
-    velocity.Q_SAS = cell(1, length(cas.locations));
-    
     fprintf("Reading velocity & coords from .nrrdd ... ")
     
-    
-    for i = 1:length(cas.locations)
+    for i = idx
         location = cas.locations{i};
-        Nt = dat_PC.Nt{i};
-        [velocity.U_SAS{i}, velocity.pixel_coord{i}] = read_velocity_and_coords(location, Nt, output_registration_dir);
-        [velocity.ROI_SAS{i}] = read_ROI_nrrd(location, segmentation_2D);
+        [dat_PC.SAS.ROI{i}] = read_ROI_nrrd(location, segmentation_2D);
+        [dat_PC.SAS.U{i}, dat_PC.pixel_coord{i}] = read_velocity_and_coords(location, dat_PC.Nt{i}, output_registration_dir);
     
-        % compute flow rate
-        Qi = zeros(1, Nt);
-        mask = velocity.ROI_SAS{i};
-        coords = velocity.pixel_coord{i};
+        coords = dat_PC.pixel_coord{i};
     
-        dx = mean(sqrt(sum((coords(2:end,:, :) - coords(1:end-1,:, :)).^2, 3)), 'all');
-        dy = mean(sqrt(sum((coords(:,2:end,:) - coords(:,1:end-1,:)).^2, 3)), 'all');
-        dA = dx * dy;
+        dat_PC.fcal_H_cm_px{i} = mean(sqrt(sum((coords(2:end,:, :) - coords(1:end-1,:, :)).^2, 3)), 'all');
+        dat_PC.fcal_V_cm_px{i} = mean(sqrt(sum((coords(:,2:end,:) - coords(:,1:end-1,:)).^2, 3)), 'all');
+        dat_PC.onepxarea{i} = dat_PC.fcal_H_cm_px{i} * dat_PC.fcal_V_cm_px{i};
+
+        dat_PC.SAS.area{i}  = sum(sum(dat_PC.SAS.ROI{i}))   * dat_PC.onepxarea{i};
+        dat_PC.SAS.Upeak(i)   = max(abs(dat_PC.SAS.U{i}(:)));
     
-        for n = 1:Nt
-            u = velocity.U_SAS{i}(:, :, n);
-            u_roi = u(mask);
-            Qi(n) = sum(u_roi) * dA * 1e-2;
-        end
-        velocity.Q_SAS{i} = Qi;
+        dat_PC.SAS.Q{i}   = compute_flow_rate(dat_PC.SAS.U{i}, dat_PC.onepxarea{i});
+        [dat_PC.SAS.Q{i}, dat_PC.SAS.fou.a0{i},  dat_PC.SAS.fou.am{i},  dat_PC.SAS.fou.fm{i}]    = four_approx(dat_PC.SAS.Q{i}, dat_PC.SAS.fou.M, 0,  dat_PC.Nt{i});
+        dat_PC.SAS.Vs(i)   = compute_stroke_volume(dat_PC.SAS.Q{i}, dat_PC.T{i});
+
     end
     
     if visualization_plots
-        plot_all_velocity_comparisons(30, velocity, dat_PC, cas);
-        
-        plot_flow_rates(velocity, cas);  
-    
-        ts_cycle = 40; 
-        movieVector = create_animation(dat_PC, cas, ts_cycle);
-        
-        save_animation(movieVector, fullfile(cas.dirvid, "flow_measurements_"+cas.subj+".mp4"));
+        plot_ROI_comparisons(dat_PC, dat_0, cas);
+            
+        % movieVector = create_animation_pc(dat_PC);
+
+        % file_animation_raw = "pcmri_registration.mp4";
+        % save_animation(movieVector, fullfile(cas.dir.vid, file_animation_raw));
     end
-    
-    dat_PC = update_data(velocity, dat_PC, dat_PC.SAS.fou.M);
-    
-    dat_PC.dx = dx;
-    dat_PC.dy = dy;
     
     fprintf("Saving %s ...\n\n", data_now)
     save(fullfile(cas.dir.mat, data_now), 'cas', 'dat_PC');
 
 end
 
-function do_registration = check_if_registration_exists(reg_files, t0)
+function do_registration = check_if_registration_exists(reg_files)
     do_registration = true;  % default: run registration
 
     if ~isempty(reg_files)
         % Get latest file modification time
         reg_times = [reg_files.datenum];
         latest_reg_time = datetime(max(reg_times), 'ConvertFrom', 'datenum');
-
-        % Compare to reference time
-        if latest_reg_time > t0
             answer = questdlg("Registration already exists and is updated. Do you want to redo it?", ...
                               'Confirm Re-run', 'Yes', 'No', 'No');
     
@@ -149,7 +134,6 @@ function do_registration = check_if_registration_exists(reg_files, t0)
                 disp("Skipping registration step.")
                 do_registration = false;
             end
-        end
     else
         do_registration = true;  % no files exist → should run
     end
@@ -192,7 +176,7 @@ function [U, xyz] = read_velocity_and_coords(location, Nt, folder)
     xyz = cat(3, x, y, z);
 end
 
-function plot_all_velocity_comparisons(tstep, velocity, dat_PC, cas)
+function plot_ROI_comparisons(dat_PC, dat_0, cas)
 
     N = length(cas.locations);  % number of locations
 
@@ -200,18 +184,14 @@ function plot_all_velocity_comparisons(tstep, velocity, dat_PC, cas)
     tiledlayout(2, N, 'TileSpacing', 'compact', 'Padding', 'compact');
 
     for i = 1:N
-        location = cas.locations{i};
-
         % === Unregistered ===
-        U2 = dat_PC.U_SAS{i}(:, :, tstep);
-        ROI = dat_PC.ROI_SAS{i};
-        XYZ2 = dat_PC.pixel_coord{i};
+        ROI = dat_0.SAS.ROI{i};
+        XYZ2 = dat_0.pixel_coord{i};
         x2 = XYZ2(:,:,1); y2 = XYZ2(:,:,2); z2 = XYZ2(:,:,3);
-        x2 = x2(:); y2 = y2(:); z2 = z2(:); u2 = U2(:); roi = ROI(:);
+        x2 = x2(:); y2 = y2(:); z2 = z2(:); roi = ROI(:);
 
         nexttile(i)
         scatter3(x2, y2, z2, 10, roi, 'filled');
-        % title(sprintf('%s (Unreg)', location));
         axis equal tight
         colormap(gca, gray)
         view(2)
@@ -220,7 +200,7 @@ function plot_all_velocity_comparisons(tstep, velocity, dat_PC, cas)
         nexttile(N + i)
 
         % === ROI mask ===
-        ROI = velocity.ROI_SAS{i};
+        ROI = dat_PC.SAS.ROI{i};
         [ny, nx] = size(ROI);
         [X, Y] = meshgrid(1:nx, 1:ny);
 
@@ -234,23 +214,8 @@ function plot_all_velocity_comparisons(tstep, velocity, dat_PC, cas)
         set(gca, 'XTick', [], 'YTick', []);
     end
 
-    sgtitle(sprintf('ROI and Velocity Fields at t = %d', tstep), 'FontWeight', 'bold');
+    sgtitle(sprintf('ROI'), 'FontWeight', 'bold');
 end    
-
-function velocity = update_data(velocity, dat_PC, modes)
-    velocity.Ndat = dat_PC.Ndat;
-    velocity.locz = dat_PC.locz;
-    velocity.Nt   = dat_PC.Nt;
-    velocity.T    = dat_PC.T;
-    velocity.t    = dat_PC.t;
-    velocity.fou.M = modes;
-    for k = 1:dat_PC.Ndat
-        [~, a0, am, fm] = four_approx(velocity.Q_SAS{k}, modes, 1, 100);
-        velocity.fou.fm{k} = fm;
-        velocity.fou.am{k} = am;
-        velocity.fou.a0{k} = a0;
-    end
-end
 
 function roi_mask = read_ROI_nrrd(location, segmentation_2D)
 % Read a binary ROI mask from a _segmentation.nrrd file
@@ -274,25 +239,5 @@ function roi_mask = read_ROI_nrrd(location, segmentation_2D)
 
     % Convert to binary mask: keep all nonzero values
     roi_mask = roi_raw > 0;
-end
-
-function plot_flow_rates(velocity, cas)
-    N = length(cas.locations);  % number of slices
-    figure('Units', 'normalized', 'Position', [0.1 0.2 0.1 0.6]);
-    tiledlayout(ceil(N), 1, 'TileSpacing', 'compact', 'Padding', 'compact');
-
-    for i = 1:N
-        nexttile
-        Q = - velocity.Q_SAS{i};       % flow rate
-        t = linspace(0,1,length(Q));           % time vector
-        flow_rate(Q)
-        ylim([-2,2])
-        xlabel('Time [s]')
-        ylabel('Flow rate [mm^3/s]')
-        title(cas.locations{i}, 'Interpreter', 'none')
-        grid on
-    end
-
-    sgtitle("Flow Rates over Time", 'FontWeight', 'bold');
 end
 

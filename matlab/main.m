@@ -7,7 +7,7 @@ cas.subj = "s00";
 
 %% 0) Check compatibility
 % out: config file with paths
-check_compatibility(["Slicer"]);
+check_compatibility(["Slicer", "Python", "Ansys"]);
 
 %% 1) Setup subject and extract MRI data 
 % out: list DICOMs and organize into flow and anatomy 
@@ -29,7 +29,7 @@ alignment_MRI(cas, false);
 [cas, dat_PC] = main_3_apply_roi_compute_Q(cas, true, true, true, true, true, true);
 
 %% 6) Registration (only if segmentation exist)
-[cas, dat_PC] = main_4_registration(cas);
+[cas, dat_PC] = main_4_registration(cas, cas.locations{end});
 
 %% 6) Define geometry in SpaceClaim
 % out: computational domain

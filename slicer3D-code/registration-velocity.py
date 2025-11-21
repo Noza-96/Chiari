@@ -23,23 +23,43 @@ def register_velocity_image(fixed_mask_path, moving_mask_path, moving_img_path, 
     arr3d = result.numpy()[:, :, np.newaxis]
     registered_img = ants.from_numpy(arr3d, origin=fixed_mask.origin, spacing=fixed_mask.spacing, direction=fixed_mask.direction)
     ants.image_write(registered_img, output_img_path)
-    print(f"✅ Saved registered image: {output_img_path}")
+    print(f"Saved registered image: {output_img_path}")
 
 # === MAIN SCRIPT ===
 subject = sys.argv[1]
 chiari_path = sys.argv[2]
+
+# Optional 3rd argument: comma-separated list of locations
+if len(sys.argv) > 3:
+    user_locations = sys.argv[3]
+else:
+    user_locations = None
+
 
 registration_path = os.path.join(chiari_path, "computations", "segmentation", subject, "registration")
 segmentation_2D_folder = os.path.join(registration_path, "2D-segmentation")
 input_velocity_folder = os.path.join(registration_path, "input-velocity")
 output_velocity_folder = os.path.join(registration_path, "output-velocity")
 
-# Get all locations
-roi_files = [f for f in os.listdir(segmentation_2D_folder) if f.endswith("_roi.nrrd")]
-locations = [f.split("_roi.nrrd")[0] for f in roi_files]
+# -------------------------------------------------------------
+# Get locations:
+# - If user provided input: use that
+# - Otherwise: detect all *_roi.nrrd files in folder
+# -------------------------------------------------------------
+if user_locations:
+    # User passed something like: "001,002,003" or "T1,T2,T3"
+    locations = [loc.strip() for loc in user_locations.split(",")]
+    print(f"Using user-specified locations: {locations}")
+else:
+    # Auto-detect all ROI locations
+    roi_files = [f for f in os.listdir(segmentation_2D_folder)
+                 if f.endswith("_roi.nrrd")]
+    locations = [f.split("_roi.nrrd")[0] for f in roi_files]
+    print(f"Detected locations: {locations}")
+
 
 for loc in locations:
-    print(f"\n📍 Registering location: {loc}")
+    print(f"\n Registering location: {loc}")
     fixed_mask_path = os.path.join(segmentation_2D_folder, loc + "_segmentation.nrrd")
     moving_mask_path = os.path.join(segmentation_2D_folder, loc + "_roi.nrrd")
 

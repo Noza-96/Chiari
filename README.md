@@ -34,6 +34,7 @@ https://www.mathworks.com/products/matlab/student.html
 
 Required Toolbox:
 - Image Processing Toolbox
+- Medical Imaging Toolbox
 
 --------------------------------------------------------------------
 
@@ -54,10 +55,13 @@ https://www.python.org/downloads/
 Install Anaconda:
 https://www.anaconda.com/download
 
-Once you clone the repository, run:
+Once you clone the repository, on git-chiari folder from terminal run:
 
-    make install
-    conda activate chiari
+# Install the environment (works on macOS and Windows)
+conda env create -f environment.yml
+
+# Activate the environment
+conda activate chiari
 
 This installs all Python dependencies from environment.yml.
 
