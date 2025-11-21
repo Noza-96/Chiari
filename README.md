@@ -57,9 +57,9 @@ https://www.anaconda.com/download
 
 Once you clone the repository, on git-chiari folder from terminal run:
 
-conda env create -f environment.yml
+    conda env create -f environment.yml
 
-conda activate chiari
+    conda activate chiari
 
 This installs all Python dependencies from environment.yml.
 
@@ -101,64 +101,11 @@ Install a missing task (example):
 
 --------------------------------------------------------------------
 
-6. ANSYS Fluent (optional, not needed yet)
+6. ANSYS Fluent
 
 Version: 2024 R1  
 Download:
 https://www.ansys.com/academic/students/ansys-student
-
---------------------------------------------------------------------
-
-Project Setup
-
-GitHub repository:
-https://github.com/Noza-96/Chiari
-
---------------------------------------------------------------------
-
-1. Clone the repository
-
-Install Git:
-Windows: https://git-scm.com/download/win
-macOS: https://git-scm.com/download/mac
-
-Clone:
-
-    cd ~/Documents
-    git clone https://github.com/Noza-96/Chiari.git git-chiari
-    cd git-chiari
-
-(Optional):
-
-    git status
-
---------------------------------------------------------------------
-
-2. Install the Python environment
-
-From inside the repository:
-
-    make install
-    conda activate chiari
-
-No need for requirements.txt.  
-Environment is fully automated and reproducible.
-
---------------------------------------------------------------------
-
-3. Update your local copy
-
-Check for updates:
-
-    git fetch
-    git status
-
-If your branch is behind:
-
-    git fetch origin
-    git reset --hard origin/main
-
-Warning: this overwrites any local changes inside git-chiari.
 
 --------------------------------------------------------------------
 
