@@ -1,11 +1,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [cas,dat_PC] = main_4_registration(cas, loc_registration)
+function [cas,dat_PC] = main_4_registration(cas)
+
+    % This sets the location in which you want to do registration, as it
+    % is, only does registration of most caudal measurement
+    loc_registration = cas.locations{end};
 
     fprintf("6) Registration:\n")    
 
     data_now = "data_3.mat";
 
-    [cas, dat_PC, didSkip] = check_data_updated(cas, data_now, "data_2.mat");
+    [cas, dat_PC, didSkip] = check_data_updated(cas, data_now, "data_2.mat", dir(fullfile(cas.dir.trans, '*')));
     dat_0 = dat_PC;
     if didSkip, return, end   
 
@@ -21,7 +25,7 @@ function [cas,dat_PC] = main_4_registration(cas, loc_registration)
         error("Python virtual environment not found at: %s", python_path);
     end
     
-    % segmentation_script = fullfile(pwd, '..', '..', 'slicer3D-code', 'segmentation-2D.py');
+    segmentation_script = fullfile(cas.dir.git, 'slicer3D-code', 'segmentation-2D.py');
     registration_script = full_path(fullfile(cas.dir.git, 'slicer3D-code','registration-velocity.py'));
     
     % === Define and create output directories ===
@@ -31,67 +35,69 @@ function [cas,dat_PC] = main_4_registration(cas, loc_registration)
     
     cellfun(@(d) ~exist(d, 'dir') && mkdir(d), ...
         {segmentation_2D, input_registration_dir, output_registration_dir});
-    
-    % Check if registration output already exists and is newer than input
-    reg_files = dir(fullfile(output_registration_dir, '*.nrrd'));
-    
-    do_registration = check_if_registration_exists(reg_files);
+        
+    % === Loop over slices and time steps ===
+    for i = idx
+        fprintf("\n-Registration location: %s \n", cas.locations{idx})
+        % ROI and coordinate grid
 
+        filename = cas.locations{idx} + "_transformation.txt";
+        transformation_path = fullfile(cas.dir.trans, filename);
+
+        if exist(transformation_path, 'file')
+            % Read the matrix (assumes 4 rows, 4 columns, space-separated)
+            transformation_matrix = dlmread(transformation_path);            
+            dat_PC.pixel_coord{i} = applyTransformation(dat_PC.pixel_coord{i}, transformation_matrix);
+            fprintf('\tLinear transformation applied! \n');
+        else
+            fprintf('\tThere is no linear transformation to apply... \n');
+        end
+
+        roi = dat_PC.SAS.ROI{i};
+        xyz = dat_PC.pixel_coord{i};
     
-    if do_registration
-        % === Loop over slices and time steps ===
-        for i = idx
-            fprintf("\nRegistration location: %s \n\n", cas.locations{idx})
-            % ROI and coordinate grid
-            roi = dat_PC.SAS.ROI{i};
-            xyz = dat_PC.pixel_coord{i};
-        
-            % Compute IJK-to-LPS transform
-            origin = squeeze(xyz(1,1,:));
-            dy = squeeze(xyz(1,2,:) - xyz(1,1,:));
-            dx = squeeze(xyz(2,1,:) - xyz(1,1,:));
-            dz = cross(dx, dy);
-            R = [dx, dy, dz];
-            T = origin - dx - dy;
-            transform = [R, T; 0 0 0 1];
-        
-            % Save ROI
-            img.pixelData = double(roi);
-            img.ijkToLpsTransform = transform;
-            img.metaData.encoding = 'gzip';
-            img.metaData.space = 'left-posterior-superior';
-            roi_filename = fullfile(segmentation_2D, cas.locations{i} + "_roi.nrrd");
-            nrrdwrite(roi_filename, img);
-        
-            % Save velocity frames
-            for n = 1:dat_PC.Nt{i}
-                u = dat_PC.SAS.U{i}(:, :, n);
-                img.pixelData = double(u);
-                u_filename = fullfile(input_registration_dir, cas.locations{i} + "_u_" + n + ".nrrd");
-                nrrdwrite(u_filename, img);
-            end
+        % Compute IJK-to-LPS transform
+        origin = squeeze(xyz(1,1,:));
+        dy = squeeze(xyz(1,2,:) - xyz(1,1,:));
+        dx = squeeze(xyz(2,1,:) - xyz(1,1,:));
+        dz = cross(dx, dy);
+        R = [dx, dy, dz];
+        T = origin - dx - dy;
+        transform = [R, T; 0 0 0 1];
+    
+        % Save ROI
+        img.pixelData = double(roi);
+        img.ijkToLpsTransform = transform;
+        img.metaData.encoding = 'gzip';
+        img.metaData.space = 'left-posterior-superior';
+        roi_filename = fullfile(segmentation_2D, cas.locations{i} + "_roi.nrrd");
+        nrrdwrite(roi_filename, img);
+    
+        % Save velocity frames
+        for n = 1:dat_PC.Nt{i}
+            u = dat_PC.SAS.U{i}(:, :, n);
+            img.pixelData = double(u);
+            u_filename = fullfile(input_registration_dir, cas.locations{i} + "_u_" + n + ".nrrd");
+            nrrdwrite(u_filename, img);
         end
         
-        disp('.nrrd files created with ROI and velocity information ...')
-    
+        fprintf("\tRegistering images using ANTs... \n\n")
+
+        % 1. Create 2D segmentations using 3D Slicer
+        run_slicer_python(cas, segmentation_script, 0)
         % 2. Run velocity registration using ANTs
         cmd2 = python_path + " " + registration_script + " " + cas.subj + " " + full_path(cas.dir.chiari) + " " + loc_registration;
         system(cmd2);   
-        disp('Registration completed using ANTs ... ' + newline)
     end
     
-    
-    % === Load registered velocity .nrrd files ===
-    disp("Loading registered velocity fields from: " + output_registration_dir)
-    
-    fprintf("Reading velocity & coords from .nrrdd ... ")
+    fprintf("\tRecomputing velocity metrics... \n")
     
     for i = idx
         location = cas.locations{i};
         [dat_PC.SAS.ROI{i}] = read_ROI_nrrd(location, segmentation_2D);
         [dat_PC.SAS.U{i}, dat_PC.pixel_coord{i}] = read_velocity_and_coords(location, dat_PC.Nt{i}, output_registration_dir);
     
-        coords = dat_PC.pixel_coord{i};
+        coords = dat_PC.pixel_coord{i} / 10.0;
     
         dat_PC.fcal_H_cm_px{i} = mean(sqrt(sum((coords(2:end,:, :) - coords(1:end-1,:, :)).^2, 3)), 'all');
         dat_PC.fcal_V_cm_px{i} = mean(sqrt(sum((coords(:,2:end,:) - coords(:,1:end-1,:)).^2, 3)), 'all');
@@ -108,35 +114,16 @@ function [cas,dat_PC] = main_4_registration(cas, loc_registration)
     
     if visualization_plots
         plot_ROI_comparisons(dat_PC, dat_0, cas);
-            
-        % movieVector = create_animation_pc(dat_PC);
 
-        % file_animation_raw = "pcmri_registration.mp4";
-        % save_animation(movieVector, fullfile(cas.dir.vid, file_animation_raw));
+        movieVector = create_animation_pc(dat_PC);
+
+        file_animation_raw = "pcmri_registration.mp4";
+        save_animation(movieVector, fullfile(cas.dir.vid, file_animation_raw));
     end
     
-    fprintf("Saving %s ...\n\n", data_now)
+    fprintf("\nSaving %s ...\n\n", data_now)
     save(fullfile(cas.dir.mat, data_now), 'cas', 'dat_PC');
 
-end
-
-function do_registration = check_if_registration_exists(reg_files)
-    do_registration = true;  % default: run registration
-
-    if ~isempty(reg_files)
-        % Get latest file modification time
-        reg_times = [reg_files.datenum];
-        latest_reg_time = datetime(max(reg_times), 'ConvertFrom', 'datenum');
-            answer = questdlg("Registration already exists and is updated. Do you want to redo it?", ...
-                              'Confirm Re-run', 'Yes', 'No', 'No');
-    
-            if isempty(answer) || strcmp(answer, 'No')
-                disp("Skipping registration step.")
-                do_registration = false;
-            end
-    else
-        do_registration = true;  % no files exist → should run
-    end
 end
 
 function [U, xyz] = read_velocity_and_coords(location, Nt, folder)
@@ -203,10 +190,7 @@ function plot_ROI_comparisons(dat_PC, dat_0, cas)
         ROI = dat_PC.SAS.ROI{i};
         [ny, nx] = size(ROI);
         [X, Y] = meshgrid(1:nx, 1:ny);
-
-        % nexttile(2*N + i)
         scatter(X(:), Y(:), 10, double(ROI(:)), 'filled');
-        % title(sprintf('%s (ROI)', location));
         axis equal tight
         view(2)
         colormap(gca, gray)  % apply gray only to this tile
@@ -241,3 +225,32 @@ function roi_mask = read_ROI_nrrd(location, segmentation_2D)
     roi_mask = roi_raw > 0;
 end
 
+function transformed_pixel_coordinates = applyTransformation(pixel_coordinates, transformation_matrix)
+% Apply a 4x4 transformation matrix to a [rows x cols x 3] pixel coordinate grid
+%
+% Inputs:
+%   pixel_coordinates     - [rows x cols x 3] array of original (x,y,z) positions
+%   transformation_matrix - [4 x 4] transformation matrix from 3D slicer
+%
+% Output:
+%   transformed_pixel_coordinates - [rows x cols x 3] array of transformed positions
+
+    % Get dimensions
+    [rows, cols, ~] = size(pixel_coordinates);
+    N = rows * cols;
+
+    % Flatten pixel coordinates into [N x 3]
+    coords = reshape(pixel_coordinates, [N, 3]);
+
+    % Convert to homogeneous coordinates [N x 4]
+    coords_hom = [coords, ones(N, 1)];
+
+    % Apply transformation matrix [N x 4]
+    transformed_coords_hom = (transformation_matrix * coords_hom')';  % [N x 4]
+
+    % Extract (x, y, z)
+    transformed_coords = transformed_coords_hom(:, 1:3);
+
+    % Reshape back to [rows x cols x 3]
+    transformed_pixel_coordinates = reshape(transformed_coords, [rows, cols, 3]);
+end

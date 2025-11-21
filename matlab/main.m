@@ -3,7 +3,7 @@ clear; close all; clc;
 addpath('functions/');
 addpath('functions/others/');
 
-cas.subj = "s00";
+cas.subj = "s000";
 
 %% 0) Check compatibility
 % out: config file with paths
@@ -29,7 +29,7 @@ alignment_MRI(cas, false);
 [cas, dat_PC] = main_3_apply_roi_compute_Q(cas, true, true, true, true, true, true);
 
 %% 6) Registration (only if segmentation exist)
-[cas, dat_PC] = main_4_registration(cas, cas.locations{end});
+[cas, dat_PC] = main_4_registration(cas);
 
 %% 6) Define geometry in SpaceClaim
 % out: computational domain

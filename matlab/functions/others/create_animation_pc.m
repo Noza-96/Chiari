@@ -149,7 +149,7 @@ function contour_velocity(dat_PC, loc, n)
     
     % outlines
     contour(dat_PC.SAS.ROI{loc},  [0.5 0.5], 'k',      'LineWidth', 1.5);
-    contour(dat_PC.CORD.ROI{loc}, [0.5 0.5], 'Color', 'b', 'LineWidth', 1.5);
+    % contour(dat_PC.CORD.ROI{loc}, [0.5 0.5], 'Color', 'b', 'LineWidth', 1.5);
     if sum(dat_PC.TONS.ROI{loc}(:)) > 0
         contour(dat_PC.TONS.ROI{loc}, [0.5 0.5], 'Color', orange, 'LineWidth', 1.5);
     end

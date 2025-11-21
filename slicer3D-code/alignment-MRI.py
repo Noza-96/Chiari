@@ -13,44 +13,6 @@ vtk.vtkObject.GlobalWarningDisplayOff()
 slicer.mrmlScene.Clear(0)
 
 
-def segmentation_2D_slices(segmentation_node, volume_node, segmentation_2D_path):
-
-    # Clone input volume for output
-    volumes_logic = slicer.modules.volumes.logic()
-    output_volume = volumes_logic.CloneVolume(slicer.mrmlScene, volume_node, volume_node.GetName() + "_segmentation")
-
-    # Get segment ID
-    segment_id = segmentation_node.GetSegmentation().GetNthSegmentID(0)
-
-    # Fill INSIDE the segment with 0
-    SegmentEditorEffects.SegmentEditorMaskVolumeEffect.maskVolumeWithSegment(
-        segmentation_node,
-        segment_id,
-        "FILL_INSIDE",
-        [1],
-        output_volume,
-        output_volume,
-        [0]*6
-    )
-
-    # Fill OUTSIDE the segment with 0
-    SegmentEditorEffects.SegmentEditorMaskVolumeEffect.maskVolumeWithSegment(
-        segmentation_node,
-        segment_id,
-        "FILL_OUTSIDE",
-        [0],
-        output_volume,
-        output_volume,
-        [0]*6
-    )
-
-    # Save final NRRD
-    slicer.util.saveNode(output_volume, segmentation_2D_path)
-    print(f"2D segmentation saved to: {segmentation_2D_path}")
-
-    # Remove volume from scene
-    slicer.mrmlScene.RemoveNode(output_volume)
-
 def get_volumes_sorted_by_z():
     volume_nodes_with_z = []
 
@@ -311,7 +273,6 @@ for k in range(len(sorted_volumes)):
     pcmri_node = sorted_volumes[k]
     set_manual = True
     pcmri_transformation = os.path.join(transformation_path, pcmri_node.GetName() + "_transformation.txt")
-    segmentation_2D_path = os.path.join(main_path, 'registration', '2D-segmentation', pcmri_node.GetName() + "_segmentation.nrrd")
     # Apply a linear transformation to the pc-mri slices
     if os.path.exists(pcmri_transformation):
         response = QMessageBox.question(None, 'Load Existing Transformation', pcmri_node.GetName() + ': apply existing transformation?', QMessageBox.No | QMessageBox.Yes, QMessageBox.Yes )
@@ -379,10 +340,6 @@ for k in range(len(sorted_volumes)):
                         # Output the results
                         print("transformation matrix saved to: " + pcmri_transformation)
                     break
-    if not os.path.exists(segmentation_2D_path):
-
-        segmentation_2D_slices(segmentation_node, pcmri_node, segmentation_2D_path)
-        # slicer.mrmlScene.RemoveNode(segmentation_node)
         
 repeat = True
 while repeat:
