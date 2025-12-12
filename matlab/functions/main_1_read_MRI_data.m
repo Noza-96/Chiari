@@ -1,4 +1,4 @@
-function [cas, dat_PC] = read_MRI_data(cas)
+function [cas, dat_PC] = main_1_read_MRI_data(cas)
 
     fprintf('\n--- Processing subject: %s ---\n\n', cas.subj);
 

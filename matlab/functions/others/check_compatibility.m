@@ -88,12 +88,22 @@ function find_programs_paths(programs, config_file)
             fprintf('Steps to run on terminal (git-chiari folder) to obtain path to python environment: \n')
             fprintf('1) create python environment \n\t conda env create -f environment.yml\n')
             fprintf('2) activate environment  \n\t conda activate chiari\n')
-            fprintf('3) find location environment  \n\t where.exe python\n')
+            if ismac
+                fprintf('3) find location environment  \n\t where python\n')
+            else
+                fprintf('3) find location environment  \n\t where.exe python\n')
+            end
 
             if isempty(python_guess) || ~isfile(python_guess)
+                if ismac
                 python_guess = askForPath('PYTHON_PATH', ...
-                    '4) copy and paste path (e.g., C:\Users\USR\anaconda3\envs\chiari\python.exe)');
-                python_guess = fullfile(python_guess, 'python.exe');
+                    '4) copy and paste path (e.g., /Users/noza/miniforge3/envs/chiari/bin/python)');
+                python_guess = fullfile(python_guess, 'python');
+                else
+                    python_guess = askForPath('PYTHON_PATH', ...
+                        '4) copy and paste path (e.g., C:\Users\USR\anaconda3\envs\chiari\python.exe)');
+                    python_guess = fullfile(python_guess, 'python.exe');
+                end
             end
             % Validate path
             if isempty(python_guess) || ~isfile(python_guess)

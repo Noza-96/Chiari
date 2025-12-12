@@ -7,7 +7,7 @@ function TUI_run_simulation(dat_PC, cas, DNS, fileID)
 
     fprintf(fileID,';run simulation \n' );
 
-    profile_dir = DNS.ansys_path+"/"+cas.subj+"/inputs/profiles/";
+    profile_dir = DNS.ansys_path+"/"+cas.subj+"/inputs/profiles/ts_"+DNS.ts_cycle+"/";
     surface_path = DNS.ansys_path+"/"+cas.subj+"/outputs/surface_mesh";
 
     % set time-step
@@ -51,7 +51,7 @@ function TUI_run_simulation(dat_PC, cas, DNS, fileID)
                 end
             end
 
-            fprintf(fileID,";" + DNS.case + ": iteration " +n+"/"+DNS.ts_cycle+" cycle "+k+"/"+DNS.cycles+"\n" );
+            fprintf(fileID,";" + DNS.case + ": iteration " + n + "/" + DNS.ts_cycle + " cycle "+k+"/"+DNS.cycles+"\n" );
 
             fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
 

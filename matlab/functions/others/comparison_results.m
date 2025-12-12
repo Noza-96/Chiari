@@ -1,4 +1,4 @@
-function comparison_results(cas, case_name, mesh_size)
+function comparison_results(cas, case_name, mesh_size, ts, cyc)
 
     Ncases = length(case_name); 
     DNS_cases = cell (1,Ncases);
@@ -10,7 +10,7 @@ function comparison_results(cas, case_name, mesh_size)
     
     for ii = 1:Ncases
         [t_geom, t_sim, b_inlet, version] = get_type_simulation(case_name{ii});
-        DNS_cases{ii} = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version;
+        DNS_cases{ii} = t_geom + string(t_sim) + b_inlet + "_dx" + formatDecimal(mesh_size) + version + "_ts_" + ts + "_N_" + cyc;
         load(fullfile(cas.dirmat, "DNS-results", "DNS_" + DNS_cases{ii} + ".mat"), 'DNS');
         st_DNS{ii} = DNS;
     end
@@ -55,7 +55,7 @@ function comparison_results(cas, case_name, mesh_size)
             end
         end
 
-        % plot_flow_rate (pcmri.q{Ndat},n)
+        plot_flow_rate (pcmri.q{Ndat},n)
         
         % Capture the frame
         movieVector(n) = getframe(fig);

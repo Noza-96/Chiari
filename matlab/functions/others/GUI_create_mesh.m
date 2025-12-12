@@ -13,24 +13,36 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
     fileID = fopen(GUI_journal_path, 'w');
 
     geom = [];
-    if any(cellfun(@(s) ~isempty(regexp(s, '^c\d', 'once')), case_name))
-        geom = [geom, "c"];
-    end
+    version = [];
     
-    if any(cellfun(@(s) ~isempty(regexp(s, '^b\d', 'once')), case_name))
-        geom = [geom, "b"];
-    end
+    for k = 1:numel(case_name)
+        s = case_name{k};  % current case name, e.g. 'cnl3_dx00004_v1'
     
+        % prefix: everything before the first digit
+        prefix = regexp(s, '^\D*', 'match', 'once');
+    
+        % first digit in the string
+        firstDigit = regexp(s, '\d', 'match', 'once');
+  
+        if ~isempty(prefix) && ~isempty(firstDigit) && ~strcmp(firstDigit, '3')
+            [gg, ~, ~, vv] = get_type_simulation(case_name{k});
+            geom = [geom, string(gg)];
+            version = [version, string(vv)];
+        end
+    end
+    % (optional) remove duplicates, keep first occurrence
+    geom = unique(geom, 'stable');
+
     % for type 2 simulation, which boundary has continuity condition
     continuity_condition = "tonsils";
     
-    prox_limit = [0.0002, 0.0008];
+    
     
     for k = 1: length(geom)
     
         for ii = 1:length(mesh_size)
-    
-            case_i = geom(k) + "_dx" + mesh_size(ii);
+            prox_limit = [mesh_size(ii), mesh_size(ii)*4];
+            case_i = geom(k) + "_dx" + mesh_size(ii) + version(k);
             % check if case already exists or needs to be created
             if isfile(fullfile(cas.diransys_in, "case-files", case_i + ".cas.gz"))
                 fprintf('case file %s already exists ... \n', case_i + ".cas.gz");
@@ -50,12 +62,14 @@ function all_simulations = GUI_create_mesh(cas, mesh_size, case_name)
                 end
             
                 sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
+
+                geom_name = geom+ "_geometry"+version(k)+".scdoc";
             
-                geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom(k)+ "_geometry.scdoc");
+                geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom_name);
     
                 if ~isfile(geometry_path)
                     geometry_exist = false; % cannot run simulation
-                    fprintf(2, 'geometry file %s does not exist ...\n', geom(k)+ "_geometry.scdoc");
+                    fprintf(2, 'geometry file %s does not exist ...\n', geom_name);
                 end
             
                 if count_sim == 1

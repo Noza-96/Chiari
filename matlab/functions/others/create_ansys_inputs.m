@@ -14,9 +14,9 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
 
         % Extract and scale pcMRI data
         ROI = dat_PC.ROI_SAS{ii};                      % [100 x 100]
-        U = dat_PC.U_SAS{ii} * 1e-2;       % [m/s]
+        U = -dat_PC.U_SAS{ii} * 1e-2;       % [m/s]
         xyz = dat_PC.pixel_coord{ii} * 1e-3; % [m]
-        Q = dat_PC.Q_SAS{ii};              % Flow rate
+        Q = -dat_PC.Q_SAS{ii};              % Flow rate
 
         % Trim empty rows and columns with padding
         zeroRows = all(U(:,:,1) == 0, 2);
@@ -38,10 +38,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
         % Fourier interpolation for velocity profiles
         uu = zeros(size(U,1), ts_cycle);
         for k = 1:size(U,1)
-            [uu(k,:), ~, ~, ~] = four_approx(U(k,:), modes, 0, ts_cycle);
+            [uu(k,:), ~, ~] = four_approx(U(k,:), modes, 0, ts_cycle);
         end
-
-        %TODO recalculate flow rate now.
 
         % Define points in millimeters
         x_coords = [xx(1), xx(floor(end/2)), xx(end)] * 1e3;
@@ -84,13 +82,16 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             equation_terms(1) = sprintf("%.10f", a0/2); % add a0 as the first term
 
             for n = 1:modes
-
+                dt = T/ts_cycle;
                 omega = n * 2 * pi / T;
                 real_part = real(An(n));
                 imag_part = imag(An(n));
-                equation_terms(n+1) = sprintf("+%.10f*cos(%.10f*t*1[s^-1]) - %.10f*sin(%.10f*t*1[s^-1])", ...
-                                            real_part, omega, imag_part, omega);
-                Q_recon = Q_recon + 2 * (real_part * cos(omega * t * T) - imag_part * sin(omega * t * T));
+                equation_terms(n+1) = sprintf( ...
+                        "+%.10f*cos(%.10f*(t-%.10f*1[s])*1[s^-1]) - %.10f*sin(%.10f*(t-%.10f*1[s])*1[s^-1])", ...
+                        real_part, omega, dt, imag_part, omega, dt);
+
+                Q_recon = Q_recon + 2 * (real_part * cos(omega * t * T) ...
+                             - imag_part * sin(omega * t * T));
             end
             Q_recon = Q_recon + a0;
             eq_str = sprintf("(%s)*2E-6[m^3/s]", strjoin(equation_terms, ' '));
@@ -113,8 +114,12 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             vel_sign = strcmp(tag, "top") * -1 + strcmp(tag, "bottom") * 1;
             for n = 1:ts_cycle
                 template(row_offset + (1:n_points), 4) = num2cell(vel_sign * uu(:,n));
-                tt = cell2table(template);
-                filename = fullfile(cas.diransys_in, "profiles", tag + "_prof_" + num2str(n) + ".csv");
+                tt = cell2table(template);             
+                filename = fullfile(cas.diransys_in, "profiles", "ts_" + ts_cycle, tag + "_prof_" + num2str(n) + ".csv");
+                folderpath = fileparts(filename);
+                if ~exist(folderpath, 'dir')
+                    mkdir(folderpath);
+                end
                 writetable(tt, filename, 'WriteVariableNames', false);
             end
 
@@ -133,8 +138,9 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
                 omega = n * 2 * pi / T;
                 real_part = real(An(n));
                 imag_part = imag(An(n));
-                equation_terms(n+1) = sprintf("+%.10f*cos(%.10f*t*1[s^-1]) - %.10f*sin(%.10f*t*1[s^-1])", ...
-                                              real_part, omega, imag_part, omega);
+                equation_terms(n+1) = sprintf( ...
+                        "+%.10f*cos(%.10f*(t-%.10f*1[s])*1[s^-1]) - %.10f*sin(%.10f*(t-%.10f*1[s])*1[s^-1])", ...
+                        real_part, omega, dt, imag_part, omega, dt);
                 Q_recon = Q_recon + 2 * (real_part * cos(omega * t * T) - imag_part * sin(omega * t * T));
             end
             Q_recon = Q_recon + a0;
@@ -144,15 +150,6 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             
             filename = fullfile(cas.diransys_in, "flow-rates", "Q_" + num2str(ii - 1) + ".txt");
             write_text_file(filename, eq_str);
-
-            %CHECK: TO BE DELETED
-            % if ii == 2
-                % figure 
-                % plot(t,q{ii},'-','Color','r',LineWidth=1.2 )
-                % hold on 
-                % plot(t,Q_recon,'--o','Color','b',LineWidth=1.2)
-                % drawnow;
-            % end
             
         end
 

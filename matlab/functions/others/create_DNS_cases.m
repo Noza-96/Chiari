@@ -1,5 +1,6 @@
-function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle)
+function [DNS_cases, nerve_sim, lig_sim, nerve_lig_sim, zones_sim] = create_DNS_cases (case_name, mesh_size, cas, cycles, iterations_ts, ts_cycle)
     DNS_cases = cell(length(case_name),length(mesh_size));
+    nerve_sim = false; lig_sim = false; zones_sim = false; nerve_lig_sim = false;
 
     for i = 1:length(case_name)     
         for j = 1:length(mesh_size)
@@ -8,7 +9,7 @@ function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterat
     
             [DNS.geom, DNS.sim, DNS.inlet, DNS.version] = get_type_simulation(case_i);
             DNS.mesh_size = mesh_j;
-            DNS.case = DNS.geom + string(DNS.sim) + DNS.inlet + "_dx" + formatDecimal(DNS.mesh_size) + DNS.version;
+            DNS.case = DNS.geom + string(DNS.sim) + DNS.inlet + "_dx" + formatDecimal(DNS.mesh_size) + DNS.version + "_ts_" + ts_cycle + "_N_" + cycles;
             
             % full ansys folder path
             DNS.ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));
@@ -34,6 +35,22 @@ function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterat
                 DNS.Dz = 0:1:50;
             end
 
+            % check if any simulation contains ligaments
+            if DNS.geom == "cl"
+                lig_sim = true;
+            end
+            % check if any simulation contains nerves
+            if DNS.geom == "cn"
+                nerve_sim = true;
+            end
+
+            if DNS.geom == "cnl"
+                nerve_lig_sim = true;
+            end
+
+            if DNS.sim == 3
+                zones_sim = true;
+            end
             save(fullfile(cas.dirmat,"DNS_"+DNS.case+".mat"),'DNS')
             clear DNS
         end     
@@ -42,8 +59,4 @@ function DNS_cases = create_DNS_cases (case_name, mesh_size, cas, cycles, iterat
     disp('created DNS.mat with cases information ...')
 end
 
-%% Auxiliary functions 
 
-function filepath = correct_path(filepath)
-    filepath = strrep(filepath, '\', '/');
-end
