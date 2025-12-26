@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [cas,dat_PC] = main_4_registration(cas)
+function [cas,dat_PC] = main_6_registration(cas)
 
     % This sets the location in which you want to do registration, as it
     % is, only does registration of most caudal measurement

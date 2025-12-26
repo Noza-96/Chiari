@@ -1,5 +1,5 @@
 
-function [cas,dat_PC] = main_3_apply_roi_compute_Q(cas, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter, offset_vel, fourier_dec)
+function [cas,dat_PC] = main_5_apply_roi_compute_Q(cas, correct_aliasing, unwrap_periodic, smooth_spatial_outliers, gauss_filter, offset_vel, fourier_dec)
 
     fprintf("5) Filter and create animation:\n")    
 

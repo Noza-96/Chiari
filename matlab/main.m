@@ -3,7 +3,7 @@ clear; close all; clc;
 addpath('functions/');
 addpath('functions/others/');
 
-cas.subj = "s4";
+cas.subj = "s3-post";
 
 %% 0) Check compatibility
 % out: config file with paths
@@ -23,6 +23,7 @@ main_2_segmentation(cas, false);
 main_3_alignment_MRI(cas, false);
 
 %% 4) PC-MRI measurements
+crop_size = 100;
 [cas, dat_PC] = main_4_crop_set_roi(cas, 100);
 
 %% 5) Filter and create animation
@@ -31,18 +32,34 @@ main_3_alignment_MRI(cas, false);
 %% 6) Registration (only if segmentation exist)
 [cas, dat_PC] = main_6_registration(cas);
 
-%% 7) Define geometry in SpaceClaim
-% out: computational domain
-[cas, dat_PC] = main_7_geometry(cas);
 
-%% 8) Mesh - create case
+%% 7) Setup DNS cases
+% out: creted flow-rates, planes, and velocity profiles of PC-MRI
+% DNS_cases contains information about the simulations to be done
+
+case_name = {"c3"};     % Array with the kind of simulations to do
+mesh_size = 0.0002;         % Array with the different mesh sizes to be simulated
+ts_cycle = 100;             % number of time steps per cycle
+cycles = 3;                 % cyles to be computed
+iterations_ts = 20;         % iterations per time step
+
+[cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_size, ts_cycle, cycles, iterations_ts);
+
+
+%% 8) Define geometry in SpaceClaim
+% out: computational domain
+[cas, dat_PC] = main_8_geometry(cas);
+
+%% 9) Mesh - create case
 % out: mesh and case for ANSYS Fluent simulations
-[cas, dat_PC] = main_8_setup_case_mesh(cas);
+n_cores = 8;   % number of processors meshing
+main_9_mesh(cas, case_name, mesh_size, n_cores)
 
-%% 9) ANSYS simulations
+%% 10) ANSYS simulations
 % out: 
-[cas, dat_PC] = main_9_run_simulation(cas);
+n_cores = 14;   % number of processors Fluent
+[cas, dat_PC] = main_10_run_simulation(cas, DNS_cases, n_cores);
 
-%% 10) Post-processing
+%% 11) Post-processing
 % out: computational domain
-[cas, dat_PC] = main_10_postprocessing(cas);
+[cas, dat_PC] = main_11_postprocessing(cas);

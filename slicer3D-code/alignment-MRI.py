@@ -5,13 +5,38 @@ import SegmentEditorEffects
 import slicer
 import vtk
 from DICOMLib import DICOMUtils
-
+import re
 # Suppress VTK warnings and errors
 vtk.vtkObject.GlobalWarningDisplayOff()
 
 # Clear the MRML scene to delete all loaded data
 slicer.mrmlScene.Clear(0)
 
+def detect_level(desc: str) -> str:
+    """Map SeriesDescription -> label like FM, C1C2, C3C4, ..."""
+    d = (desc or "").lower()
+
+    # Foramen magnum / FM (optionally with VENC like "VENC 5")
+    if any(k in d for k in ["foramen", "foreman", "magnum", " fm"] ) or d.strip().startswith("fm"):
+        # Try to find a number like 5/10/15 in the text
+        m = re.search(r"(?<!\d)(5|10|15)(?!\d)", d[2:])
+        if m:
+            return f"FM-{m.group(1)}"
+        return "FM"
+
+    # Cervical pairs
+    if "c1" in d and "c2" in d: return "C1C2"
+    if "c2" in d and "c3" in d: return "C2C3"
+    if "c3" in d and "c4" in d: return "C3C4"
+    if "c4" in d and "c5" in d: return "C4C5"
+    if "c5" in d and "c6" in d: return "C5C6"
+
+    # Single level (you mentioned it may look like "C1")
+    m = re.search(r"\bc([1-7])\b", d)
+    if m:
+        return f"C{m.group(1)}"
+
+    return "UNK"
 
 def get_volumes_sorted_by_z():
     volume_nodes_with_z = []
@@ -125,18 +150,39 @@ def prompt_yes_with_fallback(prompt, default):
         ans = default  # no stdin → treat like pressing Enter
     return ans 
 
-def get_slice_labels(flow_path):
+import slicer
+
+def get_volume_labels(volume_nodes):
     """
-    Return list of slice labels ['FM','C1C2',...] from subfolders named 'z#-LABEL'.
+    Given a list of vtkMRMLScalarVolumeNode, return labels inferred from
+    DICOM SeriesDescription, in the same order.
     """
-    import os, re
     labels = []
-    for name in os.listdir(flow_path):
-        if os.path.isdir(os.path.join(flow_path, name)):
-            m = re.match(r"^z\d+-(.+)$", name, re.IGNORECASE)
-            if m:
-                labels.append(m.group(1))
+    for n in volume_nodes:
+        if n.GetName() == "anatomy":
+            continue
+
+        desc = ""
+
+        # Try to get SeriesDescription from DICOM (if loaded from DICOM)
+        try:
+            uids = slicer.dicomDatabase.fileValue  # just to ensure DB exists
+            shNode = slicer.vtkMRMLSubjectHierarchyNode.GetSubjectHierarchyNode(slicer.mrmlScene)
+            itemID = shNode.GetItemByDataNode(n)
+            if itemID:
+                # Attribute usually stored on the SH item
+                desc = shNode.GetItemAttribute(itemID, "DICOM.SeriesDescription") or ""
+        except Exception:
+            desc = ""
+
+        # Fallback: sometimes the node name already contains it
+        if not desc:
+            desc = n.GetName()
+
+        labels.append(detect_level(desc))
+
     return labels
+
 
 def save_transformation_matrix(transform_node, save_path):
     if not transform_node:
@@ -224,14 +270,9 @@ for file_name in nrrd_files:
     file_path = os.path.join(pcMRI_path, file_name)
     slicer.util.loadSequence(file_path)
     
-id_slices = get_slice_labels(flow_path)
-print(f"pc-mri sequences {id_slices} loaded...")
-
 # load anatomy
 volume_node = slicer.util.loadVolume(os.path.join(segmentation_path, "anatomy.nrrd"))
 volume_node.SetName("anatomy")
-
-print("anatomy loaded...")
 
 # Convert stl as model and transform it to segmentation node
 model_node = slicer.util.loadModel(os.path.join(segmentation_path, 'segmentation.stl'))
@@ -242,10 +283,10 @@ display_segmentation_3D(segmentation_node)
 slicer.mrmlScene.RemoveNode(model_node)
 segmentation_node.CreateDefaultDisplayNodes()
 
-print("segmentation loaded...")
-        
+# Sort the volumes by z-coordinate
+sorted_volumes = get_volumes_sorted_by_z()
 
-if len(id_slices) == 3:
+if len(sorted_volumes) == 3:
     slicer.app.layoutManager().setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutFourUpView)
     slice_views = ["Red",  "Green", "Yellow"]
 else:
@@ -253,8 +294,9 @@ else:
     slicer.app.layoutManager().setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutTwoOverTwoView)
     slice_views = ["Red",  "Green", "Yellow", "Slice4"]
 
-# Sort the volumes by z-coordinate
-sorted_volumes = get_volumes_sorted_by_z()
+id_slices = get_volume_labels(sorted_volumes)
+
+print(f"pc-mri sequences {id_slices} loaded...")
 
 # Assign the sorted volumes to the slice views
 assign_to_slices(sorted_volumes, slice_views)

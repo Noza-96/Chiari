@@ -69,7 +69,6 @@ function cas = organize_DICOMS(cas)
 % - Organizes flow series into patient-data/<cas.subj>/flow/zK-<level>/01PC/<series_desc>_{00,MAG_01,P_02}
 
     %% Setup
-    data_name = 'data_0.mat';
     
     % List DICOM series
     T = list_dicom_series(cas.dir.patient);
@@ -96,8 +95,8 @@ function cas = organize_DICOMS(cas)
     % Select T2 series to construct segmentation only if replacing or none exists
     if ~useExisting
         % pass 'true' to skip internal "existing anatomy" prompt inside picker
-        [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(cas, T, true);
-        copyfile(anatomy_dicom, dest_folder);
+        pick_T2_series(cas, T, true);
+        % copyfile(anatomy_dicom, dest_folder);
     end
     
     fprintf('\n- Velocity data .... \n');
@@ -152,22 +151,22 @@ function cas = organize_DICOMS(cas)
                 for i = 1:numel(choices)
                     fprintf('\t\t%s\n', choices(i));
                 end
-                fprintf ("\n\tOrdered from cranial to caudal direction (e.g., FM first, C1-C2 second, C3-C3, third)... \n")
+                fprintf ("\n\tOrdered from cranial to caudal direction (e.g., FM-15 first, FM-5 second, C1-C2 third, C3-C3, fourth)... \n")
                 sel = askIndexOrQuit(sprintf('\t... pick flow series [1..%d] (q to quit): ', numel(choices)), numel(choices));
                 if sel == 0
                     break;
                 end
     
                 src_path   = char(paths(sel));
+
                 series_desc = sanitize_series_desc(TF.SeriesDescription{sel});
-    
+
                 % decide label based on series description
                 sstt = detect_level(TF.SeriesDescription{sel});
     
                 % flow/zK-label/01PC/<series_desc>
                 z_folder   = fullfile(cas.dir.flow, sprintf('z%d-%s', z, sstt));
                 dest_path  = fullfile(z_folder, '01PC', series_desc);
-                createDirIfNotExists(dest_path);
     
                 % Base container: flow/zK-<sstt>/01PC/
                 base_container = fullfile(z_folder, '01PC');
@@ -179,7 +178,6 @@ function cas = organize_DICOMS(cas)
                 z = z + 1;  % next slice level
             end
         end
-        save(fullfile(cas.dir.mat, data_name),"cas");
     end
 
 end
@@ -189,104 +187,152 @@ end
 
 
 function T = list_dicom_series(rootDir, csvOut)
-    % LIST_DICOM_SERIES  Print/return one line per SE0000xx series.
-    %   T = list_dicom_series(rootDir)
-    %   T = list_dicom_series(rootDir, 'series_list.csv')
-    %
-    % Output columns: PAT, ST, SE, StudyDate, StudyTime, SeriesNumber, SeriesDescription
-    
+% LIST_DICOM_SERIES  List DICOM series under rootDir (handles 2 layouts).
+%
+%   T = list_dicom_series(rootDir)
+%   T = list_dicom_series(rootDir, 'series_list.csv')
+%
+% Handles:
+%   (A) Siemens tree: .../PATxxxx/STxxxxxx/SE000001/MR000123
+%   (B) Flat dump:    .../IMAGES/IM000001 (or similar) with multiple series mixed
+%
+% Output columns:
+%   PAT, ST, SE, Manufacturer, StudyDate, StudyTime, SeriesNumber, SeriesDescription, SeriesInstanceUID
+%
+% Notes:
+%   - In flat layout, PAT/ST may be unknown; left blank.
+%   - Series are grouped by SeriesInstanceUID (one row per UID).
+
     if nargin < 1 || ~isfolder(rootDir)
         error('Folder not found: %s', string(rootDir));
     end
     if nargin < 2, csvOut = ''; end
-    % Find all SE folders under rootDir (e.g., s3/ST000001/SE000009)
+
+    % ------------------------------------------------------------
+    % Detect layout: do we have SE* folders anywhere under rootDir?
+    % ------------------------------------------------------------
     seDirs = dir(fullfile(rootDir, '**', 'SE*'));
     seDirs = seDirs([seDirs.isdir]);
-    
-    rows = [];
-    data = struct('PAT', {}, 'ST', {}, 'SE', {}, 'Manufacturer', {}, 'StudyDate', {}, 'StudyTime', {}, ...
-                  'SeriesNumber', {}, 'SeriesDescription', {});
-    
-    for k = 1:numel(seDirs)
-        thisSE = fullfile(seDirs(k).folder, seDirs(k).name);
-        % Look for one MR* file inside this SE folder
-        mr = dir(fullfile(thisSE, 'MR*'));
-        mr = mr(~[mr.isdir]);
-        if isempty(mr)
-            % sometimes files are nested one level deeper; handle it
-            mr = dir(fullfile(thisSE, '**', 'MR*'));
+    useSEFolders = ~isempty(seDirs);
+
+    % Data accumulator
+    data = struct('PAT', {}, 'ST', {}, 'SE', {}, 'Manufacturer', {}, ...
+                  'StudyDate', {}, 'StudyTime', {}, 'SeriesNumber', {}, ...
+                  'SeriesDescription', {}, 'SeriesInstanceUID', {});
+
+    if useSEFolders
+        % ============================================================
+        % Case A: Siemens layout (SE folders exist) => fast per SE folder
+        % ============================================================
+        for k = 1:numel(seDirs)
+            thisSE = fullfile(seDirs(k).folder, seDirs(k).name);
+
+            % Look for one MR* file inside this SE folder
+            mr = dir(fullfile(thisSE, 'MR*'));
             mr = mr(~[mr.isdir]);
+
+            if isempty(mr)
+                % sometimes files are nested deeper; handle it
+                mr = dir(fullfile(thisSE, '**', 'MR*'));
+                mr = mr(~[mr.isdir]);
+            end
+
+            if isempty(mr)
+                % no dicoms here
+                continue
+            end
+
+            sampleFile = fullfile(mr(1).folder, mr(1).name);
+            info = safe_dicominfo(sampleFile);
+            if isempty(info), continue; end
+
+            % SE name is the folder itself (e.g., SE000001)
+            SEname = string(seDirs(k).name);
+
+            data = append_series_row(data, info, thisSE, SEname);
         end
-        if isempty(mr)
-            % no dicoms here
-            continue
+
+    else
+        % ============================================================
+        % Case B: Flat dump (e.g., IMAGES) => scan + group by Series UID
+        % ============================================================
+        dicomFiles = find_dicom_files(rootDir);
+
+        seen = containers.Map('KeyType','char','ValueType','logical');
+
+        for i = 1:numel(dicomFiles)
+            sampleFile = dicomFiles{i};
+            info = safe_dicominfo(sampleFile);
+            if isempty(info), continue; end
+
+            uid = getfield_try(info, 'SeriesInstanceUID', '');
+            if isempty(uid)
+                % fallback key if UID missing (rare)
+                uid = sprintf('SER%d_%s', ...
+                    getfield_try(info,'SeriesNumber',0), ...
+                    getfield_try(info,'SeriesDescription',''));
+            end
+            key = char(uid);
+
+            if isKey(seen, key)
+                continue; % already captured this series
+            end
+            seen(key) = true;
+
+            % Use the parent folder name as SE label (often "IMAGES")
+            parentFolder = string(string(fileparts(sampleFile)));
+            [~, folderName] = fileparts(parentFolder);
+            if strlength(folderName) == 0
+                folderName = "IMAGES";
+            end
+
+            % We pass "thisSE" as the folder path; PAT/ST likely unknown here
+            thisSE = fileparts(sampleFile);
+            data = append_series_row(data, info, thisSE, folderName);
         end
-    
-        sampleFile = fullfile(mr(1).folder, mr(1).name);
-        try
-            info = dicominfo(sampleFile);
-        catch
-            % skip unreadable series
-            continue
-        end
-    
-        % Pull fields with safe fallbacks
-        StudyDate  = getfield_try(info, 'StudyDate', '00000000');
-        StudyTime  = sanitize_time(getfield_try(info, 'StudyTime', '000000'));
-        SeriesNum  = getfield_try(info, 'SeriesNumber', 0);
-        SeriesDesc = getfield_try(info, 'SeriesDescription', '');
-        if isempty(SeriesDesc)
-            SeriesDesc = getfield_try(info, 'ProtocolName', '');
-        end
-        Manufacturer      = upper(strtrim(getfield_try(info, 'Manufacturer', '')));
-    
-        if contains(Manufacturer, 'SIEMENS')
-            Manufacturer = 'SIEMENS';
-        elseif contains(Manufacturer, 'GE')
-            Manufacturer = 'GE';
-        else
-            error('Manufacturer "%s" is not known.', Manufacturer);
-        end
-        % Extract PAT/ST/SE names from the path for convenience
-        parts = split(string(thisSE), filesep);
-        % Expect .../PATxxxxx/STxxxxxx/SExxxxxx
-        PAT = "";
-        ST  = "";
-        SE  = string(seDirs(k).name);
-        if numel(parts) >= 3
-            PAT = parts(end-2);
-            ST  = parts(end-1);
-        end
-        data(end+1) = struct( ... 
-            'PAT', char(PAT), ...
-            'ST',  char(ST), ...
-            'SE',  char(SE), ...
-            'Manufacturer',  char(Manufacturer), ...
-            'StudyDate',  char(StudyDate), ...
-            'StudyTime',  char(StudyTime), ...
-            'SeriesNumber', double(SeriesNum), ...
-            'SeriesDescription', char(SeriesDesc));
     end
-    
-    % Turn into table and sort by PAT, ST, SeriesNumber
+
+    % ------------------------------------------------------------
+    % Build table, sort, print
+    % ------------------------------------------------------------
     if isempty(data)
         T = table();
         fprintf('\tNo series found under %s\n', rootDir);
         return
     end
+
     T = struct2table(data);
-    T = sortrows(T, {'PAT','ST','SeriesNumber'});
+
+    % Sort: if PAT/ST empty (flat layout), sort by StudyDate/SeriesNumber
+    if all(cellfun(@isempty, T.PAT)) && all(cellfun(@isempty, T.ST))
+        T = sortrows(T, {'StudyDate','StudyTime','SeriesNumber'});
+    else
+        T = sortrows(T, {'PAT','ST','SeriesNumber'});
+    end
+
+    % Print summary
     lastPAT = '';
     lastST  = '';
     for i = 1:height(T)
-        if ~strcmp(lastPAT, T.PAT{i}) || ~strcmp(lastST, T.ST{i})
-            fprintf('\n\t%s / %s\n', T.PAT{i}, T.ST{i});
-            lastPAT = T.PAT{i}; lastST = T.ST{i};
+        pat = T.PAT{i};
+        st  = T.ST{i};
+
+        if isempty(pat) && isempty(st)
+            % Flat layout (no PAT/ST)
+            if i == 1
+                fprintf('\n\t%s\n', rootDir);
+            end
+        else
+            if ~strcmp(lastPAT, pat) || ~strcmp(lastST, st)
+                fprintf('\n\t%s / %s\n', pat, st);
+                lastPAT = pat; lastST = st;
+            end
         end
+
         fprintf('\t\t%s : Ser%03d %s\n', T.SE{i}, T.SeriesNumber(i), T.SeriesDescription{i});
     end
     fprintf('\n\tTotal series: %d\n\n', height(T));
-    
+
     % Optional CSV
     if ~isempty(csvOut)
         writetable(T, csvOut);
@@ -294,30 +340,154 @@ function T = list_dicom_series(rootDir, csvOut)
     end
 end
 
-% ---- helpers ----
-function v = getfield_try(s, fld, defaultVal)
-    if isfield(s, fld) && ~isempty(s.(fld))
-        v = s.(fld);
+% ======================================================================
+% Helpers
+% ======================================================================
+
+function info = safe_dicominfo(f)
+    try
+        info = dicominfo(f);
+    catch
+        info = [];
+    end
+end
+
+function files = find_dicom_files(rootDir)
+    % Try common filename patterns first (fast-ish), then fallback to all files.
+    pats = {'MR*','IM*','*.dcm','*.DCM'};
+    files = {};
+    for p = 1:numel(pats)
+        d = dir(fullfile(rootDir, '**', pats{p}));
+        d = d(~[d.isdir]);
+        for k = 1:numel(d)
+            files{end+1} = fullfile(d(k).folder, d(k).name); %#ok<AGROW>
+        end
+    end
+
+    % If nothing found, fall back to "all files" and let dicominfo reject non-DICOMs
+    if isempty(files)
+        d = dir(fullfile(rootDir, '**', '*'));
+        d = d(~[d.isdir]);
+        for k = 1:numel(d)
+            files{end+1} = fullfile(d(k).folder, d(k).name); %#ok<AGROW>
+        end
+    end
+end
+
+function data = append_series_row(data, info, thisSE, SEname)
+    % Pull fields with safe fallbacks
+    StudyDate  = getfield_try(info, 'StudyDate', '00000000');
+    StudyTime  = sanitize_time(getfield_try(info, 'StudyTime', '000000'));
+    SeriesNum  = getfield_try(info, 'SeriesNumber', 0);
+    SeriesDesc = getfield_try(info, 'SeriesDescription', '');
+    if isempty(SeriesDesc)
+        SeriesDesc = getfield_try(info, 'ProtocolName', '');
+    end
+
+    Manufacturer = upper(strtrim(getfield_try(info, 'Manufacturer', '')));
+    if contains(Manufacturer, 'SIEMENS')
+        Manufacturer = 'SIEMENS';
+    elseif contains(Manufacturer, 'GE')
+        Manufacturer = 'GE';
+    elseif isempty(Manufacturer)
+        Manufacturer = '';
     else
-        v = defaultVal;
+        % Keep as-is, don’t error out (some vendors put unexpected strings)
+        Manufacturer = char(string(Manufacturer));
+    end
+
+    SeriesUID = getfield_try(info, 'SeriesInstanceUID', '');
+
+    % Extract PAT/ST from path if it looks like .../PATxxx/STxxx/SE...
+    parts = split(string(thisSE), filesep);
+    PAT = ""; ST = "";
+    if numel(parts) >= 3
+        PATcand = parts(end-2);
+        STcand  = parts(end-1);
+        if startsWith(PATcand, "PAT") && startsWith(STcand, "ST")
+            PAT = PATcand;
+            ST  = STcand;
+        end
+    end
+
+    data(end+1) = struct( ...
+        'PAT', char(PAT), ...
+        'ST',  char(ST), ...
+        'SE',  char(string(SEname)), ...
+        'Manufacturer',  char(Manufacturer), ...
+        'StudyDate',  char(StudyDate), ...
+        'StudyTime',  char(StudyTime), ...
+        'SeriesNumber', double(SeriesNum), ...
+        'SeriesDescription', char(SeriesDesc), ...
+        'SeriesInstanceUID', char(string(SeriesUID)) );
+end
+
+function val = getfield_try(s, field, defaultVal)
+    % Safe getter for struct fields; returns defaultVal if missing/empty.
+    if isstruct(s) && isfield(s, field)
+        val = s.(field);
+        if isempty(val)
+            val = defaultVal;
+        end
+    else
+        val = defaultVal;
     end
 end
 
 function t = sanitize_time(tin)
-    t = char(string(tin));
-    t = regexprep(t, '\D', '');
-    if isempty(t), t = '000000'; end
-    if numel(t) >= 6, t = t(1:6); else, t = pad(t, 6, 'right', '0'); end
+    % Make StudyTime printable and consistent (HHMMSS or HHMMSS.FFFFFF).
+    % dicominfo can return char or numeric.
+    if isnumeric(tin)
+        t = num2str(tin);
+    else
+        t = char(tin);
+    end
+    t = strtrim(t);
+    if isempty(t)
+        t = '000000';
+        return
+    end
+
+    % Remove any colons
+    t = strrep(t, ':', '');
+
+    % Pad if too short
+    if numel(t) < 6
+        t = [t repmat('0', 1, 6-numel(t))];
+    end
 end
 
+% % ---- helpers ----
+% function v = getfield_try(s, fld, defaultVal)
+%     if isfield(s, fld) && ~isempty(s.(fld))
+%         v = s.(fld);
+%     else
+%         v = defaultVal;
+%     end
+% end
+% 
+% function t = sanitize_time(tin)
+%     t = char(string(tin));
+%     t = regexprep(t, '\D', '');
+%     if isempty(t), t = '000000'; end
+%     if numel(t) >= 6, t = t(1:6); else, t = pad(t, 6, 'right', '0'); end
+% end
 function [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(cas, T, skipExistingCheck)
 % PICK_T2_SERIES
 % - Lists DICOM series and filters to T2
 % - Lets user choose one
-% - If anatomy/<cas.subj> already contains a folder, ask to replace it (unless skipped)
-% - Returns the chosen SE path and destination folder
+% - If anatomy/<series_desc> already exists, ask to replace it (unless skipped)
+% - IMPORTANT: even if multiple series live in the same folder, it copies ONLY the
+%   selected series (by SeriesInstanceUID) into dest_folder and returns that folder.
+%
+% Outputs
+%   anatomy_dicom : destination folder containing ONLY the chosen series DICOMs
+%   dest_folder   : same as anatomy_dicom
+%   series_desc   : sanitized series description for folder naming
+%   idx           : selected row index within T2T
+%   T2T           : filtered table of T2 series
 
-    if nargin < 5
+    if nargin < 3 || isempty(skipExistingCheck)
         skipExistingCheck = false;
     end
 
@@ -328,12 +498,14 @@ function [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(ca
         error('No series with "T2" found under: %s', cas.dir.patient);
     end
 
-    % build choices and paths
+    % --- build choices and paths ---
     choices = strings(height(T2T),1);
     paths   = strings(height(T2T),1);
+
     for i = 1:height(T2T)
         choices(i) = sprintf('%s / %s / %s : Ser%03d  %s', ...
             T2T.PAT{i}, T2T.ST{i}, T2T.SE{i}, T2T.SeriesNumber(i), T2T.SeriesDescription{i});
+
         pth = fullfile(cas.dir.patient, T2T.PAT{i}, T2T.ST{i}, T2T.SE{i});
         if ~isfolder(pth)
             pth = fullfile(cas.dir.patient, T2T.ST{i}, T2T.SE{i});
@@ -341,36 +513,110 @@ function [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(ca
                 pth = fullfile(cas.dir.patient, T2T.SE{i});
             end
         end
+        if ~isfolder(pth)
+            error('Series folder not found for row %d. Tried: %s', i, pth);
+        end
         paths(i) = pth;
     end
 
     % --- user picks series ---
     if height(T2T) > 1
-        fprintf('\t\nT2 series found:\n\n');
-        for i = 1:numel(choices), fprintf('\t\t%2d) %s\n', i, choices(i)); end
-        fprintf('\n\t');
+        fprintf('\nT2 series found:\n\n');
+        for i = 1:numel(choices)
+            fprintf('\t%2d) %s\n', i, choices(i));
+        end
+        fprintf('\n');
         idx = askInt('Enter the number of the series to use for anatomy: ', 1, numel(choices));
     else
         idx = 1;
         fprintf('\nOnly one T2 series found. Using:\n   %s\n', choices(1));
     end
-    anatomy_dicom = char(paths(idx));
-    series_desc   = regexprep(T2T.SeriesDescription{idx}, '[^\w\-]', '_');
-    dest_folder   = fullfile(cas.dir.anatomy, series_desc);
 
-    % --- optionally ask about replacing existing anatomy (if not skipped) ---
-    if ~skipExistingCheck
-        existing = dir(cas.dir.anatomy);
-        existing = existing([existing.isdir] & ~ismember({existing.name},{'.','..'}));
-        if ~isempty(existing)
-            resp = askYN(sprintf('- Anatomy already contains folder "%s". Replace it with "%s"? (y/n): ', ...
-                                 existing(1).name, series_desc));
-            if resp
-                rmdir(fullfile(cas.dir.anatomy, existing(1).name), 's');
-            else
-                error('- Aborted: user chose not to replace existing anatomy folder.');
-            end
+    % --- destination folder name ---
+    series_desc = regexprep(T2T.SeriesDescription{idx}, '[^\w\-]', '_');
+    dest_folder = fullfile(cas.dir.anatomy, series_desc);
+
+    % --- optionally ask about replacing existing anatomy folder ---
+    if ~skipExistingCheck && isfolder(dest_folder)
+        resp = askYN(sprintf('- Anatomy folder "%s" already exists. Replace it? (y/n): ', series_desc));
+        if resp
+            rmdir(dest_folder, 's');
+        else
+            error('- Aborted: user chose not to replace existing anatomy folder.');
         end
+    end
+
+    % --- find files belonging ONLY to the chosen series ---
+    srcFolder = string(paths(idx));
+
+    % Prefer SeriesInstanceUID if available
+    targetUID = "";
+    if any(strcmpi(T2T.Properties.VariableNames, 'SeriesInstanceUID'))
+        targetUID = string(T2T.SeriesInstanceUID{idx});
+    end
+
+    if strlength(targetUID) > 0
+        files = list_dicom_files_for_uid(srcFolder, targetUID);
+    else
+        % Fallback: SeriesNumber (less robust)
+        warning('SeriesInstanceUID not found in table T; falling back to SeriesNumber filtering.');
+        targetSeriesNumber = T2T.SeriesNumber(idx);
+        files = list_dicom_files_for_seriesnumber(srcFolder, targetSeriesNumber);
+    end
+
+    % --- copy only those files into dest_folder ---
+    if ~isfolder(dest_folder), mkdir(dest_folder); end
+    for k = 1:numel(files)
+        copyfile(files{k}, dest_folder);
+    end
+
+    anatomy_dicom = dest_folder; % return the folder that contains only the chosen series
+end
+
+
+% ========================= Helpers =========================
+
+function files = list_dicom_files_for_uid(folder, targetUID)
+    D = dir(folder);
+    D = D(~[D.isdir]);
+
+    files = {};
+    for i = 1:numel(D)
+        f = fullfile(D(i).folder, D(i).name);
+        try
+            info = dicominfo(f);
+            if isfield(info,'SeriesInstanceUID') && string(info.SeriesInstanceUID) == string(targetUID)
+                files{end+1} = f; %#ok<AGROW>
+            end
+        catch
+            % ignore non-DICOM / unreadable files
+        end
+    end
+
+    if isempty(files)
+        error('No DICOM files matched SeriesInstanceUID %s in folder %s', targetUID, folder);
+    end
+end
+
+function files = list_dicom_files_for_seriesnumber(folder, targetSeriesNumber)
+    D = dir(folder);
+    D = D(~[D.isdir]);
+
+    files = {};
+    for i = 1:numel(D)
+        f = fullfile(D(i).folder, D(i).name);
+        try
+            info = dicominfo(f);
+            if isfield(info,'SeriesNumber') && double(info.SeriesNumber) == double(targetSeriesNumber)
+                files{end+1} = f; %#ok<AGROW>
+            end
+        catch
+            % ignore non-DICOM / unreadable files
+        end
+    end
+
+    if isempty(files)
+        error('No DICOM files matched SeriesNumber %g in folder %s', targetSeriesNumber, folder);
     end
 end
 
@@ -424,13 +670,14 @@ end
 function sstt = detect_level(desc)
 % Detect anatomical level keyword from SeriesDescription (case-insensitive)
     d = lower(desc);
+    d = sanitize_series_desc(d);
 
     if contains(d,'foramen') || contains(d,'foreman') || contains(d,'magnum') || contains(d,'fm')
-        if contains(d,' 5 ')
+        if contains(d,'_5')
             sstt = 'FM-5';
-        elseif contains(d,' 10 ')
+        elseif contains(d,'_10')
             sstt = 'FM-10';
-        elseif contains(d,' 15 ')
+        elseif contains(d,'_15')
             sstt = 'FM-15';
         else
             sstt = 'FM';
@@ -452,91 +699,188 @@ function sstt = detect_level(desc)
 end
 
 function split_flow_series(src_path, dest_base, base_name)
-% Create:
+% SPLIT_FLOW_SERIES
+% Copies ONLY the DICOMs in src_path that belong to the flow series whose
+% SeriesDescription matches base_name (case-insensitive).
+%
+% Creates:
 %   <dest_base>/<base_name>_00
 %   <dest_base>/<base_name>_MAG_01
 %   <dest_base>/<base_name>_P_02
-% Then:
-%   - _00 keeps MR000000..MR000029 (removes others if any)
-%   - _MAG_01 copies MR000030..MR000059
-%   - _P_02 copies MR000000..MR000029
+%
+% And copies:
+%   - MR000000..MR000029  -> _00 and _P_02
+%   - MR000030..MR000059  -> _MAG_01
 %
 % src_path can have nested subfolders.
+%
+% NOTE: This function does NOT copy everything in src_path anymore.
+%       It filters by DICOM SeriesDescription (and locks SeriesInstanceUID).
 
-    % Sanitize base_name for filesystem safety (in case caller didn't)
-    base_name = regexprep(base_name, '[^\w\-]', '_');
-    base_name = regexprep(base_name, '_+', '_');
-    base_name = regexprep(base_name, '^_+|_+$', '');
-    if isempty(base_name), base_name = 'Series'; end
+    if nargin < 3 || isempty(base_name)
+        error('base_name is required.');
+    end
+    if ~isfolder(src_path)
+        error('src_path is not a folder: %s', src_path);
+    end
 
-    dest00   = fullfile(dest_base, [base_name '_00']);
-    destMAG  = fullfile(dest_base, [base_name '_MAG_01']);
-    destP02  = fullfile(dest_base, [base_name '_P_02']);
+    % Keep an unsanitized version for matching against DICOM header
+    base_name_match = string(base_name);
 
-    % Build directories
+    % Sanitize base_name for filesystem safety (folder names)
+    base_name_fs = regexprep(base_name, '[^\w\-]', '_');
+    base_name_fs = regexprep(base_name_fs, '_+', '_');
+    base_name_fs = regexprep(base_name_fs, '^_+|_+$', '');
+    if isempty(base_name_fs), base_name_fs = 'Series'; end
+
+    dest00   = fullfile(dest_base, [base_name_fs '_00']);
+    destMAG  = fullfile(dest_base, [base_name_fs '_MAG_01']);
+    destP02  = fullfile(dest_base, [base_name_fs '_P_02']);
+
     createDirIfNotExists(dest_base);
     createDirIfNotExists(dest00);
     createDirIfNotExists(destMAG);
     createDirIfNotExists(destP02);
 
-    % First: copy the whole source tree into _00, then prune by range
-    % (Keeps any ancillary files/sidecars that aren’t MR* too.)
-    fprintf('\n\tCopying full series to: %s\n', dest00);
-    copyfile(src_path, dest00);
+    % ---- collect all files under src_path (DICOMs may have no extension) ----
+    allFiles = dir(fullfile(src_path, '**', '*'));
+    allFiles = allFiles(~[allFiles.isdir]);
 
-    % Collect all MR* files from source recursively once
-    mrList = dir(fullfile(src_path, '**', 'MR*'));
-    mrList = mrList(~[mrList.isdir]);  % files only
+    % Helper: parse MR/IM index e.g., MR000030 or IM000030
+    mr_im_index = @(fname) local_mr_im_index(fname);
 
-    % Helper: parse MR index e.g., MR000030 -> 30
-    function n = mr_index(fname)
-        % Accepts just name (MR000030.dcm) or full path; use basename
-        [~, just] = fileparts(fname);
-        tok = regexp(just, 'MR(\d+)', 'tokens', 'once');
-        if isempty(tok)
-            n = NaN;
+    % ---- first pass: find candidate files that match SeriesDescription ----
+    matchFiles = {};
+    matchUIDs  = strings(0);
+
+    for k = 1:numel(allFiles)
+        f = fullfile(allFiles(k).folder, allFiles(k).name);
+
+        % Quick filter: only consider files that look like MR######
+        idx = mr_im_index(allFiles(k).name);
+        if isnan(idx)
+            continue;
+        end
+
+        try
+            info = safe_dicominfo(f);
+        catch
+            continue; % not readable DICOM
+        end
+
+
+        if isfield(info, 'SeriesDescription')
+            sd = string(info.SeriesDescription);
         else
-            n = str2double(tok{1});
+            sd = "";
+        end
+
+        if contains(lower(sanitize_series_desc(sd)), lower(base_name_match))
+            matchFiles{end+1} = f; %#ok<AGROW>
+            if isfield(info,'SeriesInstanceUID')
+                matchUIDs(end+1) = string(info.SeriesInstanceUID); %#ok<AGROW>
+            else
+                matchUIDs(end+1) = ""; %#ok<AGROW>
+            end
         end
     end
-    % Copy selected files into _MAG_01 and _P_02
-    for k = 1:numel(mrList)
-        srcFile = fullfile(mrList(k).folder, mrList(k).name);
-        idx = mr_index(mrList(k).name);
+
+    if isempty(matchFiles)
+        error('No DICOMs matched SeriesDescription containing "%s" under: %s', base_name_match, src_path);
+    end
+
+    % ---- lock to ONE SeriesInstanceUID (extra safety if multiple matches) ----
+    % If UID is missing, we skip the lock and just use SeriesDescription match.
+    nonEmptyUIDs = matchUIDs(matchUIDs ~= "");
+    lockUID = "";
+    if ~isempty(nonEmptyUIDs)
+        % pick the most frequent UID among matches
+        [u,~,ic] = unique(nonEmptyUIDs);
+        counts = accumarray(ic, 1);
+        [~,imax] = max(counts);
+        lockUID = u(imax);
+    end
+
+    % ---- copy only matching files (and matching UID if available) ----
+    n00 = 0; nP = 0; nMAG = 0;
+% --- build list of (file, idx) first ---
+fileList = {};
+idxList  = [];
+
+    for k = 1:numel(matchFiles)
+        srcFile = matchFiles{k};
+        [~, nm, ext] = fileparts(srcFile);
+        idx = mr_im_index([nm ext]);
         if isnan(idx), continue; end
-
-        % 0..29 => goes to P_02 (copy)
-        if idx >= 0 && idx <= 29
-            rel = split(srcFile, filesep);  % relative path
-            rel = rel{end};
-            tgt = fullfile(destP02, rel);
-            createDirIfNotExists(fileparts(tgt));
-            copyfile(srcFile, tgt);
+    
+        % enforce UID lock if available
+        if strlength(lockUID) > 0
+            try
+                info = dicominfo(srcFile);
+                if ~isfield(info,'SeriesInstanceUID') || string(info.SeriesInstanceUID) ~= lockUID
+                    continue;
+                end
+            catch
+                continue;
+            end
         end
-
-        % 30..59 => goes to MAG_01 (copy)
-        if idx >= 30 && idx <= 59
-            rel = split(srcFile, filesep);  % relative path
-            rel = rel{end};
-            tgt = fullfile(destMAG, rel);
-            createDirIfNotExists(fileparts(tgt));
-            copyfile(srcFile, tgt);
-        end
+    
+        fileList{end+1} = srcFile; %#ok<AGROW>
+        idxList(end+1)  = idx;     %#ok<AGROW>
+    end
+    
+    if numel(fileList) ~= 60
+        error('Expected 60 MR/IM files for the series; found %d.', numel(fileList));
+    end
+    
+    % --- sort by idx and split first 30 / next 30 ---
+    [~, ord] = sort(idxList, 'ascend');
+    first30 = ord(1:30);
+    next30  = ord(31:60);
+    
+    % --- copy first 30 to dest00 and destP02; next 30 to destMAG ---
+    for ii = first30
+        srcFile = fileList{ii};
+        [~, nm, ext] = fileparts(srcFile);
+    
+        copyfile(srcFile, fullfile(dest00,  [nm ext]));  n00 = n00 + 1;
+        copyfile(srcFile, fullfile(destP02, [nm ext]));  nP  = nP  + 1;
+    end
+    
+    for ii = next30
+        srcFile = fileList{ii};
+        [~, nm, ext] = fileparts(srcFile);
+    
+        copyfile(srcFile, fullfile(destMAG, [nm ext]));  nMAG = nMAG + 1;
     end
 
-    % Prune _00 to keep only 0..29
-    mrList00 = dir(fullfile(dest00, '**', 'MR*'));
-    mrList00 = mrList00(~[mrList00.isdir]);
-    for k = 1:numel(mrList00)
-        f00 = fullfile(mrList00(k).folder, mrList00(k).name);
-        idx = mr_index(mrList00(k).name);
-        if ~isnan(idx) && ~(idx >= 0 && idx <= 29)
-            delete(f00);
-        end
+    fprintf('\n\tFiltered copy done (SeriesDescription contains "%s"):\n', base_name_match);
+    if strlength(lockUID) > 0
+        fprintf('\tLocked to SeriesInstanceUID: %s\n', lockUID);
     end
+    fprintf('\t_00:     %d files\n', n00);
+    fprintf('\t_P_02:   %d files\n', nP);
+    fprintf('\t_MAG_01: %d files\n', nMAG);
 
-    rmdir(fullfile(dest_base, base_name), 's');
+    if n00 == 0 && nP == 0 && nMAG == 0
+        error('Matched series, but no MR000000..MR000059 files were copied. Check naming / ranges.');
+    end
+end
 
+
+function n = local_mr_im_index(fname)
+    % Accepts MR#### or IM#### (with or without extension)
+    [~, just] = fileparts(fname);
+    tok = regexp(just, '^(MR|IM)(\d+)$', 'tokens', 'once');
+    if isempty(tok)
+        n = NaN;
+    else
+        n = str2double(tok{2});
+    end
+end
+
+function createDirIfNotExists(p)
+    if ~isfolder(p), mkdir(p); end
 end
 
 function [cas, dat_PC] = main_1_read_dat(cas)
@@ -648,70 +992,214 @@ function delete_folder_contents(rootPath)
     end
 end
 
-function dat  = read_dicoms_PC(cas)
+function dat = read_dicoms_PC(cas)
 
     Ndat = length(cas.folders_);
 
+    % Initial guess (can be refined after reading first header)
     if strcmp(cas.model, 'GE')
-        dicom_ext = 'MR*';
+        dicom_ext = {'IM*','MR*','*'};
     elseif strcmp(cas.model, 'SIEMENS')
-        dicom_ext = '*.dcm';
+        dicom_ext = {'*.dcm','*.ima','*'};   % safe default
+    else
+        dicom_ext = {'*'};
     end
 
-    % Get data for each case and store in cell structures were first dimension is case number:
-
+    % Preallocate main outputs
     pixel_coord = cell(1, Ndat);
-    for idat = 1:Ndat
-                
-        dicomlist = dir(fullfile(cas.dir.flow, cas.folders_P{idat}, dicom_ext));
 
+    % These were used later; keep as cells
+    info        = cell(1, Ndat);
+    infomag     = cell(1, Ndat);
+    infocom     = cell(1, Ndat);
+
+    im_unsorted    = cell(1, Ndat);
+    immag_unsorted = cell(1, Ndat);
+    imcom_unsorted = cell(1, Ndat);
+
+    venc      = cell(1, Ndat);   
+    vencscale = cell(1, Ndat);   
+    triggertime = cell(1, Ndat);
+    location    = cell(1, Ndat);
+    fcal_V_cm_px = cell(1, Ndat);
+    fcal_H_cm_px = cell(1, Ndat);
+
+    im     = cell(1, Ndat);
+    immag  = cell(1, Ndat);
+    imcom  = cell(1, Ndat);
+
+    phase  = cell(1, Ndat);
+    magni  = cell(1, Ndat);
+    compl  = cell(1, Ndat);
+
+    U_tot  = cell(1, Ndat);
+    Vscale = cell(1, Ndat);
+
+    t      = cell(1, Ndat);
+    Nt     = cell(1, Ndat);
+    dt     = cell(1, Ndat);
+    T      = cell(1, Ndat);
+    locz   = cell(1, Ndat);
+    onepxarea = cell(1, Ndat);
+
+    fname_showorient = cell(1, Ndat);
+
+    for idat = 1:Ndat
+
+        % ---------- Load PC/phase directory ----------
+        dicomlist = list_files_multi_pattern(fullfile(cas.dir.flow, cas.folders_P{idat}), dicom_ext);
         numim = numel(dicomlist);
 
-        % Run through all files and collect useful headers and image matrices:
+        if numim == 0
+            error('No files found in %s for patterns: %s', ...
+                fullfile(cas.dir.flow, cas.folders_P{idat}), strjoin(string(dicom_ext), ', '));
+        end
+        venc_suggested = 10;
 
+        % Collect headers and images
         for jj = 1:numim
 
-            fname = fullfile(cas.dir.flow,  cas.folders_P{idat}, dicomlist(jj).name);
+            fname = fullfile(dicomlist(jj).folder, dicomlist(jj).name);
             info{idat}{jj} = dicominfo(fname);
 
-            % Identify manufacturer
-            if idat == 1 && jj == 1
-                if contains(upper(info{idat}{jj}.Manufacturer), 'SIEMENS')
-                    cas.model = 'SIEMENS';
-                    dicom_ext = '*.dcm';
+            if jj == 1
+                % Identify manufacturer ONCE from the first DICOM we successfully read
+                if idat == 1 
+                    if isfield(info{idat}{jj}, 'Manufacturer') && contains(upper(info{idat}{jj}.Manufacturer), 'SIEMENS')
+                        cas.model = 'SIEMENS';
+                        dicom_ext = {'*.dcm','*.ima','*'};
+                    elseif isfield(info{idat}{jj}, 'Manufacturer') && contains(upper(info{idat}{jj}.Manufacturer), 'GE')
+                        cas.model = 'GE';
+                        dicom_ext = {'IM*','MR*','*'};
+                    end
+                end
+
+                % Hack to find VENC:
+                if strcmp(cas.model, 'SIEMENS')
+                    command = sprintf('awk ''/^sAngio.sFlowArray.asElm\\[0\\].nVelocity/'' "%s"', fname);
+                    [~, sysout] = system(command);
+                    sysout = erase(sysout, "sAngio.sFlowArray.asElm[0].nVelocity");
+                    sysout = erase(sysout, "=");
+                    sysout = sysout(find(~isspace(sysout)));
+                    venc{idat} = str2double(sysout);
+    
+                elseif strcmp(cas.model, 'GE')
+    
+                    % ---- 1) Try GE private tag (0019,10CC): VelocityEncoding (cm/s) ----
+                    venc_val = NaN;
+                    tag_venc = dicomlookup('0019','10CC');
                     
-                elseif contains(upper(info{idat}{jj}.Manufacturer), 'GE')
-                    cas.model = 'GE';
-                    dicom_ext = 'MR*';
+                    if isfield(info{idat}{jj}, tag_venc)
+                        tmp = double(info{idat}{jj}.(tag_venc));
+                        if ~isempty(tmp) && ~isnan(tmp)
+                            venc_val = 0.1 * tmp*(tmp>50) + tmp*(tmp<50);   % cm/s
+                        end
+                    end
+                    
+                % ---- 2) Fallback: parse SeriesDescription (usually cm/s) ----
+                if isnan(venc_val) && isfield(info{idat}{jj}, 'SeriesDescription')
+                    desc = string(info{idat}{jj}.SeriesDescription);
+                    tok  = regexp(desc, 'VENC\s*([0-9]+(\.[0-9]+)?)', 'tokens', 'once');
+                    if ~isempty(tok)
+                        venc_suggested = str2double(tok{1});  % cm/s
+                    end
+                end
+                
+                % ---- 3) Last resort: ask user ----
+                if isnan(venc_val)
+                
+                    fprintf('\nSeriesDescription: %s\n', info{idat}{1}.SeriesDescription);
+                    fprintf('VENC not found in metadata.\n');
+                
+                    if ~isnan(venc_suggested)
+                        fprintf('Suggested VENC from SeriesDescription: %.0f cm/s\n', venc_suggested);
+                    end
+                
+                    while true
+                        if ~isnan(venc_suggested)
+                            venc_user = input( ...
+                                sprintf('Enter VENC [cm/s] (press Enter to use %.0f): ', venc_suggested), ...
+                                's');
+                        else
+                            venc_user = input('Enter VENC [cm/s]: ', 's');
+                        end
+                
+                        % --- handle Enter ---
+                        if isempty(venc_user) && ~isnan(venc_suggested)
+                            venc_val = venc_suggested;
+                            break
+                        end
+                
+                        % --- validate manual input ---
+                        venc_user = str2double(venc_user);
+                        if isnan(venc_user) || ~isscalar(venc_user) || venc_user <= 0
+                            fprintf('Invalid VENC value. Please enter a positive scalar.\n\n');
+                        else
+                            venc_val = venc_user;
+                            break
+                        end
+                    end
+                end
+                    
+                    % ---- Store ----
+                    venc{idat} = venc_val;
+    
+                    % ---- Velocity scale (GE private tag 0019,10E2) ----
+                    vencscale_val = NaN;
+                    tag_vencscale = dicomlookup('0019','10E2');
+                    
+                    % 1) Try GE private tag
+                    if isfield(info{idat}{jj}, tag_vencscale)
+                        tmp = double(info{idat}{jj}.(tag_vencscale));
+                        if ~isempty(tmp) && ~isnan(tmp)
+                            vencscale_val = tmp;
+                        end
+                    end
+                    
+                    % 2) Last resort: ask user (with default)
+                    if isnan(vencscale_val)
+                    
+                        default_vencscale = 1.718874;   % previously observed GE value
+                    
+                        fprintf('\nVelocityEncodeScale not found in metadata.\n');
+                        fprintf('Default value previously used: %.6f\n', default_vencscale);
+                    
+                        while true
+                            vencscale_user = input( ...
+                                sprintf('Enter VelocityEncodeScale (press Enter to use %.6f): ', ...
+                                        default_vencscale), ...
+                                's');
+                    
+                            if isempty(vencscale_user)
+                                vencscale_val = default_vencscale;
+                                break
+                            end
+                    
+                            vencscale_user = str2double(vencscale_user);
+                            if isnan(vencscale_user) || vencscale_user <= 0
+                                fprintf('Invalid value. Please enter a positive scalar.\n\n');
+                            else
+                                vencscale_val = vencscale_user;
+                                break
+                            end
+                        end
+                    end
+                    
+                    % ---- Store ----
+                    vencscale{idat} = vencscale_val;
                 end
             end
 
-            % Hack to find VENC:
-            if strcmp(cas.model, 'SIEMENS')
-                command = sprintf('awk ''/^sAngio.sFlowArray.asElm\\[0\\].nVelocity/'' %s', fname);
-                [status, sysout] = system(command);
-                sysout = erase(sysout, "sAngio.sFlowArray.asElm[0].nVelocity");
-                sysout = erase(sysout, "=");
-                sysout = sysout(find(~isspace(sysout)));
-                venc{idat}(jj) = str2num(sysout);
-            elseif strcmp(cas.model, 'GE')
-                venc{idat}(jj)        = 0.1 * double(info{idat}{jj}.(dicomlookup('0019', '10CC')));
-                vencscale{idat}(jj)   = double(info{idat}{jj}.(dicomlookup('0019', '10E2')));
-            end
-
-
-
-            if isfield(info{idat}{jj}, 'TriggerTime') == 1
-                triggertime{idat}(jj) = info{idat}{jj}.(dicomlookup('0018', '1060'));
+            if isfield(info{idat}{jj}, 'TriggerTime')
+                triggertime{idat}(jj) = double(info{idat}{jj}.(dicomlookup('0018','1060')));
             else
                 disp("No TriggerTime dicom field, using 0.0!")
                 triggertime{idat}(jj) = 0.0;
             end
-            
-            location{idat}(jj) = double(info{idat}{jj}.(dicomlookup('0020', '1041'))) / 10.0;
 
-            pixspacing = double(info{idat}{jj}.(dicomlookup('0028', '0030')));
+            location{idat}(jj) = double(info{idat}{jj}.(dicomlookup('0020','1041'))) / 10.0;
 
+            pixspacing = double(info{idat}{jj}.(dicomlookup('0028','0030')));
             fcal_V_cm_px{idat}(jj) = pixspacing(1) / 10.0;
             fcal_H_cm_px{idat}(jj) = pixspacing(2) / 10.0;
 
@@ -719,154 +1207,137 @@ function dat  = read_dicoms_PC(cas)
 
         end
 
-        % Load DICOM files with magnitude out of parallel directory for complementary use:
-        
-        if isempty(cas.folders_MAG) == 1
-            
+        % ---------- Load magnitude directory (if exists) ----------
+        if isempty(cas.folders_MAG)
+
             display("Magnitude images do not exist.")
-
-            % Set magnitude images to zero.
-
             for jj = 1:numim
-                
                 immag_unsorted{idat}{jj} = zeros(size(im_unsorted{idat}{jj}));
-                
             end
 
         else
 
-            dicomlist = dir(fullfile(cas.dir.flow, cas.folders_MAG{idat}, dicom_ext));
+            dicomlist_mag = list_files_multi_pattern(fullfile(cas.dir.flow, cas.folders_MAG{idat}), dicom_ext);
+            numim_mag = numel(dicomlist_mag);
 
-            numim = numel(dicomlist);
+            if numim_mag == 0
+                warning('No magnitude files found in %s', fullfile(cas.dir.flow, cas.folders_MAG{idat}));
+                for jj = 1:numim
+                    immag_unsorted{idat}{jj} = zeros(size(im_unsorted{idat}{jj}));
+                end
+            else
+                fname_showorient{idat} = fullfile(dicomlist_mag(1).folder, dicomlist_mag(1).name);
 
+                for jj = 1:numim_mag
+                    fname = fullfile(dicomlist_mag(jj).folder, dicomlist_mag(jj).name);
+                    infomag{idat}{jj} = dicominfo(fname);
+                    immag_unsorted{idat}{jj} = double(dicomread(infomag{idat}{jj}));
+                end
 
-            fname_showorient{idat} = fullfile(cas.dir.flow, cas.folders_MAG{idat}, dicomlist(1).name);
-
-            for jj = 1:numim
-
-                fname = fullfile(cas.dir.flow, cas.folders_MAG{idat}, dicomlist(jj).name);
-
-                infomag{idat}{jj} = dicominfo(fname);
-
-                immag_unsorted{idat}{jj} = double(dicomread(infomag{idat}{jj}));
-
+                % If magnitude count differs from phase count, we’ll still sort by trigger time of phase;
+                % simplest assumption: same ordering/count (common in PC-MRI exports).
+                % If yours differs, tell me and we’ll align by InstanceNumber / AcquisitionTime.
             end
-
         end
 
-        % Load DICOM files with stuff out of parallel directory for complementary use:
+        % ---------- Load “complementary” directory ----------
+        dicomlist_com = list_files_multi_pattern(fullfile(cas.dir.flow, cas.folders_{idat}), dicom_ext);
+        numim_com = numel(dicomlist_com);
 
-        dicomlist = dir(fullfile(cas.dir.flow, cas.folders_{idat}, dicom_ext));
-
-        numim = numel(dicomlist);
-
-        for jj = 1:numim
-
-            fname = fullfile(cas.dir.flow, cas.folders_{idat}, dicomlist(jj).name);
-
-            infocom{idat}{jj} = dicominfo(fname);
-
-            imcom_unsorted{idat}{jj} = double(dicomread(infocom{idat}{jj}));
-
+        if numim_com == 0
+            warning('No complementary files found in %s', fullfile(cas.dir.flow, cas.folders_{idat}));
+            for jj = 1:numim
+                imcom_unsorted{idat}{jj} = zeros(size(im_unsorted{idat}{jj}));
+            end
+        else
+            for jj = 1:numim_com
+                fname = fullfile(dicomlist_com(jj).folder, dicomlist_com(jj).name);
+                infocom{idat}{jj} = dicominfo(fname);
+                imcom_unsorted{idat}{jj} = double(dicomread(infocom{idat}{jj}));
+            end
         end
 
-        % Sort images as pairs by triggertime:
+        % ---------- Sort images by trigger time ----------
+        [~, sortind] = sortrows(triggertime{idat}(:), 1);
 
-        [dummy, sortind] = sortrows([triggertime{idat}.'], [1]);
-
-        venc{idat}(:)         = venc{idat}(sortind);
         triggertime{idat}(:)  = triggertime{idat}(sortind);
         location{idat}(:)     = location{idat}(sortind);
         fcal_V_cm_px{idat}(:) = fcal_V_cm_px{idat}(sortind);
         fcal_H_cm_px{idat}(:) = fcal_H_cm_px{idat}(sortind);
 
-        % these do not change in a time series so we only keep one:
+        % Scalars per time series:
+        location{idat}    = location{idat}(1);
+        fcal_V_cm_px{idat}= fcal_V_cm_px{idat}(1);
+        fcal_H_cm_px{idat}= fcal_H_cm_px{idat}(1);
+        onepxarea{idat}   = fcal_H_cm_px{idat} * fcal_V_cm_px{idat};
 
-        venc{idat} = venc{idat}(1);
-        location{idat} = location{idat}(1);
-        fcal_V_cm_px{idat} = fcal_V_cm_px{idat}(1);
-        fcal_H_cm_px{idat} = fcal_H_cm_px{idat}(1);
-        onepxarea{idat} = fcal_H_cm_px{idat} * fcal_V_cm_px{idat};
-
+        % Reorder images
         for jj = 1:numim
-            im{idat}{jj}    = im_unsorted{idat}{sortind(jj)};
-            immag{idat}{jj} = immag_unsorted{idat}{sortind(jj)};
-            imcom{idat}{jj} = imcom_unsorted{idat}{sortind(jj)};    
-        end
+            im{idat}{jj} = im_unsorted{idat}{sortind(jj)};
 
-        % Extract metadata for coordinate calculation
-        pixel_spacing = info{idat}{1}.PixelSpacing; % [spacing_x; spacing_y]
-        image_position = info{idat}{1}.ImagePositionPatient; % [x; y; z]
-        image_orientation = info{idat}{1}.ImageOrientationPatient; % [row_dir_x; row_dir_y; row_dir_z; col_dir_x; col_dir_y; col_dir_z]
-        
-        % Directions
-        row_direction = image_orientation(1:3);
-        col_direction = image_orientation(4:6); 
+            % magnitude/complementary might be missing or different length
+            if numel(immag_unsorted{idat}) >= jj
+                immag{idat}{jj} = immag_unsorted{idat}{sortind(jj)};
+            else
+                immag{idat}{jj} = zeros(size(im{idat}{jj}));
+            end
 
-        % Image dimensions
-        [rows, cols] = size(dicomread(info{idat}{1}));
-        
-        % Preallocate array for coordinates
-        pixel_coordinates = zeros(rows, cols, 3); % For (x, y, z) of each pixel
-        
-        % Calculate 3D coordinates for each pixel
-        for i = 1:rows
-            for j = 1:cols
-            pixel_coordinates(i, j, :) = image_position ...
-                                       + (j-1) * row_direction * pixel_spacing(1) ...
-                                       + (i-1) * col_direction * pixel_spacing(2);
-
+            if numel(imcom_unsorted{idat}) >= jj
+                imcom{idat}{jj} = imcom_unsorted{idat}{sortind(jj)};
+            else
+                imcom{idat}{jj} = zeros(size(im{idat}{jj}));
             end
         end
 
-        % Store in cell for this case
+        % ---------- Pixel coordinates ----------
+        pixel_spacing = info{idat}{1}.PixelSpacing;
+        image_position = info{idat}{1}.ImagePositionPatient;
+        image_orientation = info{idat}{1}.ImageOrientationPatient;
+
+        row_direction = image_orientation(1:3);
+        col_direction = image_orientation(4:6);
+
+        [rows, cols] = size(dicomread(info{idat}{1}));
+        pixel_coordinates = zeros(rows, cols, 3);
+
+        for i = 1:rows
+            for j = 1:cols
+                pixel_coordinates(i, j, :) = image_position ...
+                    + (j-1) * row_direction * pixel_spacing(1) ...
+                    + (i-1) * col_direction * pixel_spacing(2);
+            end
+        end
         pixel_coord{idat} = pixel_coordinates;
 
-
+        % ---------- Build time series + velocity conversion ----------
         for jj = 1:numim
-
-            % Save the acquisition times in seconds:
-
             t{idat}(jj) = double(triggertime{idat}(jj)) / 1000.0;
 
             phase{idat}(:, :, jj) = im{idat}{jj};
             magni{idat}(:, :, jj) = immag{idat}{jj};
             compl{idat}(:, :, jj) = imcom{idat}{jj};
-            
-            % Convert image pairs to velocity fields in cm/s:
+
             if strcmp(cas.model, 'GE')
-                Vscale{idat}(jj) = pi * vencscale{idat}(jj) / venc{idat};
+                Vscale{idat}(jj) = pi * vencscale{idat} / venc{idat};
                 U_tot{idat}(:, :, jj) = (phase{idat}(:, :, jj) ./ max(magni{idat}(:, :, jj), 1)) / Vscale{idat}(jj);
-                
             elseif strcmp(cas.model, 'SIEMENS')
-                U_tot{idat}(:, :, jj) = - venc{idat} .* ( (phase{idat}(:, :, jj) - 2048) ./ 2048 );
+                U_tot{idat}(:, :, jj) = -venc{idat} .* ((phase{idat}(:, :, jj) - 2048) ./ 2048);
             end
-
         end
-        
 
-        % We subtract whatever is needed to set the timestamp of the first time to zero:
-        
+        % Set first timestamp to zero
         t{idat}(:) = t{idat}(:) - t{idat}(1);
-        
-        % Save the number of acquisition times, the length of one period in seconds (can be
-        % overridden in step 1B):
-        
+
         Nt{idat} = numim;
+        dt{idat} = t{idat}(end) / (Nt{idat}-1);
+        T{idat}  = t{idat}(end) + dt{idat};
 
-        dt{idat} = t{idat}(end)/(Nt{idat}-1);
-        
-        T{idat} = t{idat}(end) + dt{idat};
-
-        % Sometimes the acquisition does not equispace the time vector.
-        % We then set the time vector ourselves:
-
+        % If acquisition not equispaced, force uniform phase in [0,1)
         t{idat} = (0:(Nt{idat}-1))/Nt{idat};
-        
-        % Save the slice location in cm:
 
+        % Slice location relative to first case
         locz{idat} = location{idat} - location{1};
-        
+
     end
 
     fprintf('\nList of all cases:\n')
@@ -874,6 +1345,7 @@ function dat  = read_dicoms_PC(cas)
         disp([num2str(idat, '%02d'), '  -  ', cas.names{idat}])
     end
 
+    % Pack outputs
     dat.pixel_coord  = pixel_coord;
     dat.Ndat         = Ndat;
     dat.locz         = locz;
@@ -887,8 +1359,36 @@ function dat  = read_dicoms_PC(cas)
     dat.venc         = venc;
     dat.fcal_H_cm_px = fcal_H_cm_px;
     dat.fcal_V_cm_px = fcal_V_cm_px;
-    dat.onepxarea   = onepxarea;
-    dat.locations = cas.locations;
+    dat.onepxarea    = onepxarea;
+    dat.locations    = cas.locations;
 
 end
+
+
+% ----------------- Helper: multi-pattern dir() -----------------
+function L = list_files_multi_pattern(folderPath, patterns)
+    % patterns: char/string OR cell array of char/strings
+
+    if ischar(patterns) || isstring(patterns)
+        patterns = {char(patterns)};
+    else
+        patterns = cellfun(@char, patterns, 'UniformOutput', false);
+    end
+
+    L = [];
+    for p = 1:numel(patterns)
+        tmp = dir(fullfile(folderPath, patterns{p}));
+        tmp = tmp(~[tmp.isdir]); % keep files only
+        L = [L; tmp]; %#ok<AGROW>
+    end
+
+    % Remove duplicates by full path
+    if ~isempty(L)
+        keys = strcat({L.folder}, filesep, {L.name});
+        [~, ia] = unique(keys, 'stable');
+        L = L(ia);
+    end
+end
+
+
 

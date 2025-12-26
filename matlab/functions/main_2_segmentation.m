@@ -1,4 +1,4 @@
-function cas = run_segmentation(cas, skip_segmentation)
+function cas = main_2_segmentation(cas, skip_segmentation)
 % RUN_SEGMENTATION(subject)
 % - Finds the anatomy DICOM folder under patient-data/<subject>/anatomy
 % - Converts DICOMs to NIfTI 

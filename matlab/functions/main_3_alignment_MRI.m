@@ -1,4 +1,4 @@
-function alignment_MRI(cas, skip_segmentation)
+function main_3_alignment_MRI(cas, skip_segmentation)
 % RUN_SEGMENTATION(subject)
 % - Finds the anatomy DICOM folder under patient-data/<subject>/anatomy
 % - Converts DICOMs to NIfTI (if needed)
@@ -18,7 +18,11 @@ function alignment_MRI(cas, skip_segmentation)
         fprintf("- Segmentation not done! Please come back when it’s ready.\n")
         return
     end
-        if isfolder(cas.dir.trans) && numel(dir(cas.dir.trans)) > 2
+        d = dir(cas.dir.trans);
+
+        % keep only real entries
+        d = d(~ismember({d.name}, {'.','..','.DS_Store'}));
+        if numel(d) >= 1
             if askYN('- Transformations already exist. Skip? ([y]/n): ')
                 return;
             end

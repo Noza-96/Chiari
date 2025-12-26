@@ -1,4 +1,4 @@
-function [cas, dat_PC] = main_2_crop_set_roi(cas, crop_size)
+function [cas, dat_PC] = main_4_crop_set_roi(cas, crop_size)
 
     fprintf('\n4) PC-MRI measurements:\n')
     
