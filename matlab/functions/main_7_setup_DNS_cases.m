@@ -10,7 +10,7 @@ function [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_
     % e.g. cl3_v1 does simulation type 3, with geometry containing denticulate
     % ligaments and version #v1
     
-    [cas, dat_PC, repeat_initialization] = check_subject_initialization (cas.subj, ts_cycle, 0);
+    [cas, dat_PC, repeat_initialization] = check_subject_initialization (cas, ts_cycle, 0);
     
     if repeat_initialization
         disp('ansys inputs need to be created\updated, creating files...')

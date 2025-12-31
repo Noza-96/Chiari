@@ -3,7 +3,7 @@ clear; close all; clc;
 addpath('functions/');
 addpath('functions/others/');
 
-cas.subj = "s3-post";
+cas.subj = "s4";
 
 %% 0) Check compatibility
 % out: config file with paths
