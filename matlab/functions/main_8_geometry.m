@@ -12,9 +12,8 @@ function main_8_geometry(cas)
     
     fprintf("\tOpening SpaceClaim...\n") 
     
-    cmd = ['cmd /s /c start "" /B "' sc_path ...
-           '" /RunScript="' script_clip_geometry ...
-           '" "' cas.subj '" "' full_path(cas.dir.chiari) '" "' ansys_version '" > NUL 2>&1'];
+    cmd = sprintf('cmd /s /c start "" /B "%s" /RunScript="%s" "%s" "%s" "%s" > NUL 2>&1', ...
+                  sc_path, script_clip_geometry, cas.subj, full_path(cas.dir.chiari), ansys_version);
 
     system(cmd);
     
