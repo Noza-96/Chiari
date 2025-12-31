@@ -24,7 +24,7 @@ main_3_alignment_MRI(cas, false);
 
 %% 4) PC-MRI measurements
 crop_size = 100;
-[cas, dat_PC] = main_4_crop_set_roi(cas, 100);
+[cas, dat_PC] = main_4_crop_set_roi(cas, crop_size);
 
 %% 5) Filter and create animation
 [cas, dat_PC] = main_5_apply_roi_compute_Q(cas, true, true, true, true, true, true);
