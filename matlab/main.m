@@ -32,10 +32,6 @@ crop_size = 100;
 %% 6) Registration (only if segmentation exist)
 [cas, dat_PC] = main_6_registration(cas);
 
-%% 8) Define geometry in SpaceClaim
-% out: computational domain
-main_8_geometry(cas);
-
 %% 7) Setup DNS cases
 % out: creted flow-rates, planes, and velocity profiles of PC-MRI
 % DNS_cases contains information about the simulations to be done
@@ -49,7 +45,9 @@ iterations_ts = 20;         % iterations per time step
 [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_size, ts_cycle, cycles, iterations_ts);
 
 
-
+%% 8) Define geometry in SpaceClaim
+% out: computational domain
+main_8_geometry(cas);
 
 %% 9) Mesh - create case
 % out: mesh and case for ANSYS Fluent simulations

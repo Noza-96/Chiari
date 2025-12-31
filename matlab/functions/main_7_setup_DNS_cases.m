@@ -1,5 +1,7 @@
 function [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_size, ts_cycle, cycles, iterations_ts)
 
+
+    fprintf("7) Setup DNS cases:\n")  
     % Instructions for case_name:
     % c: geometry boundded by 2 pcMRI planes. 
     % c0/c1 for zero pressure top and bottom flow rate/velocity
@@ -54,19 +56,18 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
     % Initialization
     loc_ID = [1, dat_PC.Ndat];
     sstt = {"top", "bottom"};
-    modes = dat_PC.fou.M; % # Fourier modes
+    modes = dat_PC.SAS.fou.M; % # Fourier modes
     t = (0:(ts_cycle-1))/(ts_cycle);  % Time vector
 
-    load(fullfile(cas.dir.mat,"anatomical_locations.mat"), 'anatomy');
     T = dat_PC.T{end};
 
     for ii = 1:dat_PC.Ndat
 
         % Extract and scale pcMRI data
-        ROI = dat_PC.ROI_SAS{ii};                      % [100 x 100]
-        U = dat_PC.U_SAS{ii} * 1e-2;       % [m/s]
+        ROI = dat_PC.SAS.ROI{ii};                      % [100 x 100]
+        U = dat_PC.SAS.U{ii} * 1e-2;       % [m/s]
         xyz = dat_PC.pixel_coord{ii} * 1e-3; % [m]
-        Q = dat_PC.Q_SAS{ii};              % Flow rate [ml/s]
+        Q = dat_PC.SAS.Q{ii};              % Flow rate [ml/s]
 
         % Trim empty rows and columns with padding
         zeroRows = all(U(:,:,1) == 0, 2);
@@ -123,8 +124,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             write_plane_file(filename, plane_data);
 
             % --- 2) Save flow rate as Fourier series ---
-            An = - dat_PC.fou.am{loc_ID(idx_loc)};
-            a0 = - real(dat_PC.fou.a0{loc_ID(idx_loc)});  % ensure it's real
+            An = - dat_PC.SAS.fou.am{loc_ID(idx_loc)};
+            a0 = - real(dat_PC.SAS.fou.a0{loc_ID(idx_loc)});  % ensure it's real
 
             % Normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes + 1);  % +1 to include a0
@@ -152,7 +153,7 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
 
 
             % --- 3) Save velocity profiles ---
-            filename = fullfile("Functions", "empty_inlet_vel.csv");
+            filename = fullfile("functions", "others", "empty_inlet_vel.csv");
             template = readcell(filename);
             row_offset = 10;
             n_points = length(xx);
@@ -176,8 +177,8 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
             fprintf('saved velocity profile, plane, and flow rate for %s-pcmri in ansys input folder\n', tag);
         else
             % --- 2) Save flow rate as Fourier series in middle planes ---
-            An = - dat_PC.fou.am{ii};
-            a0 = - real(dat_PC.fou.a0{ii});  % Get DC component
+            An = - dat_PC.SAS.fou.am{ii};
+            a0 = - real(dat_PC.SAS.fou.a0{ii});  % Get DC component
             
             % Normalize to period of bottom measurement, to be used in simulations
             equation_terms = strings(1, modes + 1);  % +1 for a0
@@ -224,7 +225,6 @@ function create_ansys_inputs(dat_PC, cas, ts_cycle)
      pcmri.Nt = ts_cycle;
      pcmri.case = 'PC-MRI';
      pcmri.T = dat_PC.T;
-     pcmri.FM = abs(anatomy.FM)/10; %[cm]
 
     save(fullfile(cas.dir.mat, "pcmri_vel"), 'pcmri');
 end
@@ -262,7 +262,7 @@ function [DNS_cases] = create_DNS_cases (cas, case_name, mesh_size, cycles, iter
             DNS.ansys_path = correct_path(full_path(fullfile(pwd, cas.dir.ansys)));
             DNS.TUI_path = fullfile(cas.dir.ansys_in, "journals");       
             % ansys working folder
-            DNS.path_out_report = fullfile(cas.diransys_out, DNS.case);          
+            DNS.path_out_report = fullfile(cas.dir.ansys_out, DNS.case);          
             % reports at each time step 
             DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
             DNS.slices.locations = ["top", cas.locations(2:end-1), "bottom"]';
@@ -282,7 +282,7 @@ function [DNS_cases] = create_DNS_cases (cas, case_name, mesh_size, cycles, iter
                 DNS.Dz = 0:1:50;
             end
 
-            save(fullfile(cas.dir.mat,"DNS", "DNS_"+DNS.case+".mat"),'DNS')
+            save(fullfile(cas.dir.mat, "DNS", "DNS_"+DNS.case+".mat"),'DNS')
             clear DNS
         end     
     end
