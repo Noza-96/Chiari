@@ -259,7 +259,7 @@ function [DNS_cases] = create_DNS_cases (cas, case_name, mesh_size, cycles, iter
             DNS.case = DNS.geom + string(DNS.sim) + DNS.inlet + "_dx" + formatDecimal(DNS.mesh_size) + DNS.version + "_ts_" + ts_cycle + "_N_" + cycles;
             
             % full ansys folder path
-            DNS.ansys_path = correct_path(full_path(fullfile(pwd, cas.dir.ansys)));
+            DNS.ansys_path = correct_path(full_path(cas.dir.ansys));
             DNS.TUI_path = fullfile(cas.dir.ansys_in, "journals");       
             % ansys working folder
             DNS.path_out_report = fullfile(cas.dir.ansys_out, DNS.case);          
