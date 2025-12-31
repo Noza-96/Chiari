@@ -1,10 +1,5 @@
 function main_8_geometry(cas)
 
-data_now = "data_4.mat";
-
-[cas, dat_PC, didSkip] = check_data_updated(cas, data_now, "data_3.mat", dir(fullfile(cas.dir.trans, '*')));
-if didSkip, return, end   
-
 % Create top and bottom planes
 
 
