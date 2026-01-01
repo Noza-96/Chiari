@@ -173,9 +173,7 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
         fprintf('- all fluent cases exist...\n \n- Ready to run CFD simulation! \n');
     elseif geometry_exist
         visualize_console = 1;
-        ansys_path    = fullfile(config_path('ansys', fullfile(cas.dir.chiari, 'config_file.txt')));
-
-        fluent_command = fullfile(ansys_path,"fluent","ntbin","win64","fluent.exe");
+        fluent_command = get_fluent_command(cas);
         fprintf('- Opening Fluent Meshing to create fluent .cas files ...\n');
         fluent_cmd = """" + fluent_command + """" + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
         if visualize_console == 0
@@ -327,9 +325,7 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
         if geometry_exist
             visualize_console = 1;
 
-            ansys_path    = fullfile(config_path('ansys', fullfile(cas.dir.chiari, 'config_file.txt')));
-    
-            fluent_command = fullfile(ansys_path,"fluent","ntbin","win64","fluent.exe");
+            fluent_command = get_fluent_command(cas);
 
             fluent_cmd = """" + fluent_command + """" + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
 

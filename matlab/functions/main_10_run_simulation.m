@@ -1,8 +1,10 @@
 function main_10_run_simulation(cas, DNS_cases, n_cores)
+
+    fprintf("10) CFD simulation:\n") 
     
     answer = questdlg('Run ANSYS simulation?', 'Confirmation', 'Yes', 'No', 'No');
     if strcmp(answer, 'Yes')
-        disp('Running ANSYS simulation...');   
+        disp('- Running ANSYS simulation...');   
         
         % Run simulations for each DNS case
         for k = 1:length(DNS_cases)
@@ -13,10 +15,10 @@ function main_10_run_simulation(cas, DNS_cases, n_cores)
             output_check = fullfile(DNS.path_out_report, DNS_cases{k} + "_report.out");
     
             if isfile(output_check)
-                fprintf('%s simulation already done! skipping to next case...\n', DNS_cases{k});
+                fprintf('- %s simulation already done! skipping to next case...\n', DNS_cases{k});
                 continue;
             else
-                fprintf('\n%s ...\n', DNS_cases{k});
+                fprintf('\n- %s ...\n', DNS_cases{k});
             end  
             
     
@@ -35,7 +37,7 @@ function main_10_run_simulation(cas, DNS_cases, n_cores)
             % run the simulation - add reports last cycle
             TUI_run_simulation(dat_PC, cas, DNS, fileID);
     
-            runFluentSimulation(DNS, DNS_cases{k}, n_cores, visualize_console);
+            runFluentSimulation(cas, DNS, DNS_cases{k}, n_cores, visualize_console);
     
             % Finalize after simulation
             elapsed_time = toc;
@@ -47,13 +49,13 @@ end
 
 % Helper function to load DNS data
 function DNS = loadDNSData(cas, case_name)
-    load(fullfile(cas.dirmat,'DNS', "DNS_" + case_name + ".mat"), 'DNS');
+    load(fullfile(cas.dir.mat,'DNS', "DNS_" + case_name + ".mat"), 'DNS');
 end
 
 % Helper function to run the Fluent simulation through terminal
-function runFluentSimulation(DNS, case_name, n_cores, visualize_console)
-    fluent_command = get_fluent_command();
-    fluent_cmd = fluent_command + " 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
+function runFluentSimulation(cas, DNS, case_name, n_cores, visualize_console)
+    fluent_command = get_fluent_command(cas);
+    fluent_cmd = """" + fluent_command + """" + " 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
     if visualize_console == 0
         fluent_cmd = fluent_cmd + " > nul";
     end
@@ -68,7 +70,7 @@ function finalizeSimulation(DNS, case_name, cas, elapsed_time)
 
     % Save the simulation time
     DNS.time = elapsed_time;
-    save(fullfile(cas.dirmat, 'DNS', "DNS_" + DNS.case + ".mat"), 'DNS');
+    save(fullfile(cas.dir.mat, 'DNS', "DNS_" + DNS.case + ".mat"), 'DNS');
 end
 
 
@@ -97,8 +99,8 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     end
 
     % read case
-    case_path = DNS.ansys_path +"/" + DNS.subject +"/inputs/case-files/"+ case_name + ".cas.gz"; 
-
+    case_path = fullfile(DNS.ansys_path, DNS.subject, "input", "case-files", case_name + ".cas.gz");
+    
     fprintf(fileID,"/file read-case "+case_path+"\n" );
 
     % disable flow-warnings (reverse-flow)
@@ -133,13 +135,13 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     fprintf(fileID,'/solve/set p-v-coupling 24 q  \n');
 
     % import Q_b and Q_t
-    fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_bottom.txt"), 'r');  % Open the file for reading
-    sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
+    fid = fopen(fullfile(cas.dir.ansys_in, "flow-rates", "Q_bottom.txt"), 'r');  
+    sstt = fread(fid, '*char')';  
     fclose(fid);
     named_expression (fileID, "Q_b", sstt)
 
-    fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_top.txt"), 'r');  % Open the file for reading
-    sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
+    fid = fopen(fullfile(cas.dir.ansys_in, "flow-rates", "Q_top.txt"), 'r');  
+    sstt = fread(fid, '*char')';  
     fclose(fid);
     named_expression (fileID, "Q_t", sstt)
     
@@ -147,8 +149,8 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     % Create uniform velocity inlet
     if DNS.sim == 0
         % independently of boundary inlet, uses flow rate at the bottom
-        fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_bottom.txt"), 'r');  % Open the file for reading
-        sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
+        fid = fopen(fullfile(cas.dir.ansys_in, "flow-rates", "Q_bottom.txt"), 'r');  
+        sstt = fread(fid, '*char')'; 
         fclose(fid);
         if DNS.inlet == "bottom"
             sign_normal_u = "+";
@@ -170,7 +172,7 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     if DNS.sim == 3
         for zone_i = 1:(cas.Ncas-1)
             if zone_i < (cas.Ncas-1)
-                fid = fopen(fullfile(cas.diransys_in, "flow-rates", "Q_"+zone_i+".txt"), 'r');  % Open the file for reading
+                fid = fopen(fullfile(cas.dir.ansys_in, "flow-rates", "Q_"+zone_i+".txt"), 'r');  % Open the file for reading
                 sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
                 fclose(fid);
                 named_expression (fileID, "Q_cord_"+zone_i, sstt)
@@ -213,9 +215,6 @@ function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
         fprintf(fileID,'/file/set-tui-version "24.1"\n' );
     end
 
-    % data with anatomical positions
-    load(fullfile(cas.dirmat,"anatomical_locations.mat"), 'anatomy');
-
     fprintf(fileID,';create surfaces\n' );
 
     N = dat_PC.Ndat;
@@ -226,14 +225,15 @@ function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
         create_plane (fileID,XYZ,cas.locations{loc})
     end
 
+    z_FM=dat_PC.pixel_coord{1}(:,:,3);
     % create planes perpendicular to z-dir  
     for Dz = DNS.Dz
         % Dz foramen with respect to top pcmri location
-        Dz_foramen = (anatomy.FM-(Dz+0.01))/1000; % [m]
+        Dz_foramen = mean(z_FM(:)-(Dz+0.01))/1000; % [m]
 
          % create plane at the location of the foramen_magnum
         XYZ(:,3) = Dz_foramen;
-        create_plane (fileID,XYZ,"FM-"+Dz)
+        create_plane (fileID,XYZ_fm,"FM-"+Dz)
     end
 
     if DNS.sim ~= 3
@@ -314,13 +314,6 @@ function TUI_reports_journal(DNS, fileID)
     
     for Dz = DNS.Dz
         fprintf(fileID,"/solve/report-definitions/add p_FM-" + Dz + "  surface-areaavg field pressure surface-names FM-" + Dz + " () q \n" );
-    end
-
-    if startsWith(DNS.geom, 'b')
-        sstt = "FM-"+ DNS.Dz;
-        sstt = strjoin(sstt, ' ');
-        filename = fullfile(DNS.ansys_path, DNS.subject, "outputs", "area-z");
-        fprintf(fileID,"/report/surface-integrals/area " + sstt + " () yes """+strrep(strrep(filename, '\', '\\'), '/', '\\')+""" no yes q \n" );
     end
 
     % report files
