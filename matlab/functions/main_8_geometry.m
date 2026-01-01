@@ -2,12 +2,48 @@ function main_8_geometry(cas)
 
     fprintf("8) Geometry:\n");
 
+    geom_path = fullfile(cas.dir.ansys_in, "geometry", "geometry.scdoc");
+
     % --- ANSYS install path + version (e.g., v231) ---
     ansys_path    = fullfile(config_path('ansys', fullfile(cas.dir.chiari, 'config_file.txt')));
     ansys_version = regexp(ansys_path, 'v\d+', 'match', 'once');
 
     % --- SpaceClaim executable ---
     sc_path = fullfile(ansys_path, 'scdm', 'SpaceClaim.exe');
+
+        % ============================================================
+    % Check if geometry already exists
+    % ============================================================
+    if exist(geom_path, 'file') == 2
+
+        fprintf("\tExisting geometry found:\n\t%s\n\n", geom_path);
+
+        a = input('Do you want to use the existing geometry? (yes/no): ', 's');
+        if strcmpi(strtrim(a), 'yes')
+            fprintf("\tUsing existing geometry.\n");
+            return
+        end
+
+        a = input('Do you want to open it in SpaceClaim to make changes? (yes/no): ', 's');
+        if strcmpi(strtrim(a), 'yes')
+            fprintf("\tOpening geometry in SpaceClaim...\n");
+            cmd = sprintf('cmd /s /c start "" "%s" "%s"', sc_path, geom_path);
+            system(cmd);
+            return
+        end
+
+        a = input('Do you want to recreate the geometry from scratch and replace it? (yes/no): ', 's');
+        if ~strcmpi(strtrim(a), 'yes')
+            fprintf("\tGeometry step skipped.\n");
+            return
+        end
+
+        fprintf("\tRecreating geometry from scratch...\n");
+    end
+
+    % ============================================================
+    % Geometry creation from scratch (YOUR EXISTING CODE BELOW)
+    % ============================================================
 
     % --- SpaceClaim script to run ---
     script_clip_geometry = full_path(fullfile('..', 'ansys', 'clip_geometry.scscript'));
@@ -39,7 +75,6 @@ function main_8_geometry(cas)
         '4. Create named selections:\n' ...
         '   bottom, top, cord, dura, tonsils, (nerve_roots, ligaments).\n\n' ...
         '5. Save and exit.\n\n' ...
-
         '--- Troubleshooting ---\n' ...
         'If there is an error when generating the geometry:\n' ...
         '  • Redo the segmentation in Slicer 3D.\n' ...
