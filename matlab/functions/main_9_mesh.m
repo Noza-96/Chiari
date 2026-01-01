@@ -176,12 +176,13 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
         ansys_path    = fullfile(config_path('ansys', fullfile(cas.dir.chiari, 'config_file.txt')));
 
         fluent_command = fullfile(ansys_path,"fluent","ntbin","win64","fluent.exe");
-        fprintf('- opening Fluent meshing to create cases with microanatomy...l\n');
+        fprintf('- Opening Fluent Meshing to create fluent .cas files ...\n');
         fluent_cmd = """" + fluent_command + """" + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
         if visualize_console == 0
             fluent_cmd = fluent_cmd + " > nul";
         end
         system(fluent_cmd); 
+        a = '';
         while ~strcmpi(a, 'ok')
             a = input('Type "ok" to continue: ', 's');
         end
@@ -336,6 +337,7 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
                 fluent_cmd = fluent_cmd + " > nul";
             end
             system(fluent_cmd); % Run with "> nul" to suppress terminal output
+            a = '';
             while ~strcmpi(a, 'ok')
                 a = input('Type "ok" to continue: ', 's');
             end

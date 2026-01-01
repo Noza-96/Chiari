@@ -14,23 +14,23 @@ function main_8_geometry(cas)
     % Check if geometry already exists
     if exist(geom_path, 'file') == 2
     
-        fprintf("- Existing geometry found...");
+        fprintf("- Existing geometry found...\n");
     
         a = strtrim(input('- Do you want to use the existing geometry? [yes]/no: ', 's'));
         if isempty(a); a = 'yes'; end
         if strcmpi(a, 'yes')
-            fprintf("\tUsing existing geometry.\n");
+            fprintf("- Using existing geometry.\n");
             return
         end
     
         a = strtrim(input('- Do you want to recreate the geometry from scratch and replace it? [yes]/no: ', 's'));
         if isempty(a); a = 'yes'; end
         if ~strcmpi(a, 'yes')
-            fprintf("\tGeometry step skipped.\n");
+            fprintf("- Geometry step skipped.\n");
             return
         end
     
-        fprintf("\tRecreating geometry from scratch...\n");
+        fprintf("- Recreating geometry from scratch...\n");
     end
 
     % Geometry creation from scratch

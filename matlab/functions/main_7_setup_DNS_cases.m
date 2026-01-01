@@ -17,7 +17,7 @@ function [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_
         fprintf('- Ansys inputs need to be created\updated, creating files...')
         create_ansys_inputs(dat_PC, cas, ts_cycle);
     else 
-        fprintf('\n- Ansys inputs are up to date.')
+        fprintf('- Ansys inputs are up to date.')
     end
     
     DNS_cases = create_DNS_cases (cas, case_name, mesh_size, cycles, iterations_ts, ts_cycle, z_p);

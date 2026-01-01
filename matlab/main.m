@@ -42,7 +42,7 @@ mesh_size = 0.0002;   % Array with the different mesh sizes to be simulated
 ts_cycle = 100;       % number of time steps per cycle
 cycles = 3;           % cyles to be computed
 iterations_ts = 20;   % iterations per time step
-z_p = 0:-5:ceil(dat_PC{end}*10+1); % z-loc to obtain temporal evolution of spatially-averaged pressure
+z_p = 0:-5:ceil(dat_PC.locz{end}*10+1); % z-loc to obtain temporal evolution of spatially-averaged pressure
 
 [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_size, ts_cycle, cycles, iterations_ts, z_p);
 
