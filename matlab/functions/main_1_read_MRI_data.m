@@ -54,7 +54,7 @@ function cas = create_directories(cas)
 
     % List of directories to ensure exist
     dirsToCreate = {cas.dir.anatomy, cas.dir.flow, cas.dir.mat, fullfile(cas.dir.mat, 'DNS'), cas.dir.dat, cas.dir.ansys, cas.dir.ansys_out, cas.dir.ansys_in, cas.dir.ansys_profiles, cas.dir.vid, ... 
-        cas.dir.seg, cas.dir.fig, cas.dir.reg, cas.dir.trans, fullfile(cas.dir.reg, 'pcMRI'), fullfile(cas.dir.reg, '2D-segmentation'), fullfile(cas.dir.reg, 'input-velocity'), fullfile(cas.dir.reg, 'output-velocity'), cas.dir.ROI, fullfile(cas.dir.seg, 'stl'), fullfile(cas.dir.ansys_in, "planes"), fullfile(cas.dir.ansys_in, "flow-rates"), fullfile(cas.dir.ansys_in, "case-files"), fullfile(cas.dir.ansys_in, "journals")};
+        cas.dir.seg, cas.dir.fig, cas.dir.reg, cas.dir.trans, fullfile(cas.dir.reg, 'pcMRI'), fullfile(cas.dir.reg, '2D-segmentation'), fullfile(cas.dir.reg, 'input-velocity'), fullfile(cas.dir.reg, 'output-velocity'), cas.dir.ROI, fullfile(cas.dir.seg, 'stl'), fullfile(cas.dir.ansys_in, "planes"), fullfile(cas.dir.ansys_in, "flow-rates"), fullfile(cas.dir.ansys_in, "case-files"), fullfile(cas.dir.ansys_in, "geometry"), fullfile(cas.dir.ansys_in, "journals")};
     
     % Create directories if not present
     for i = 1:length(dirsToCreate)
