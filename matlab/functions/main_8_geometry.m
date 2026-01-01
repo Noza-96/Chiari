@@ -15,29 +15,23 @@ function main_8_geometry(cas)
     % Check if geometry already exists
     % ============================================================
     if exist(geom_path, 'file') == 2
-
+    
         fprintf("\tExisting geometry found:\n\t%s\n\n", geom_path);
-
-        a = input('Do you want to use the existing geometry? (yes/no): ', 's');
-        if strcmpi(strtrim(a), 'yes')
+    
+        a = strtrim(input('Do you want to use the existing geometry? [yes]/no: ', 's'));
+        if isempty(a); a = 'yes'; end
+        if strcmpi(a, 'yes')
             fprintf("\tUsing existing geometry.\n");
             return
         end
-
-        a = input('Do you want to open it in SpaceClaim to make changes? (yes/no): ', 's');
-        if strcmpi(strtrim(a), 'yes')
-            fprintf("\tOpening geometry in SpaceClaim...\n");
-            cmd = sprintf('cmd /s /c start "" "%s" "%s"', sc_path, geom_path);
-            system(cmd);
-            return
-        end
-
-        a = input('Do you want to recreate the geometry from scratch and replace it? (yes/no): ', 's');
-        if ~strcmpi(strtrim(a), 'yes')
+    
+        a = strtrim(input('Do you want to recreate the geometry from scratch and replace it? [yes]/no: ', 's'));
+        if isempty(a); a = 'yes'; end
+        if ~strcmpi(a, 'yes')
             fprintf("\tGeometry step skipped.\n");
             return
         end
-
+    
         fprintf("\tRecreating geometry from scratch...\n");
     end
 
