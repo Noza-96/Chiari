@@ -36,17 +36,19 @@ crop_size = 100;
 % out: creted flow-rates, planes, and velocity profiles of PC-MRI
 % DNS_cases contains information about the simulations to be done
 
-case_name = {"c3"};     % Array with the kind of simulations to do
-mesh_size = 0.0002;         % Array with the different mesh sizes to be simulated
-ts_cycle = 100;             % number of time steps per cycle
-cycles = 3;                 % cyles to be computed
-iterations_ts = 20;         % iterations per time step
+case_name = {"c1"};   % Instructions for case_name within function 
 
-[cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_size, ts_cycle, cycles, iterations_ts);
+mesh_size = 0.0002;   % Array with the different mesh sizes to be simulated
+ts_cycle = 100;       % number of time steps per cycle
+cycles = 3;           % cyles to be computed
+iterations_ts = 20;   % iterations per time step
+z_p = 0:-5:ceil(dat_PC{end}*10+1); % z-loc to obtain temporal evolution of spatially-averaged pressure
+
+[cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_size, ts_cycle, cycles, iterations_ts, z_p);
 
 
 %% 8) Define geometry in SpaceClaim
-% out: computational domain
+% out: geometry
 main_8_geometry(cas);
 
 %% 9) Mesh - create case

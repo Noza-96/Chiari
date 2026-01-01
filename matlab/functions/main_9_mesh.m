@@ -20,9 +20,9 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
     geometry_exist = true;
     count_sim = 1; 
 
-    full_ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));
+    full_ansys_path_in = correct_path(full_path(cas.dir.ansys_in));
     
-    GUI_journal_path = fullfile(full_ansys_path, cas.subj, "inputs", "journals", "create_mesh.jou");
+    GUI_journal_path = fullfile(full_ansys_path_in, "journals", "create_mesh.jou");
 
     fileID = fopen(GUI_journal_path, 'w');
 
@@ -48,22 +48,18 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
     geom = unique(geom, 'stable');
 
     % for type 2 simulation, which boundary has continuity condition
-    continuity_condition = "tonsils";
-    
-    
+    continuity_condition = "tonsils";  
     
     for k = 1: length(geom)
-    
         for ii = 1:length(mesh_size)
             prox_limit = [mesh_size(ii), mesh_size(ii)*4];
             case_i = geom(k) + "_dx" + mesh_size(ii) + version(k);
-            % check if case already exists or needs to be created
+
             if isfile(fullfile(cas.diransys_in, "case-files", case_i + ".cas.gz"))
                 fprintf('case file %s already exists ... \n', case_i + ".cas.gz");
             else
                 all_simulations = false;
                 fprintf('case file %s needs to be created ...\n', case_i + ".cas.gz");
-                    
                 % Define to which boundaries apply local sizing
                 local_sizing = {"cord", "dura", "tonsils"}; 
 
@@ -77,9 +73,9 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
             
                 sstt_sizing = sprintf("r'%s'", strjoin(cellstr(local_sizing), "', r'"));
 
-                geom_name = geom+ "_geometry"+version(k)+".scdoc";
+                geom_name = geom + "_geometry" + version(k) + ".scdoc";
             
-                geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom_name);
+                geometry_path = fullfile(full_ansys_path_in, "geometry", geom_name);
     
                 if ~isfile(geometry_path)
                     geometry_exist = false; % cannot run simulation
@@ -159,7 +155,7 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
 
                 fprintf(fileID,"(%%py-exec ""input('Journal paused - check quality volume mesh and press Enter to continue...')"")\n" );
 
-                filename_2 = fullfile(full_ansys_path, cas.subj, "inputs", "case-files", case_i);
+                filename_2 = fullfile(full_ansys_path_in, "case-files", case_i);
                 % export case file 
                 fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*WriteSubMenu*Case..."") \n" );     
                 fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+strrep(strrep(filename_2, '\', '\\'), '/', '\\')+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n\n" );
@@ -178,7 +174,9 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
         fprintf('all fluent cases w/o anatomy exist... \n \ncheck anatomy cases ...\n');
     elseif geometry_exist
         visualize_console = 1;
-        fluent_command = get_fluent_command(); 
+        ansys_path    = fullfile(config_path('ansys', fullfile(cas.dir.chiari, 'config_file.txt')));
+
+        fluent_command = fullfile(ansys_path,"fluent","ntbin","win64","fluent.exe");
         fprintf('opening Fluent meshing to create cases using GUI journal\n');
         fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
         if visualize_console == 0
@@ -197,9 +195,9 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
     count_sim = 1; 
 
 
-    full_ansys_path = correct_path(full_path(fullfile(pwd, '..', '..', '..','computations','ansys')));
+    full_ansys_path_in = correct_path(full_path(cas.dir.ansys_in));
     
-    GUI_journal_path = fullfile(full_ansys_path, cas.subj, "inputs", "journals", "create_mesh.jou");
+    GUI_journal_path = fullfile(full_ansys_path_in, "journals", "create_mesh.jou");
 
     fileID = fopen(GUI_journal_path, 'w');
        
@@ -231,7 +229,7 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
                 end
                 
                 sstt_sizing = sprintf("r'%s'", strjoin(local_sizing, "', r'"));            
-                geometry_path = fullfile(full_ansys_path, cas.subj, "geometry", geom+ "_geometry_zones"+version+".scdoc");
+                geometry_path = fullfile(full_ansys_path_in, "geometry", geom+ "_geometry_zones"+version+".scdoc");
     
                 if ~isfile(geometry_path)
                     geometry_exist = false; % cannot run simulation
@@ -253,9 +251,6 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
                     % wall_sizing
                     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 1,r'BOIControlName': r'wall_sizing',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Face Size',r'BOIFaceLabelList': ["+sstt_sizing+"],r'BOIGrowthRate': 1.1,r'BOISize': "+mesh_size(ii)+",r'BOIZoneorLabel': r'label',})"")\n" );
                     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].AddChildAndUpdate(DeferUpdate=False)"")\n" );
-                    % proximity
-                    % fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 10,r'BOIControlName': r'proximity',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Proximity',r'BOIFaceLabelList': [r'cord', r'dura'],r'BOIGrowthRate': 1.1,r'BOIMaxSize': "+prox_limit(2)+",r'BOIMinSize': "+prox_limit(1)+",r'BOIZoneorLabel': r'label',})"")\n" );
-                    % fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Add Local Sizing'].AddChildAndUpdate(DeferUpdate=False)"")    \n" );
                 else
                     % wall_sizing
                     fprintf(fileID,"(%%py-exec ""workflow.TaskObject['wall_sizing'].Arguments.set_state({r'AddChild': r'yes',r'BOICellsPerGap': 1,r'BOIControlName': r'wall_sizing',r'BOICurvatureNormalAngle': 18,r'BOIExecution': r'Face Size',r'BOIFaceLabelList': ["+sstt_sizing+"],r'BOIGrowthRate': 1.1,r'BOISize': "+mesh_size(ii)+",r'BOIZoneorLabel': r'label',r'CompleteFaceLabelList': ["+sstt_sizing+"],r'DrawSizeControl': True,})"")\n" );
@@ -309,7 +304,7 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
 
                 fprintf(fileID,"(%%py-exec ""input('Journal paused - check quality volume mesh and press Enter to continue...')"")\n" );
 
-                filename_2 = fullfile(full_ansys_path, cas.subj, "inputs", "case-files", case_name);
+                filename_2 = fullfile(full_ansys_path_in, "case-files", case_name);
                 % export case file 
                 fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*WriteSubMenu*Case..."") \n" );     
                 fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+strrep(strrep(filename_2, '\', '\\'), '/', '\\')+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n\n" );

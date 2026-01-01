@@ -2,7 +2,7 @@ function main_8_geometry(cas)
 
     fprintf("8) Geometry:\n");
 
-    geom_path = fullfile(cas.dir.ansys_in, "geometry", "geometry.scdoc");
+    geom_path = fullfile(cas.dir.ansys_in, "geometry", "c_geometry.scdoc");
 
     % --- ANSYS install path + version (e.g., v231) ---
     ansys_path    = fullfile(config_path('ansys', fullfile(cas.dir.chiari, 'config_file.txt')));
