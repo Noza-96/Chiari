@@ -11,21 +11,19 @@ function main_8_geometry(cas)
     % --- SpaceClaim executable ---
     sc_path = fullfile(ansys_path, 'scdm', 'SpaceClaim.exe');
 
-        % ============================================================
     % Check if geometry already exists
-    % ============================================================
     if exist(geom_path, 'file') == 2
     
-        fprintf("\tExisting geometry found:\n\t%s\n\n", geom_path);
+        fprintf("- Existing geometry found...");
     
-        a = strtrim(input('Do you want to use the existing geometry? [yes]/no: ', 's'));
+        a = strtrim(input('- Do you want to use the existing geometry? [yes]/no: ', 's'));
         if isempty(a); a = 'yes'; end
         if strcmpi(a, 'yes')
             fprintf("\tUsing existing geometry.\n");
             return
         end
     
-        a = strtrim(input('Do you want to recreate the geometry from scratch and replace it? [yes]/no: ', 's'));
+        a = strtrim(input('- Do you want to recreate the geometry from scratch and replace it? [yes]/no: ', 's'));
         if isempty(a); a = 'yes'; end
         if ~strcmpi(a, 'yes')
             fprintf("\tGeometry step skipped.\n");
@@ -35,15 +33,10 @@ function main_8_geometry(cas)
         fprintf("\tRecreating geometry from scratch...\n");
     end
 
-    % ============================================================
-    % Geometry creation from scratch (YOUR EXISTING CODE BELOW)
-    % ============================================================
-
-    % --- SpaceClaim script to run ---
+    % Geometry creation from scratch
     script_clip_geometry = full_path(fullfile('..', 'ansys', 'clip_geometry.scscript'));
 
-    % --- Write args file for SpaceClaim/Python (3 lines) ---
-    % Location: in chiari root folder
+    % --- Write temporary file for SpaceClaim inputs---
     args_file = fullfile(pwd,  'ansys_sc_args.txt');
 
     fid = fopen(args_file, 'w');

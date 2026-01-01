@@ -1,17 +1,16 @@
 function main_9_mesh(cas, case_name, mesh_size, n_cores)
 
-% run fluent-meshing to create meshes and corresponding .cas files
-GUI_create_mesh(cas, mesh_size, case_name, n_cores);
-
-
-% Get cases  with first digit 3
-cases_zones = case_name(cellfun(@(s) ~isempty(regexp(s, '\D*3', 'once')), case_name));
-
-if ~isempty(cases_zones)   
-    GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores);
-end
-
-
+    fprintf("9) Meshing:\n");
+    
+    % run fluent-meshing to create meshes and corresponding .cas files
+    GUI_create_mesh(cas, mesh_size, case_name, n_cores);
+    
+    % Get cases  with first digit 3
+    cases_zones = case_name(cellfun(@(s) ~isempty(regexp(s, '\D*3', 'once')), case_name));
+    
+    if ~isempty(cases_zones)   
+        GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores);
+    end
 end
 
 function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
@@ -55,11 +54,11 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
             prox_limit = [mesh_size(ii), mesh_size(ii)*4];
             case_i = geom(k) + "_dx" + mesh_size(ii) + version(k);
 
-            if isfile(fullfile(cas.diransys_in, "case-files", case_i + ".cas.gz"))
-                fprintf('case file %s already exists ... \n', case_i + ".cas.gz");
+            if isfile(fullfile(cas.dir.ansys_in, "case-files", case_i + ".cas.gz"))
+                fprintf('- case file %s already exists ... \n', case_i + ".cas.gz");
             else
                 all_simulations = false;
-                fprintf('case file %s needs to be created ...\n', case_i + ".cas.gz");
+                fprintf('- case file %s needs to be created ...\n', case_i + ".cas.gz");
                 % Define to which boundaries apply local sizing
                 local_sizing = {"cord", "dura", "tonsils"}; 
 
@@ -79,7 +78,7 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
     
                 if ~isfile(geometry_path)
                     geometry_exist = false; % cannot run simulation
-                    fprintf(2, 'geometry file %s does not exist ...\n', geom_name);
+                    fprintf(2, '- geometry file %s does not exist ...\n', geom_name);
                 end
             
                 if count_sim == 1
@@ -171,19 +170,21 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
 
     % run ansys meshing to run simulations
     if all_simulations
-        fprintf('all fluent cases w/o anatomy exist... \n \ncheck anatomy cases ...\n');
+        fprintf('- all fluent cases exist...\n \n- Ready to run CFD simulation! \n');
     elseif geometry_exist
         visualize_console = 1;
         ansys_path    = fullfile(config_path('ansys', fullfile(cas.dir.chiari, 'config_file.txt')));
 
         fluent_command = fullfile(ansys_path,"fluent","ntbin","win64","fluent.exe");
-        fprintf('opening Fluent meshing to create cases using GUI journal\n');
-        fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
+        fprintf('- opening Fluent meshing to create cases with microanatomy...l\n');
+        fluent_cmd = """" + fluent_command + """" + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
         if visualize_console == 0
             fluent_cmd = fluent_cmd + " > nul";
         end
-        system(fluent_cmd); % Run with "> nul" to suppress terminal output
-        input('Press Enter when done with ANSYS to continue code execution...\n', 's');
+        system(fluent_cmd); 
+        while ~strcmpi(a, 'ok')
+            a = input('Type "ok" to continue: ', 's');
+        end
     end
 
 end
@@ -213,7 +214,7 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
     
             case_name = geom + "_dx" + mesh_size(ii) + "_zones" + version;
             % check if case already exists or needs to be created
-            if isfile(fullfile(cas.diransys_in, "case-files", case_name + ".cas.gz"))
+            if isfile(fullfile(cas.dir.ansys_in, "case-files", case_name + ".cas.gz"))
                 fprintf('case file %s already exists ... \n', case_name + ".cas.gz");
             else
                 all_simulations = false;
@@ -320,18 +321,24 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
 
     % run ansys meshing to run simulations
     if all_simulations
-        fprintf('all fluent cases w anatomy exist... \n \nready to run CFD simulation! \n');
+        fprintf('- all fluent cases with microanatomy exist... \n');
         else
         if geometry_exist
             visualize_console = 1;
-            fluent_command = get_fluent_command(); 
-            
-            fluent_cmd = fluent_command + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
+
+            ansys_path    = fullfile(config_path('ansys', fullfile(cas.dir.chiari, 'config_file.txt')));
+    
+            fluent_command = fullfile(ansys_path,"fluent","ntbin","win64","fluent.exe");
+
+            fluent_cmd = """" + fluent_command + """" + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
+
             if visualize_console == 0
                 fluent_cmd = fluent_cmd + " > nul";
             end
             system(fluent_cmd); % Run with "> nul" to suppress terminal output
-            input('Press Enter when done with ANSYS to continue code execution...\n', 's');
+            while ~strcmpi(a, 'ok')
+                a = input('Type "ok" to continue: ', 's');
+            end
         end
     end
 

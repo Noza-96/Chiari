@@ -14,10 +14,10 @@ function [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_
     [cas, dat_PC, repeat_initialization] = check_subject_initialization (cas, ts_cycle, 0);
     
     if repeat_initialization
-        fprintf('ansys inputs need to be created\updated, creating files...')
+        fprintf('- Ansys inputs need to be created\updated, creating files...')
         create_ansys_inputs(dat_PC, cas, ts_cycle);
     else 
-        fprintf('ansys inputs are up to date.')
+        fprintf('\n- Ansys inputs are up to date.')
     end
     
     DNS_cases = create_DNS_cases (cas, case_name, mesh_size, cycles, iterations_ts, ts_cycle, z_p);
@@ -256,7 +256,7 @@ function [DNS_cases] = create_DNS_cases (cas, case_name, mesh_size, cycles, iter
         end     
     end
     DNS_cases = reshape(DNS_cases.', 1, []); 
-    fprintf('created DNS.mat with cases information ...')
+    fprintf('\n- DNS.mat with cases information has been created.\n\n')
 end
 
 
