@@ -96,8 +96,6 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     % read case
     case_path_gz = fullfile(DNS.ansys_path, "inputs", "case-files", case_name + ".cas.gz");
     case_path_cas = fullfile(DNS.ansys_path, "inputs", "case-files", case_name + ".cas");
-    case_path_gz
-    case_path_cas
     if isfile(case_path_gz)
         case_path = case_path_gz;
     elseif isfile(case_path_cas)
@@ -230,11 +228,12 @@ function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
         create_plane (fileID,XYZ,cas.locations{loc})
     end
 
-    z_FM=dat_PC.pixel_coord{1}(:,:,3);
+    z_FM = dat_PC.pixel_coord{1}(:,:,3);
+    z_FM = mean(z_FM(dat_PC.SAS.ROI{1}));
     % create planes perpendicular to z-dir  
     for Dz = DNS.Dz
         % Dz foramen with respect to top pcmri location
-        Dz_foramen = (mean(z_FM(:))+(Dz+0.01))/1000; % [m]
+        Dz_foramen = (z_FM+(Dz-0.01))/1000; % [m]
 
          % create plane at the location of the foramen_magnum
         XYZ(:,3) = Dz_foramen;
