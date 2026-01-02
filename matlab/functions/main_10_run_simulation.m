@@ -94,9 +94,18 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     end
 
     % read case
-    case_path = fullfile(DNS.ansys_path, "input", "case-files", case_name + ".cas.gz");
+    case_path_gz = fullfile(DNS.ansys_path, "input", "case-files", case_name + ".cas.gz");
+    case_path_cas = fullfile(DNS.ansys_path, "input", "case-files", case_name + ".cas");
     
-    fprintf(fileID,"/file read-case "+correct_path(case_path)+"\n" );
+    if isfile(case_path_gz)
+        case_path = case_path_gz;
+    elseif isfile(case_path_cas)
+        case_path = case_path_cas;
+    else
+        error("- Case file not found: %s", case_name);
+    end
+
+    fprintf(fileID,"/file read-case " + correct_path(case_path) + "\n" );
 
     % disable flow-warnings (reverse-flow)
     fprintf(fileID,"/solve/set flow-warnings? no \n" );
