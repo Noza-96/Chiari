@@ -53,7 +53,7 @@ end
 % Helper function to run the Fluent simulation through terminal
 function runFluentSimulation(cas, DNS, case_name, n_cores)
     fluent_command = get_fluent_command(cas);
-    fluent_cmd = """" + fluent_command + """" + " 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
+    fluent_cmd = """" + fluent_command + """" + " 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, "inputs", "journals", case_name + ".jou") + """";
     system(fluent_cmd); % Run with "> nul" to suppress terminal output
 end
 
@@ -94,7 +94,7 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     end
 
     % read case
-    case_path = fullfile(DNS.ansys_path, DNS.subject, "input", "case-files", case_name + ".cas.gz");
+    case_path = fullfile(DNS.ansys_path, "input", "case-files", case_name + ".cas.gz");
     
     fprintf(fileID,"/file read-case "+correct_path(case_path)+"\n" );
 
@@ -338,8 +338,8 @@ function TUI_run_simulation(dat_PC, cas, DNS, fileID)
 
     fprintf(fileID,';run simulation \n' );
 
-    profile_dir = fullfile(DNS.ansys_path, cas.subj, "inputs", "profiles", "ts_"+DNS.ts_cycle);
-    surface_path = fullfile(DNS.ansys_path, cas.subj, "outputs", "surface_mesh");
+    profile_dir = fullfile(DNS.ansys_path, "inputs", "profiles", "ts_" + DNS.ts_cycle);
+    surface_path = fullfile(DNS.ansys_path, "outputs", "surface_mesh");
     
     time_step = dat_PC.T{end}/DNS.ts_cycle;
     fprintf(fileID,"time-step "+time_step+" \n");
@@ -399,7 +399,7 @@ function TUI_last_cycle_report_journal(DNS, fileID)
     fprintf(fileID,';last cycle reports \n' );
     
     report_name = DNS.case + '_report';
-    report_path = fullfile(DNS.ansys_path, DNS.subject, "outputs", DNS.case, report_name);
+    report_path = fullfile(DNS.ansys_path, "outputs", DNS.case, report_name);
 
     frequency = 1;
     comma = 'no'; % Delimiter/Comma?
