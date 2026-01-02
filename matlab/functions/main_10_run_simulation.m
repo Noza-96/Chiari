@@ -1,50 +1,48 @@
-function main_10_run_simulation(cas, DNS_cases, n_cores)
+function main_10_run_simulation(cas, dat_PC, DNS_cases, n_cores)
 
     fprintf("10) CFD simulation:\n") 
     
-    answer = questdlg('Run ANSYS simulation?', 'Confirmation', 'Yes', 'No', 'No');
-    if strcmp(answer, 'Yes')
-        disp('- Running ANSYS simulation...');   
-        
-        % Run simulations for each DNS case
-        for k = 1:length(DNS_cases)
-            tic; 
     
-            DNS = loadDNSData(cas, DNS_cases{k});
-    
-            output_check = fullfile(DNS.path_out_report, DNS_cases{k} + "_report.out");
-    
-            if isfile(output_check)
-                fprintf('- %s simulation already done! skipping to next case...\n', DNS_cases{k});
-                continue;
-            else
-                fprintf('\n- %s ...\n', DNS_cases{k});
-            end  
-            
-    
-            % Create and run the ANSYS journal
-            fileID = fopen(fullfile(cas.dir.ansys_in, "journals", DNS.case + ".jou"), 'w');
-            
-            % Setup simulation
-            TUI_setup_Fluent_case(DNS, cas, fileID);
-            
-            % Create PCMRI surfaces and other necessary setups
-            TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID);
-            
-            % Add reports every time step
-            TUI_reports_journal(DNS, fileID);
-            
-            % run the simulation - add reports last cycle
-            TUI_run_simulation(dat_PC, cas, DNS, fileID);
-    
-            runFluentSimulation(cas, DNS, DNS_cases{k}, n_cores, visualize_console);
-    
-            % Finalize after simulation
-            elapsed_time = toc;
-            finalizeSimulation(DNS, DNS_cases{k}, cas, elapsed_time);
-        end
-    end
+    % Run simulations for each DNS case
+    for k = 1:length(DNS_cases)
+        tic; 
 
+        DNS = loadDNSData(cas, DNS_cases{k});
+
+        output_check = fullfile(DNS.path_out_report, DNS_cases{k} + "_report.out");
+
+        if isfile(output_check)
+            fprintf('- %s simulation already done! skipping to next case...\n', DNS_cases{k});
+            continue;
+        else
+            fprintf('\n%s:\n', DNS_cases{k});
+        end  
+        
+
+        % Create and run the ANSYS journal
+        fileID = fopen(fullfile(cas.dir.ansys_in, "journals", DNS.case + ".jou"), 'w');
+        
+        fprintf('- Setting up Fluent case...\n');   
+        % Setup simulation
+        TUI_setup_Fluent_case(DNS, cas, fileID);
+
+        fprintf('- Creating journals...\n');   
+        % Create PCMRI surfaces and other necessary setups
+        TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID);
+        
+        % Add reports every time step
+        TUI_reports_journal(DNS, fileID);
+
+        fprintf('- Running CFD simulation...\n');   
+        % run the simulation - add reports last cycle
+        TUI_run_simulation(dat_PC, cas, DNS, fileID);
+
+        runFluentSimulation(cas, DNS, DNS_cases{k}, n_cores);
+
+        % Finalize after simulation
+        elapsed_time = toc;
+        finalizeSimulation(DNS, DNS_cases{k}, cas, elapsed_time);
+    end
 end
 
 % Helper function to load DNS data
@@ -53,12 +51,9 @@ function DNS = loadDNSData(cas, case_name)
 end
 
 % Helper function to run the Fluent simulation through terminal
-function runFluentSimulation(cas, DNS, case_name, n_cores, visualize_console)
+function runFluentSimulation(cas, DNS, case_name, n_cores)
     fluent_command = get_fluent_command(cas);
     fluent_cmd = """" + fluent_command + """" + " 3ddp -t" + n_cores + " -g -i """ + fullfile(DNS.ansys_path, DNS.subject, "inputs", "journals", case_name + ".jou") + """";
-    if visualize_console == 0
-        fluent_cmd = fluent_cmd + " > nul";
-    end
     system(fluent_cmd); % Run with "> nul" to suppress terminal output
 end
 
@@ -101,7 +96,7 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     % read case
     case_path = fullfile(DNS.ansys_path, DNS.subject, "input", "case-files", case_name + ".cas.gz");
     
-    fprintf(fileID,"/file read-case "+case_path+"\n" );
+    fprintf(fileID,"/file read-case "+correct_path(case_path)+"\n" );
 
     % disable flow-warnings (reverse-flow)
     fprintf(fileID,"/solve/set flow-warnings? no \n" );
@@ -229,11 +224,11 @@ function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
     % create planes perpendicular to z-dir  
     for Dz = DNS.Dz
         % Dz foramen with respect to top pcmri location
-        Dz_foramen = mean(z_FM(:)-(Dz+0.01))/1000; % [m]
+        Dz_foramen = (mean(z_FM(:))-(Dz+0.01))/1000; % [m]
 
          % create plane at the location of the foramen_magnum
         XYZ(:,3) = Dz_foramen;
-        create_plane (fileID,XYZ_fm,"FM-"+Dz)
+        create_plane (fileID,XYZ,"FM-"+Dz)
     end
 
     if DNS.sim ~= 3
@@ -343,9 +338,9 @@ function TUI_run_simulation(dat_PC, cas, DNS, fileID)
 
     fprintf(fileID,';run simulation \n' );
 
-    profile_dir = DNS.ansys_path+"/"+cas.subj+"/inputs/profiles/ts_"+DNS.ts_cycle+"/";
-    surface_path = DNS.ansys_path+"/"+cas.subj+"/outputs/surface_mesh";
-
+    profile_dir = fullfile(DNS.ansys_path, cas.subj, "inputs", "profiles", "ts_"+DNS.ts_cycle);
+    surface_path = fullfile(DNS.ansys_path, cas.subj, "outputs", "surface_mesh");
+    
     time_step = dat_PC.T{end}/DNS.ts_cycle;
     fprintf(fileID,"time-step "+time_step+" \n");
 
@@ -366,7 +361,7 @@ function TUI_run_simulation(dat_PC, cas, DNS, fileID)
 
             for boundary = prof_bound
                 % load profile data
-                fprintf(fileID,"/file/read-profile """+profile_dir+""+boundary{1}+"_prof_"+n+".csv"" \n");
+                fprintf(fileID,"/file/read-profile """ + correct_path(fullfile(profile_dir, boundary{1} + "_prof_" + n + ".csv""")) + "\n");
 
                 % setup inlet velocity boundary condition 
                 ID_prof = boundary+"_vel";
@@ -381,13 +376,13 @@ function TUI_run_simulation(dat_PC, cas, DNS, fileID)
 
                 if DNS.sim ~=3
                     % export surface mesh
-                    fprintf(fileID,sprintf("/file/export ascii %s wall () no () ok  q \n", surface_path));
+                    fprintf(fileID, sprintf("/file/export ascii %s wall () no () ok  q \n", correct_path(surface_path)));
                 end
             end
 
             fprintf(fileID,";" + DNS.case + ": iteration " + n + "/" + DNS.ts_cycle + " cycle "+k+"/"+DNS.cycles+"\n" );
 
-            fprintf(fileID,"/solve/dual-time-iterate 1 "+DNS.iterations_ts+" ok ok \n");
+            fprintf(fileID,"/solve/dual-time-iterate 1 " + DNS.iterations_ts + " ok ok \n");
 
         end         
     end
@@ -404,9 +399,7 @@ function TUI_last_cycle_report_journal(DNS, fileID)
     fprintf(fileID,';last cycle reports \n' );
     
     report_name = DNS.case + '_report';
-    folder = DNS.ansys_path+"/"+DNS.subject+"/outputs/"+DNS.case;
-    directory = folder + "/" + report_name;
-
+    report_path = fullfile(DNS.ansys_path, DNS.subject, "outputs", DNS.case, report_name);
 
     frequency = 1;
     comma = 'no'; % Delimiter/Comma?
@@ -418,7 +411,7 @@ function TUI_last_cycle_report_journal(DNS, fileID)
     locations_str = strjoin(DNS.slices.locations, ' '); % Concatenate locations with space delimiter
 
     TUI_sstt = sprintf('/file/transient-export/ascii "%s" %s () %s q %s %s %s "%s" %d time-step \n', ...
-    directory, locations_str, fields_str, Cell_centered, comma, report_name, export_every, frequency);
+    correct_path(report_path), locations_str, fields_str, Cell_centered, comma, report_name, export_every, frequency);
 
     fprintf(fileID,TUI_sstt);
     

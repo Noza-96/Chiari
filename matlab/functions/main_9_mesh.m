@@ -55,10 +55,10 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
             case_i = geom(k) + "_dx" + mesh_size(ii) + version(k);
 
             if isfile(fullfile(cas.dir.ansys_in, "case-files", case_i + ".cas.gz"))
-                fprintf('- case file %s already exists ... \n', case_i + ".cas.gz");
+                fprintf('- Case file %s already exists... \n', case_i + ".cas.gz");
             else
                 all_simulations = false;
-                fprintf('- case file %s needs to be created ...\n', case_i + ".cas.gz");
+                fprintf('- Case file %s needs to be created...\n', case_i + ".cas.gz");
                 % Define to which boundaries apply local sizing
                 local_sizing = {"cord", "dura", "tonsils"}; 
 
@@ -78,7 +78,7 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
     
                 if ~isfile(geometry_path)
                     geometry_exist = false; % cannot run simulation
-                    fprintf(2, '- geometry file %s does not exist ...\n', geom_name);
+                    fprintf(2, '- Geometry file %s does not exist...\n', geom_name);
                 end
             
                 if count_sim == 1
@@ -155,9 +155,9 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
                 fprintf(fileID,"(%%py-exec ""input('Journal paused - check quality volume mesh and press Enter to continue...')"")\n" );
 
                 filename_2 = fullfile(full_ansys_path_in, "case-files", case_i);
-                % export case file 
+                % export Case file 
                 fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*WriteSubMenu*Case..."") \n" );     
-                fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+strrep(strrep(filename_2, '\', '\\'), '/', '\\')+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n\n" );
+                fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+strrep(strrep(filename_2, '\', '\\'), '/', '\\')+""") ""Legacy Compressed Case files (*.cas.gz )"") \n\n" );
             
                 fprintf(fileID,"(cx-gui-do cx-activate-item ""Information*OK"") \n");    
                 count_sim = count_sim + 1;
@@ -170,11 +170,11 @@ function GUI_create_mesh(cas, mesh_size, case_name, n_cores)
 
     % run ansys meshing to run simulations
     if all_simulations
-        fprintf('- all fluent cases exist...\n \n- Ready to run CFD simulation! \n');
+        fprintf('- All fluent cases exist -> Ready to run CFD simulation! \n\n');
     elseif geometry_exist
         visualize_console = 1;
         fluent_command = get_fluent_command(cas);
-        fprintf('- Opening Fluent Meshing to create fluent .cas files ...\n');
+        fprintf('- Opening Fluent Meshing to create fluent .cas files...\n');
         fluent_cmd = """" + fluent_command + """" + " 3ddp -meshing -t" + n_cores + " -i """ + GUI_journal_path + """";
         if visualize_console == 0
             fluent_cmd = fluent_cmd + " > nul";
@@ -214,10 +214,10 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
             case_name = geom + "_dx" + mesh_size(ii) + "_zones" + version;
             % check if case already exists or needs to be created
             if isfile(fullfile(cas.dir.ansys_in, "case-files", case_name + ".cas.gz"))
-                fprintf('case file %s already exists ... \n', case_name + ".cas.gz");
+                fprintf('Case file %s already exists... \n', case_name + ".cas.gz");
             else
                 all_simulations = false;
-                fprintf(2, 'case file %s needs to be created ...\n', case_name + ".cas.gz");
+                fprintf(2, 'Case file %s needs to be created...\n', case_name + ".cas.gz");
                     
                 % Define to which boundaries apply local sizing
                 local_sizing = [continuity_condition, "dura", "tonsils"];
@@ -233,7 +233,7 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
     
                 if ~isfile(geometry_path)
                     geometry_exist = false; % cannot run simulation
-                    fprintf(2, 'geometry file %s does not exist ...\n', geom+ "_geometry_zones"+version+".scdoc");
+                    fprintf(2, 'geometry file %s does not exist...\n', geom+ "_geometry_zones"+version+".scdoc");
                 end
             
                 if count_sim == 1
@@ -275,7 +275,7 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].UpdateChildTasks(SetupTypeChanged=True)"")\n" );
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Describe Geometry'].Execute()"")\n" );
                 
-                fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom', " + strjoin(compose("r'%s'", continuity_condition),", ") +"]," + ...
+                fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Arguments.set_state({r'BoundaryLabelList': [r'top', r'bottom', " + strjoin(compose("r'%s'", continuity_condition),", ") +"]," +...
                " r'BoundaryLabelTypeList': ["+strjoin(repmat("r'velocity-inlet'", 1, 1 + cas.Ncas),", ")+"],r'OldBoundaryLabelList': [r'top', r'bottom', " + strjoin(compose("r'%s'", continuity_condition),", ") +"] ,r'OldBoundaryLabelTypeList': ["+strjoin(repmat("r'wall'", 1, 1 + cas.Ncas),", ")+"],})"")\n" );
 
                 fprintf(fileID,"(%%py-exec ""workflow.TaskObject['Update Boundaries'].Execute()"")\n" );
@@ -305,9 +305,9 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
                 fprintf(fileID,"(%%py-exec ""input('Journal paused - check quality volume mesh and press Enter to continue...')"")\n" );
 
                 filename_2 = fullfile(full_ansys_path_in, "case-files", case_name);
-                % export case file 
+                % export Case file 
                 fprintf(fileID,"(cx-gui-do cx-activate-item ""MenuBar*WriteSubMenu*Case..."") \n" );     
-                fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+strrep(strrep(filename_2, '\', '\\'), '/', '\\')+""") ""Legacy Compressed Case Files (*.cas.gz )"") \n\n" );
+                fprintf(fileID,"(cx-gui-do cx-set-file-dialog-entries ""Select File"" '( """+strrep(strrep(filename_2, '\', '\\'), '/', '\\')+""") ""Legacy Compressed Case files (*.cas.gz )"") \n\n" );
             
                 fprintf(fileID,"(cx-gui-do cx-activate-item ""Information*OK"") \n");    
                 count_sim = count_sim + 1;
@@ -320,7 +320,7 @@ function GUI_create_mesh_zones(cas, mesh_size, cases_zones, n_cores)
 
     % run ansys meshing to run simulations
     if all_simulations
-        fprintf('- all fluent cases with microanatomy exist... \n');
+        fprintf('- All fluent cases with microanatomy exist -> Ready to run CFD simulation! \n\n');
         else
         if geometry_exist
             visualize_console = 1;

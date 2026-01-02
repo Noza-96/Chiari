@@ -14,10 +14,10 @@ function [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_
     [cas, dat_PC, repeat_initialization] = check_subject_initialization (cas, ts_cycle, 0);
     
     if repeat_initialization
-        fprintf('- Ansys inputs need to be created\updated, creating files...')
+        fprintf('- Ansys inputs need to be created\\updated, creating files...\n')
         create_ansys_inputs(dat_PC, cas, ts_cycle);
     else 
-        fprintf('- Ansys inputs are up to date.')
+        fprintf('- Ansys inputs are up to date.\n')
     end
     
     DNS_cases = create_DNS_cases (cas, case_name, mesh_size, cycles, iterations_ts, ts_cycle, z_p);
@@ -162,7 +162,7 @@ loc_ID = [1, dat_PC.Ndat];
                 writetable(tt, filename, 'WriteVariableNames', false);
             end
 
-            fprintf('saved velocity profile, plane, and flow rate for %s-pcmri in ansys input folder\n', tag);
+            fprintf('- Saved velocity profile, plane, and flow rate for %s location in ansys input folder... \n', tag);
         else
             % --- 2) Save flow rate as Fourier series in middle planes ---
             An = dat_PC.SAS.fou.am{ii};
@@ -256,7 +256,7 @@ function [DNS_cases] = create_DNS_cases (cas, case_name, mesh_size, cycles, iter
         end     
     end
     DNS_cases = reshape(DNS_cases.', 1, []); 
-    fprintf('\n- DNS.mat with cases information has been created.\n\n')
+    fprintf('- DNS.mat with cases information has been created.\n\n')
 end
 
 

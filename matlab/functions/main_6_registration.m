@@ -123,6 +123,7 @@ function [cas,dat_PC] = main_6_registration(cas)
     
     fprintf("\nSaving %s ...\n\n", data_now)
     save(fullfile(cas.dir.mat, data_now), 'cas', 'dat_PC');
+    close all; 
 
 end
 

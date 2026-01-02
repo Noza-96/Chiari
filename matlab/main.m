@@ -42,7 +42,7 @@ mesh_size = 0.0002;   % Array with the different mesh sizes to be simulated
 ts_cycle = 100;       % number of time steps per cycle
 cycles = 3;           % cyles to be computed
 iterations_ts = 20;   % iterations per time step
-z_p = 0:-5:ceil(dat_PC.locz{end}*10+1); % z-loc to obtain temporal evolution of spatially-averaged pressure
+z_p = 0:-5:ceil(dat_PC.locz{end}*10+1); % axial locations relative to the FM to obtain spatially-averaged pressure over cardiac cycle
 
 [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_size, ts_cycle, cycles, iterations_ts, z_p);
 
@@ -59,7 +59,7 @@ main_9_mesh(cas, case_name, mesh_size, n_cores)
 %% 10) ANSYS simulations
 % out: 
 n_cores = 14;   % number of processors Fluent
-[cas, dat_PC] = main_10_run_simulation(cas, DNS_cases, n_cores);
+main_10_run_simulation(cas, dat_PC, DNS_cases, n_cores);
 
 %% 11) Post-processing
 % out: computational domain
