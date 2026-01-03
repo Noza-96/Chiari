@@ -33,7 +33,7 @@ function main_10_run_simulation(cas, dat_PC, DNS_cases, n_cores)
         % Add reports every time step
         TUI_reports_journal(DNS, fileID);
 
-        fprintf('- Running CFD simulation...\n');   
+        fprintf('- Running CFD simulation...\n\n');   
         % run the simulation - add reports last cycle
         TUI_run_simulation(dat_PC, cas, DNS, fileID);
 

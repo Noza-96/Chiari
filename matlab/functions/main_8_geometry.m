@@ -6,10 +6,13 @@ function main_8_geometry(cas)
 
     % --- ANSYS install path + version (e.g., v231) ---
     ansys_path    = fullfile(config_path('ansys', fullfile(cas.dir.chiari, 'config_file.txt')));
-    ansys_version = regexp(ansys_path, 'v\d+', 'match', 'once');
+    sc_path = fullfile(ansys_path, "scdm");
+    d = dir(fullfile(sc_path, "SpaceClaim.Api.V*"));
+    versions = arrayfun(@(x) sscanf(x.name,'SpaceClaim.Api.V%d'), d);
+    ansys_version = max(versions);
 
     % --- SpaceClaim executable ---
-    sc_path = fullfile(ansys_path, 'scdm', 'SpaceClaim.exe');
+    sc_exe = fullfile(sc_path, 'SpaceClaim.exe');
 
     % Check if geometry already exists
     if exist(geom_path, 'file') == 2
@@ -42,14 +45,14 @@ function main_8_geometry(cas)
     fid = fopen(args_file, 'w');
     fprintf(fid, '%s\n', cas.subj);
     fprintf(fid, '%s\n', full_path(cas.dir.chiari));
-    fprintf(fid, '%s\n', ansys_version);
+    fprintf(fid, '%d\n', ansys_version);
     fclose(fid);
 
     fprintf("\tOpening SpaceClaim...\n");
 
     % --- Launch SpaceClaim non-blocking, no console output ---
     cmd = sprintf('cmd /s /c start "" /B "%s" /RunScript="%s" > NUL 2>&1', ...
-                  sc_path, script_clip_geometry);
+                  sc_exe, script_clip_geometry);
 
     system(cmd);
 

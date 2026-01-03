@@ -1,11 +1,6 @@
 function [cas, dat_PC, pcmri, DNS] = main_11_postprocessing(cas, cases, mesh_size, ts_cycle, cycle)
 
-    redo_report = false;
-    answer = lower(strtrim(input('Do you want to redo data extraction? (y/[n]): ', 's')));
-    
-    if strcmp(answer, 'y') || strcmp(answer, 'yes')
-        redo_report = true;
-    end
+    fprintf("11) Post-processing:\n");
     
     for case_name = cases
         for msh = mesh_size
@@ -31,21 +26,14 @@ function [cas, dat_PC, pcmri, DNS] = main_11_postprocessing(cas, cases, mesh_siz
                 
                     load(fullfile(cas.dir.mat, "DNS", "DNS_"+DNS_case+".mat"), 'DNS');
                 
-                    output_file = full_path(fullfile(pwd, cas.dir.mat, "DNS-results", "DNS_" + DNS_case + ".mat"));
-                    output_dir = fileparts(output_file);
-                    if ~exist(output_dir, 'dir')
-                        mkdir(output_dir);
-                    end
+                    output_file = fullfile(cas.dir.mat, "DNS-results", "DNS_" + DNS_case + ".mat");
+
                     if exist(output_file, 'file')
-                        if ~redo_report
-                            disp('data already extracted, continue to next ...');
+                            fprintf('- Data already extracted, continue to next...\n');
                             load(output_file,'DNS');
-                            continue  % or `continue` if inside a loop
-                        else
-                            disp('redo data extraction from simulation reports...');
-                        end
+                            continue  
                     else
-                        fprintf('reading data for the first time ...\n');
+                        fprintf('- Reading data for the first time...\n');
                     end
             
                     % Define initial cycle number
@@ -79,10 +67,10 @@ function [cas, dat_PC, pcmri, DNS] = main_11_postprocessing(cas, cases, mesh_siz
                         N = N0 + n;
                         
                         % Define file path for velocity data
-                        filePath = full_path(correct_path(fullfile(pwd, DNS.path_out_report, '..', DNS.case, DNS.case + "_report-" + sprintf('%04d', N)))); 
+                        filePath = fullfile(cas.dir.ansys_out, DNS.case, DNS.case + "_report-" + sprintf('%04d', N));
         
                         if ~exist(filePath, 'file')
-                            fprintf(2,'File "%s" does not exist, simulation needs to be done\n', filePath);
+                            fprintf(2,'- File "%s" does not exist, simulation needs to be done\n', filePath);
                             return
                         end
                         
