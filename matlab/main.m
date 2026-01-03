@@ -39,8 +39,8 @@ crop_size = 100;
 case_name = {"c1"};   % Instructions for case_name within function 
 
 mesh_size = 0.0002;   % Array with the different mesh sizes to be simulated
-ts_cycle = 100;       % number of time steps per cycle
-cycles = 3;           % cyles to be computed
+ts_cycle = 10;       % number of time steps per cycle
+cycles = 1;           % cyles to be computed
 iterations_ts = 20;   % iterations per time step
 z_p = 0:-5:ceil(dat_PC.locz{end}*10+1); % axial locations relative to the FM to obtain spatially-averaged pressure over cardiac cycle
 
