@@ -232,25 +232,28 @@ function [DNS_cases] = create_DNS_cases (cas, case_name, mesh_size, cycles, iter
             case_i = case_name {i};
             mesh_j = mesh_size (j);
     
+            DNS.subject = cas.subj; 
             [DNS.geom, DNS.sim, DNS.inlet, DNS.version] = get_type_simulation(case_i);
+            DNS.case = DNS.geom + string(DNS.sim) + DNS.inlet + "_dx" + formatDecimal(mesh_j) + DNS.version + "_ts_" + ts_cycle + "_N_" + cycles;
             DNS.mesh_size = mesh_j;
-            DNS.case = DNS.geom + string(DNS.sim) + DNS.inlet + "_dx" + formatDecimal(DNS.mesh_size) + DNS.version + "_ts_" + ts_cycle + "_N_" + cycles;
+            DNS.ts_cycle = ts_cycle;
+            DNS.cycles = cycles;
+            DNS.iterations_ts = iterations_ts;
             DNS.ansys_path = correct_path(full_path(cas.dir.ansys));
             DNS.TUI_path = fullfile(cas.dir.ansys_in, "journals");       
             DNS.path_out_report = fullfile(cas.dir.ansys_out, DNS.case); 
-
-            % reports at each time step 
-            DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
-            DNS.slices.locations = ["top", cas.locations(2:end-1), "bottom"]';
-            DNS.cycles = cycles;
-            DNS.iterations_ts = iterations_ts;
-            DNS.ts_cycle = ts_cycle;
-            DNS.subject = cas.subj;
-            DNS_cases{i,j} = DNS.case;
-            DNS.Dz = z_p; 
             if DNS.sim == 2
                 DNS.continuity = "tonsils";
             end
+
+            % reports at each time step 
+            DNS.fields = {'pressure', 'x-velocity', 'y-velocity', 'z-velocity'};
+            DNS.Dz = z_p; 
+            DNS.slices.locations = ["top", cas.locations(2:end-1), "bottom"]';
+
+            DNS_cases{i,j} = DNS.case;
+
+
             save(fullfile(cas.dir.mat, "DNS", "DNS_"+DNS.case+".mat"),'DNS')
             clear DNS
         end     

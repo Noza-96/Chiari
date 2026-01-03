@@ -119,7 +119,6 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     % change material to CSF
     fprintf(fileID,'/define/materials/change-create air csf yes expression "rho" no no yes expression "mu" no no no yes q \n');
 
-    % TODO: Update boundary conditions for DNS
     if ismember(DNS.sim, [0, 1]) 
         %bottom: zero pressure, tonsils: wall
         set_bc(fileID, DNS.inlet, "velocity-inlet")
@@ -175,8 +174,8 @@ function TUI_setup_Fluent_case(DNS, cas, fileID)
     if DNS.sim == 3
         for zone_i = 1:(cas.Ncas-1)
             if zone_i < (cas.Ncas-1)
-                fid = fopen(fullfile(cas.dir.ansys_in, "flow-rates", "Q_"+zone_i+".txt"), 'r');  % Open the file for reading
-                sstt = fread(fid, '*char')';  % Read the entire file as characters and transpose to row vector
+                fid = fopen(fullfile(cas.dir.ansys_in, "flow-rates", "Q_"+zone_i+".txt"), 'r'); 
+                sstt = fread(fid, '*char')';  
                 fclose(fid);
                 named_expression (fileID, "Q_cord_"+zone_i, sstt)
             end
@@ -230,12 +229,12 @@ function TUI_create_surfaces_journal(dat_PC, cas, DNS, fileID)
 
     z_FM = dat_PC.pixel_coord{1}(:,:,3);
     z_FM = mean(z_FM(dat_PC.SAS.ROI{1}));
-    % create planes perpendicular to z-dir  
+    % create axial planes 
     for Dz = DNS.Dz
         % Dz foramen with respect to top pcmri location
         Dz_foramen = (z_FM+(Dz-0.01))/1000; % [m]
 
-         % create plane at the location of the foramen_magnum
+         % create plane at the FM
         XYZ(:,3) = Dz_foramen;
         create_plane (fileID,XYZ,"FM-"+Dz)
     end
@@ -356,7 +355,7 @@ function TUI_run_simulation(dat_PC, cas, DNS, fileID)
     if DNS.sim == 0
         prof_bound = {}; % Do not assign profile but impose flow rate
     elseif DNS.sim == 1
-        prof_bound = {DNS.inlet}; % Only assign profile to b_inlet
+        prof_bound = {DNS.inlet}; % Only assign profile to inlet
     elseif ismember(DNS.sim, [2, 3])
         prof_bound = {"bottom", "top"}; % Two inlets
     end
