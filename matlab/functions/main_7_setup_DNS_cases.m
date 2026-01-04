@@ -35,8 +35,6 @@ function [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_
         fprintf('- Ansys inputs are up to date.\n')
     end
 
-    mesh_size
-    z_p
     DNS_cases = create_DNS_cases (cas, case_name, mesh_size, cycles, iterations_ts, ts_cycle, z_p);
 
 end
