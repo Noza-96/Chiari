@@ -22,7 +22,7 @@ function main_8_geometry(cas)
         a = strtrim(input('- Do you want to use the existing geometry? [yes]/no: ', 's'));
         if isempty(a); a = 'yes'; end
         if strcmpi(a, 'yes')
-            fprintf("- Using existing geometry.\n");
+            fprintf("- Using existing geometry.\n\n");
             return
         end
     

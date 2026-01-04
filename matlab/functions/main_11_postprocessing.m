@@ -73,7 +73,7 @@ function [cas, dat_PC, pcmri, DNS] = main_11_postprocessing(cas, cases, mesh_siz
                         [W, V, U, P] = deal(data{5}, data{6}, data{7}, data{8});
                 
                         % Loop through DNS locations and store data
-                        for k = 1:length(DNS.slices.locz)
+                        for k = 2:length(DNS.slices.locz)
                             if n == 1
                                 % Find indices where Z is within range of current location
                                 index{k} = find(abs(Z - DNS.slices.locz(k)) <= 0.2*1e-2); 
@@ -327,4 +327,13 @@ function [ZL,LI] = longitudinal_impedance(dp, q, T, freq_lim)
     
     % Piecewise-linear integral = trapezoidal rule
     LI = trapz(f_clip, ZL_clip);
+end
+
+function pcmri = apply_roi_pcmri(pcmri)
+    for k = 1:pcmri.Ndat
+        pcmri.x{k}=pcmri.x{k}(pcmri.roi{k});
+        pcmri.y{k}=pcmri.y{k}(pcmri.roi{k});
+        pcmri.z{k}=pcmri.z{k}(pcmri.roi{k});
+        pcmri.u_normal{k}=pcmri.u_normal{k}(pcmri.roi{k},:);
+    end
 end

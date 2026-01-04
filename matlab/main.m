@@ -50,8 +50,8 @@ opts = struct( ...
 
 case_name     = {"c1"};        % case identifiers (def: {"c1"})
 mesh_size     = 2e-4;          % minimum mesh size [m] (def: 2e-4)
-ts_cycle      = 100;           % time steps per cardiac cycle (def: 100)
-cycles        = 3;             % number of cardiac cycles (def: 3)
+ts_cycle      = 40;           % time steps per cardiac cycle (def: 100)
+cycles        = 1;             % number of cardiac cycles (def: 3)
 iterations_ts = 20;            % iterations per time step (def: 20)
 
 % Axial pressure locations z_p:
@@ -87,3 +87,5 @@ main_10_run_simulation(cas, dat_PC, DNS_cases, n_cores);
 %                 averaged over space, time, and space–time
 
 [cas, dat_PC, pcmri, DNS] = main_11_postprocessing(cas, case_name, mesh_size, ts_cycle, cycles);
+
+%TODO: put deafault parameters, including k=2:end;
