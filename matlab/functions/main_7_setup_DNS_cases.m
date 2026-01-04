@@ -1,17 +1,32 @@
 function [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_size, ts_cycle, cycles, iterations_ts, z_p)
+
 % Instructions for case_name:
-% c: geometry boundded by 2, caudal and rostral extreme, MRI planes. 
-% c0 for zero pressure top and bottom flow rate (uniform velocity)
-% c1 for zero pressure top and bottom spatially resolved velocity
-% c2 for two inlet velocities; continuity: normal velocity tonsils 
-% c3 for two inlet velocities; continuity: multiple regions
-% if ligaments or nerve roots, add l/n after c
-% if different versions of geometries, add _v# at the end
-% e.g. cl3_v1 does simulation type 3, with geometry containing ligaments and 
-% version #v1 (there might be different versions of ligaments)
+% c  : geometry bounded by caudal/rostral MRI planes
+% c0 : zero pressure top/bottom, uniform velocity
+% c1 : zero pressure top/bottom, spatially resolved velocity
+% c2 : two inlet velocities; continuity at tonsils
+% c3 : two inlet velocities; continuity over multiple regions
+% add l/n  -> ligaments / nerve roots
+% add _v#  -> geometry version
+% e.g. cl3_v1
+
+    arguments
+        cas
+        case_name     cell   = {"c1"}       % case identifiers
+        mesh_size     double = 2e-4         % mesh min size [m]
+        ts_cycle      double = 100          % time steps per cardiac cycle
+        cycles        double = 3            % number of cardiac cycles
+        iterations_ts double = 20           % iterations per time step
+        z_p           double = []      % axial pressure locations 
+    end
 
     fprintf("7) Setup DNS cases:\n")  
     [cas, dat_PC, repeat_initialization] = check_subject_initialization (cas, ts_cycle, 0);
+
+    % --- define default z_p if not provided ---
+    if isempty(z_p)
+        z_p = 0:-5:ceil(dat_PC.locz{end}*10 + 1);
+    end
     
     if repeat_initialization
         fprintf('- Ansys inputs need to be created\\updated, creating files...\n')
@@ -19,7 +34,9 @@ function [cas, dat_PC, DNS_cases] = main_7_setup_DNS_cases(cas, case_name, mesh_
     else 
         fprintf('- Ansys inputs are up to date.\n')
     end
-    
+
+    mesh_size
+    z_p
     DNS_cases = create_DNS_cases (cas, case_name, mesh_size, cycles, iterations_ts, ts_cycle, z_p);
 
 end

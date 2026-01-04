@@ -1,5 +1,9 @@
 function [cas, dat_PC] = main_4_crop_set_roi(cas, crop_size)
 
+    if nargin < 2 || isempty(crop_size)
+        crop_size = 100;
+    end
+    
     fprintf('\n4) PC-MRI measurements:\n')
     
     data_now = "data_1.mat";

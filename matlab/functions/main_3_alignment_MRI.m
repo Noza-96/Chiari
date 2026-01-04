@@ -1,4 +1,4 @@
-function main_3_alignment_MRI(cas, skip_segmentation)
+function main_3_alignment_MRI(cas)
 % RUN_SEGMENTATION(subject)
 % - Finds the anatomy DICOM folder under patient-data/<subject>/anatomy
 % - Converts DICOMs to NIfTI (if needed)
@@ -7,8 +7,6 @@ function main_3_alignment_MRI(cas, skip_segmentation)
 %
 % Assumes organize_flow_anatomy(subject) (or equivalent) already created
 % patient-data/<subject>/anatomy/<series_desc> with DICOMs inside.
-
-    if skip_segmentation == true, return, end
 
     fprintf('\n3) Alignment velocity measurements to segmentation:\n')
 

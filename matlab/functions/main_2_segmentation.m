@@ -1,11 +1,9 @@
-function cas = main_2_segmentation(cas, skip_segmentation)
+function cas = main_2_segmentation(cas)
 % RUN_SEGMENTATION(subject)
 % - Finds the anatomy DICOM folder under patient-data/<subject>/anatomy
 % - Converts DICOMs to NIfTI 
 % - Runs SCT auto-segmentation
 % - Launches Slicer3D to create manual segmentations
-
-    if skip_segmentation == true, return, end
 
     auto_seg_name = "auto_segmentation";
 

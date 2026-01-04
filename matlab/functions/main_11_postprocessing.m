@@ -190,7 +190,7 @@ function [cas, dat_PC, pcmri, DNS] = main_11_postprocessing(cas, cases, mesh_siz
                         fprintf('- Saved .mat file...\n');
                         save(output_file, 'DNS');
                     else
-                        warning("File %s_report.out does not exist. DNS structure not updated.", DNS_case);
+                        warning("- File %s_report.out does not exist. DNS structure not updated.", DNS_case);
                     end
                 end
                 fprintf('Done!\n');
@@ -245,16 +245,10 @@ function [RMSE_time, RMSE_space, RMSE_ave] = compute_RMSE(DNS, pcmri, pixel_size
                 end
             end
 
-            % % interpolate CFD velocity into pixel center
-            % F = scatteredInterpolant(Xd, Yd, ud(:, it), "natural", 'none'); 
-            % u_interp_loc_full = F(Xp, Yp);   
-
             if it == 1
                 valid = ~isnan(u_avg);
-                % & ~isnan(u_interp_loc_full);
                 Nv = sum(valid);
                 n_invalid = sum(~valid);
-                % u_interp_loc = NaN(Nv, Nt);
             end
         
             if it == 1 && zero_error
@@ -264,7 +258,6 @@ function [RMSE_time, RMSE_space, RMSE_ave] = compute_RMSE(DNS, pcmri, pixel_size
         
             diff = u_avg(valid) - up(valid, it);
             rmse_vec(it) = sqrt(mean(diff.^2));
-            % u_interp_loc(:,it)= u_interp_loc_full(valid);
         end
 
         % Compute RMSE over space (for each t), then average over t

@@ -400,16 +400,22 @@ function data = append_series_row(data, info, thisSE, SEname)
 
     SeriesUID = getfield_try(info, 'SeriesInstanceUID', '');
 
-    % Extract PAT/ST from path if it looks like .../PATxxx/STxxx/SE...
+    % Extract PAT / ST from path (PAT optional, ST required)
     parts = split(string(thisSE), filesep);
-    PAT = ""; ST = "";
-    if numel(parts) >= 3
-        PATcand = parts(end-2);
-        STcand  = parts(end-1);
-        if startsWith(PATcand, "PAT") && startsWith(STcand, "ST")
-            PAT = PATcand;
-            ST  = STcand;
-        end
+    parts = parts(parts ~= "");   % remove empty segments
+    
+    PAT = ""; 
+    ST  = "";
+    
+    % find last PAT* and ST* anywhere in the path (case-insensitive)
+    isPAT = startsWith(upper(parts), "PAT");
+    isST  = startsWith(upper(parts), "ST");
+    
+    if any(isPAT)
+        PAT = parts(find(isPAT, 1, "last"));
+    end
+    if any(isST)
+        ST = parts(find(isST, 1, "last"));
     end
 
     data(end+1) = struct( ...
@@ -508,11 +514,11 @@ function [anatomy_dicom, dest_folder, series_desc, idx, T2T] = pick_T2_series(ca
         choices(i) = sprintf('%s / %s / %s : Ser%03d  %s', ...
             T2T.PAT{i}, T2T.ST{i}, T2T.SE{i}, T2T.SeriesNumber(i), T2T.SeriesDescription{i});
 
-        pth = fullfile(cas.dir.patient, T2T.PAT{i}, T2T.ST{i}, T2T.SE{i})
+        pth = fullfile(cas.dir.patient, T2T.PAT{i}, T2T.ST{i}, T2T.SE{i});
         if ~isfolder(pth)
-            pth = fullfile(cas.dir.patient, T2T.ST{i}, T2T.SE{i})
+            pth = fullfile(cas.dir.patient, T2T.ST{i}, T2T.SE{i});
             if ~isfolder(pth)
-                pth = fullfile(cas.dir.patient, T2T.SE{i})
+                pth = fullfile(cas.dir.patient, T2T.SE{i});
             end
         end
         if ~isfolder(pth)
