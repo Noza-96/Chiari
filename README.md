@@ -1,9 +1,5 @@
 # Chiari Simulation Pipeline
 
-This repository provides a step-by-step guide for creating computational simulations of cerebrospinal fluid (CSF) flow in Chiari Malformation patients. The pipeline integrates segmentation, geometry preparation, and numerical simulations to analyze CSF dynamics using a combination of advanced imaging and computational tools.
-
-## Purpose
-
 The pipeline facilitates the transformation of patient-specific imaging data into computational models for numerical simulations. This process includes segmentation of the CSF space, velocity processing from pc-MRI data and registration to segmentation, computational geometry creation, meshing, and boundary condition integration for Ansys Fluent simulations.
 
 ## Installation & Setup Guide <a id="Installation"></a>
